@@ -1,0 +1,67 @@
+name: production
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    environment: production
+
+    defaults:
+      run:
+        shell: bash
+
+    strategy:
+      matrix:
+        architecture: [amd64, arm64]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Authenticate to GCP Artifact Registry
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.SECRET_GCR_CREDENTIALS_JSON }}
+
+      - name: Configure Docker for GCP
+        run: gcloud auth configure-docker gcr.io
+
+      - name: Build and Push Docker Image
+        run: |
+          IMAGE_NAME="gcr.io/${{ vars.VAR_GCR_PROJECT_ID }}/${{ github.event.repository.name }}-${{ matrix.architecture }}"
+          docker buildx build \
+            --provenance=false \
+            --platform linux/${{ matrix.architecture }} \
+            --tag "$IMAGE_NAME:latest" \
+            --tag "$IMAGE_NAME:${{ github.sha }}" \
+            --push \
+            -f .deploy/Dockerfile .
+
+  trigger:
+    name: trigger
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Trigger Remote Terraform
+        run: |
+          curl -X POST -H "Accept: application/vnd.github.v3+json" \
+               -H "Authorization: Bearer ${{ secrets.SECRET_GITHUB_WORKFLOW_TOKEN }}" \
+               https://api.github.com/repos/${{ github.repository_owner }}/${{ vars.VAR_TERRAFORM_WORKFLOW_REPO }}/actions/workflows/${{ vars.VAR_TERRAFORM_WORKFLOW_ID }}/dispatches \
+               -d '{"ref":"main"}'
