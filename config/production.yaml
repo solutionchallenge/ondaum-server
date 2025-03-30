@@ -1,0 +1,35 @@
+verbose: true
+http:
+  host: "0.0.0.0"
+  port: 8080
+  buffer:
+    read: 4096
+    write: 4096
+  limit:
+    payload: 1024
+    concurrency: 100
+  timeout:
+    read: "10s"
+    write: "10s"
+    idle: "10s"
+    shutdown: "10s"
+database:
+  kind: "mysql"
+  host: "34.64.91.145"
+  port: 3306
+  database: "secret-sphinx-451807-d1-db-primary"
+  user: 
+  password:
+migration:
+  enabled: true
+oauth:
+  google:
+    enabled: true
+    client_id: 
+    client_secret: 
+    redirect_url: "https://ondaum.revimal.me/api/v1/oauth/google/callback"
+jwt:
+  secret_key:
+  access_expire: 900
+  refresh_expire: 604800
+

@@ -1,0 +1,35 @@
+verbose: true
+http:
+  host: "0.0.0.0"
+  port: 8080
+  buffer:
+    read: 4096
+    write: 4096
+  limit:
+    payload: 1024
+    concurrency: 100
+  timeout:
+    read: "10s"
+    write: "10s"
+    idle: "10s"
+    shutdown: "10s"
+database:
+  kind: "memdb"
+  host: "localhost"
+  port: 0
+  database: "ondaum"
+  user: 
+  password:
+migration:
+  enabled: true
+oauth:
+  google:
+    enabled: true
+    client_id: 
+    client_secret: 
+    redirect_url: "http://localhost:8080/api/v1/oauth/google/callback"
+jwt:
+  secret_key:
+  access_expire: 3600
+  refresh_expire: 604800
+

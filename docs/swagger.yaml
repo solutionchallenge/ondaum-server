@@ -1,0 +1,106 @@
+basePath: /api/v1
+definitions:
+  oauth.AuthGoogleHandlerResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  user.GetSelfHandlerResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      username:
+        type: string
+    type: object
+host: ondaum.revimal.me
+info:
+  contact: {}
+  description: This is a API server for Ondaum
+  title: Ondaum API
+  version: "1.0"
+paths:
+  /oauth/google/callback:
+    get:
+      consumes:
+      - application/json
+      description: Must not be called directly!
+      operationId: GoogleOAuth
+      parameters:
+      - description: Google OAuth Code
+        in: query
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/oauth.AuthGoogleHandlerResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Callback for Google OAuth
+      tags:
+      - oauth
+  /oauth/google/start:
+    get:
+      consumes:
+      - application/json
+      description: This API redirects to Google OAuth, and finally redirects to the
+        callback URL. (GoogleOAuthCallback)
+      operationId: StartGoogleOAuth
+      produces:
+      - application/json
+      responses:
+        "307":
+          description: Temporary Redirect
+          schema:
+            type: string
+      summary: Start Google OAuth
+      tags:
+      - oauth
+  /user/self:
+    get:
+      consumes:
+      - application/json
+      description: This API returns the user's information.
+      operationId: GetSelfUser
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.GetSelfHandlerResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get Self User Information
+      tags:
+      - user
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

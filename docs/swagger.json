@@ -1,0 +1,158 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a API server for Ondaum",
+        "title": "Ondaum API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "ondaum.revimal.me",
+    "basePath": "/api/v1",
+    "paths": {
+        "/oauth/google/callback": {
+            "get": {
+                "description": "Must not be called directly!",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "oauth"
+                ],
+                "summary": "Callback for Google OAuth",
+                "operationId": "GoogleOAuth",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Google OAuth Code",
+                        "name": "code",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/oauth.AuthGoogleHandlerResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/oauth/google/start": {
+            "get": {
+                "description": "This API redirects to Google OAuth, and finally redirects to the callback URL. (GoogleOAuthCallback)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "oauth"
+                ],
+                "summary": "Start Google OAuth",
+                "operationId": "StartGoogleOAuth",
+                "responses": {
+                    "307": {
+                        "description": "Temporary Redirect",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/self": {
+            "get": {
+                "description": "This API returns the user's information.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get Self User Information",
+                "operationId": "GetSelfUser",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.GetSelfHandlerResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "oauth.AuthGoogleHandlerResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.GetSelfHandlerResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

@@ -1,0 +1,77 @@
+package google
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
+
+	"github.com/solutionchallenge/ondaum-server/pkg/oauth"
+)
+
+const (
+	Provider = oauth.Provider("google")
+)
+
+type Client struct {
+	BaseConfig oauth.Config
+	coreConfig oauth2.Config
+}
+
+func NewClient(config oauth.Config) oauth.Client {
+	if !config.Google.Enabled {
+		return nil
+	}
+
+	oauthConfig := oauth2.Config{
+		ClientID:     config.Google.ClientID,
+		ClientSecret: config.Google.ClientSecret,
+		RedirectURL:  config.Google.RedirectURL,
+		Scopes: []string{
+			"https://www.googleapis.com/auth/userinfo.email",
+			"https://www.googleapis.com/auth/userinfo.profile",
+		},
+		Endpoint: google.Endpoint,
+	}
+
+	return &Client{
+		BaseConfig: config,
+		coreConfig: oauthConfig,
+	}
+}
+
+func (client *Client) GetProvider() oauth.Provider {
+	return Provider
+}
+
+func (client *Client) GetAuthURL(state string, override ...string) string {
+	if len(override) > 0 && override[0] != "" {
+		copied := client.coreConfig
+		copied.RedirectURL = override[0]
+		return copied.AuthCodeURL(state, oauth2.AccessTypeOffline)
+	}
+	return client.coreConfig.AuthCodeURL(state, oauth2.AccessTypeOffline)
+}
+
+func (client *Client) GetUserInfo(code string) (oauth.UserInfoOutput, error) {
+	token, err := client.coreConfig.Exchange(context.Background(), code)
+	if err != nil {
+		return oauth.UserInfoOutput{}, fmt.Errorf("failed to exchange token: %v", err)
+	}
+
+	core := client.coreConfig.Client(context.Background(), token)
+	resp, err := core.Get("https://www.googleapis.com/oauth2/v2/userinfo")
+	if err != nil {
+		return oauth.UserInfoOutput{}, fmt.Errorf("failed to get user info: %v", err)
+	}
+	defer resp.Body.Close()
+
+	var userInfo oauth.UserInfoOutput
+	if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil {
+		return oauth.UserInfoOutput{}, fmt.Errorf("failed to decode user info: %v", err)
+	}
+
+	return userInfo, nil
+}
