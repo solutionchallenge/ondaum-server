@@ -46,7 +46,7 @@ func NewGetSelfHandler(deps GetSelfHandlerDependencies) (*GetSelfHandler, error)
 // @Failure      404  {object}  string
 // @Failure      500  {object}  string
 // @Router       /user/self [get]
-// @Security     ApiKeyAuth
+// @Security     BearerAuth
 func (h *GetSelfHandler) Handle(c *fiber.Ctx) error {
 	rid := http.GetRequestID(c)
 	id, err := http.GetUserID(c)

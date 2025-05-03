@@ -96,7 +96,7 @@ paths:
           schema:
             type: string
       security:
-      - ApiKeyAuth: []
+      - BearerAuth: []
       summary: Get Self User Information
       tags:
       - user
