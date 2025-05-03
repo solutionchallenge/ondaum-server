@@ -95,6 +95,8 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Get Self User Information
       tags:
       - user

@@ -86,6 +86,11 @@ const docTemplate = `{
         },
         "/user/self": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "This API returns the user's information.",
                 "consumes": [
                     "application/json"
