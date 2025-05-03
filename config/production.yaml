@@ -15,7 +15,7 @@ http:
     shutdown: "10s"
 database:
   kind: "mysql"
-  host: "34.64.91.145"
+  host: "10.220.0.3"
   port: 3306
   database: "secret-sphinx-451807-d1-db-primary"
   user: 
