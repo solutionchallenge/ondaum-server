@@ -18,8 +18,10 @@ RUN GOOS=linux go build -a -ldflags '-s -w -linkmode external -extldflags "-stat
 FROM alpine:3.21 AS runner
 WORKDIR /app
 
-COPY --from=builder /app/ondaum .
 RUN apk add --no-cache ca-certificates tzdata
+
+COPY --from=builder /app/ondaum .
+COPY --from=builder /app/configs ./configs
 
 EXPOSE 8080
 CMD ["/app/ondaum", "http"]
