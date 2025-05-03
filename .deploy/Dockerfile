@@ -21,7 +21,7 @@ WORKDIR /app
 RUN apk add --no-cache ca-certificates tzdata
 
 COPY --from=builder /app/ondaum .
-COPY --from=builder /app/configs ./configs
+COPY --from=builder /app/config ./config
 
 EXPOSE 8080
 CMD ["/app/ondaum", "http"]
