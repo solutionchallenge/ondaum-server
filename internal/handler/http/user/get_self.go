@@ -41,10 +41,10 @@ func NewGetSelfHandler(deps GetSelfHandlerDependencies) (*GetSelfHandler, error)
 // @Tags         user
 // @Accept       json
 // @Produce      json
-// @Success      200  {object}  GetSelfHandlerResponse
-// @Failure      401  {object}  string
-// @Failure      404  {object}  string
-// @Failure      500  {object}  string
+// @Success      200 {object} GetSelfHandlerResponse
+// @Failure      401 {object} http.Error
+// @Failure      404 {object} http.Error
+// @Failure      500 {object} http.Error
 // @Router       /user/self [get]
 // @Security     BearerAuth
 func (h *GetSelfHandler) Handle(c *fiber.Ctx) error {
@@ -52,9 +52,9 @@ func (h *GetSelfHandler) Handle(c *fiber.Ctx) error {
 	id, err := http.GetUserID(c)
 	if err != nil {
 		utils.Log(utils.InfoLevel).Ctx(c.UserContext()).Err(err).RID(rid).Send("Unauthorized")
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"message": "Unauthorized",
-		})
+		return c.Status(fiber.StatusUnauthorized).JSON(
+			http.NewError(err, "Unauthorized"),
+		)
 	}
 	user := user.User{}
 	err = h.deps.DB.NewSelect().
@@ -64,14 +64,14 @@ func (h *GetSelfHandler) Handle(c *fiber.Ctx) error {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			utils.Log(utils.InfoLevel).Ctx(c.UserContext()).Err(err).RID(rid).Send("User not found for id: %v", id)
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-				"message": "User not found",
-			})
+			return c.Status(fiber.StatusNotFound).JSON(
+				http.NewError(err, "User not found"),
+			)
 		}
 		utils.Log(utils.InfoLevel).Ctx(c.UserContext()).Err(err).RID(rid).Send("Failed to get user for id: %v", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "Failed to get user for id: " + strconv.FormatInt(id, 10),
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			http.NewError(err, "Failed to get user for id: "+strconv.FormatInt(id, 10)),
+		)
 	}
 
 	response := GetSelfHandlerResponse{

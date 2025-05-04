@@ -1,5 +1,15 @@
 basePath: /api/v1
 definitions:
+  http.Error:
+    properties:
+      message:
+        type: string
+    type: object
+  oauth.AuthGoogleHandlerRequest:
+    properties:
+      code:
+        type: string
+    type: object
   oauth.AuthGoogleHandlerResponse:
     properties:
       access_token:
@@ -29,18 +39,20 @@ info:
   version: "1.0"
 paths:
   /oauth/google/auth:
-    get:
+    post:
       consumes:
       - application/json
       description: Receives the authorization code (obtained from Google OAuth) and
         exchanges it for access and refresh tokens.
       operationId: ExchangeGoogleOAuthCode
       parameters:
-      - description: Authorization Code (received from Google OAuth)
-        in: query
-        name: code
+      - description: Payload containing the authorization code received from Google
+          OAuth
+        in: body
+        name: request
         required: true
-        type: string
+        schema:
+          $ref: '#/definitions/oauth.AuthGoogleHandlerRequest'
       produces:
       - application/json
       responses:
@@ -51,11 +63,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/http.Error'
         "500":
           description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/http.Error'
       summary: Exchange Google OAuth Code for Tokens
       tags:
       - oauth
@@ -84,7 +96,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/http.Error'
       summary: Get Google OAuth Authorization URL
       tags:
       - oauth
@@ -104,15 +116,15 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            type: string
+            $ref: '#/definitions/http.Error'
         "404":
           description: Not Found
           schema:
-            type: string
+            $ref: '#/definitions/http.Error'
         "500":
           description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/http.Error'
       security:
       - BearerAuth: []
       summary: Get Self User Information

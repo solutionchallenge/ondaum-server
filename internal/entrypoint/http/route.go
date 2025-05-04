@@ -13,5 +13,5 @@ var PredefinedRoutes = []fx.Option{
 	dependency.HttpRoute("GET", "/_sys/health", sys.NewGetHealthHandler),
 	dependency.HttpRoute("GET", "/user/self", user.NewGetSelfHandler),
 	dependency.HttpRoute("GET", "/oauth/google/start", oauth.NewStartGoogleHandler),
-	dependency.HttpRoute("GET", "/oauth/google/auth", oauth.NewAuthGoogleHandler),
+	dependency.HttpRoute("POST", "/oauth/google/auth", oauth.NewAuthGoogleHandler),
 }

@@ -38,36 +38,36 @@ func NewStartGoogleHandler(deps StartGoogleHandlerDependencies) (*StartGoogleHan
 // @Produce      json
 // @Param        redirect query string true "Redirect URI (the client's callback URL where Google will redirect with the code)"
 // @Success      200 {object} StartGoogleHandlerResponse
-// @Failure      400 {object} string
+// @Failure      400 {object} http.Error
 // @Router       /oauth/google/start [get]
 func (h *StartGoogleHandler) Handle(c *fiber.Ctx) error {
 	requestID := http.GetRequestID(c)
 	redirectURI := c.Query("redirect")
 	if redirectURI == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Redirect URI is required",
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(
+			http.NewError(nil, "Redirect URI is required"),
+		)
 	}
 	if !strings.HasPrefix(redirectURI, "http://") && !strings.HasPrefix(redirectURI, "https://") {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Redirect URI must be a valid URL starting with http:// or https://",
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(
+			http.NewError(nil, "Redirect URI must be a valid URL starting with http:// or https://"),
+		)
 	}
 	parsedURL, err := url.Parse(redirectURI)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Invalid redirect URI format",
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(
+			http.NewError(err, "Invalid redirect URI format"),
+		)
 	}
 
 	if parsedURL.Host == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Redirect URI must contain a valid host",
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(
+			http.NewError(nil, "Redirect URI must contain a valid host"),
+		)
 	}
 	authURL := h.deps.OAuth.Use(google.Provider).GetAuthURL(requestID)
-	return c.Status(fiber.StatusTemporaryRedirect).JSON(fiber.Map{
-		"auth_url": authURL,
+	return c.Status(fiber.StatusTemporaryRedirect).JSON(StartGoogleHandlerResponse{
+		AuthURL: authURL,
 	})
 }
 

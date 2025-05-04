@@ -16,7 +16,7 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/oauth/google/auth": {
-            "get": {
+            "post": {
                 "description": "Receives the authorization code (obtained from Google OAuth) and exchanges it for access and refresh tokens.",
                 "consumes": [
                     "application/json"
@@ -31,11 +31,13 @@ const docTemplate = `{
                 "operationId": "ExchangeGoogleOAuthCode",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Authorization Code (received from Google OAuth)",
-                        "name": "code",
-                        "in": "query",
-                        "required": true
+                        "description": "Payload containing the authorization code received from Google OAuth",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/oauth.AuthGoogleHandlerRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -48,13 +50,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/http.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/http.Error"
                         }
                     }
                 }
@@ -93,7 +95,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/http.Error"
                         }
                     }
                 }
@@ -128,19 +130,19 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/http.Error"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/http.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/http.Error"
                         }
                     }
                 }
@@ -148,6 +150,22 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "http.Error": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "oauth.AuthGoogleHandlerRequest": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                }
+            }
+        },
         "oauth.AuthGoogleHandlerResponse": {
             "type": "object",
             "properties": {

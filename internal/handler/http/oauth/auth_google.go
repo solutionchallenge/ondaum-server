@@ -22,6 +22,10 @@ type AuthGoogleHandlerDependencies struct {
 	JWT   *jwt.Generator
 }
 
+type AuthGoogleHandlerRequest struct {
+	Code string `query:"code"`
+}
+
 type AuthGoogleHandlerResponse struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
@@ -45,31 +49,36 @@ func NewAuthGoogleHandler(deps AuthGoogleHandlerDependencies) (*AuthGoogleHandle
 // @Tags         oauth
 // @Accept       json
 // @Produce      json
-// @Param        code query string true "Authorization Code (received from Google OAuth)"
+// @Param request body AuthGoogleHandlerRequest true "Payload containing the authorization code received from Google OAuth"
 // @Success      200 {object} AuthGoogleHandlerResponse
-// @Failure      400 {object} string
-// @Failure      500 {object} string
-// @Router       /oauth/google/auth [get]
+// @Failure      400 {object} http.Error
+// @Failure      500 {object} http.Error
+// @Router       /oauth/google/auth [post]
 func (h *AuthGoogleHandler) Handle(c *fiber.Ctx) error {
-	code := c.Query("code")
-	if code == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Code is required",
-		})
+	request := &AuthGoogleHandlerRequest{}
+	if err := c.BodyParser(request); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(
+			http.NewError(err, "Invalid request"),
+		)
+	}
+	if request.Code == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(
+			http.NewError(nil, "Code is required"),
+		)
 	}
 
-	userInfo, err := h.deps.OAuth.Use(google.Provider).GetUserInfo(code)
+	userInfo, err := h.deps.OAuth.Use(google.Provider).GetUserInfo(request.Code)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			http.NewError(err, "Failed to get user info"),
+		)
 	}
 
 	dbTx, err := h.deps.DB.BeginTx(c.Context(), nil)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "Failed to begin transaction",
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			http.NewError(err, "Failed to begin transaction"),
+		)
 	}
 	defer dbTx.Rollback()
 
@@ -90,15 +99,15 @@ func (h *AuthGoogleHandler) Handle(c *fiber.Ctx) error {
 				Model(newUser).
 				Exec(c.Context())
 			if err != nil {
-				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-					"message": "Failed to create user",
-				})
+				return c.Status(fiber.StatusInternalServerError).JSON(
+					http.NewError(err, "Failed to create user"),
+				)
 			}
 			foundUser = newUser
 		} else {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"message": "Failed to get user",
-			})
+			return c.Status(fiber.StatusInternalServerError).JSON(
+				http.NewError(err, "Failed to get user"),
+			)
 		}
 	}
 
@@ -112,22 +121,22 @@ func (h *AuthGoogleHandler) Handle(c *fiber.Ctx) error {
 		On("DUPLICATE KEY UPDATE provider_code = VALUES(provider_code)").
 		Exec(c.Context())
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "Failed to create user oauth",
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			http.NewError(err, "Failed to create user oauth"),
+		)
 	}
 
 	if err := dbTx.Commit(); err != nil {
-		return c.Status(fiber.StatusConflict).JSON(fiber.Map{
-			"message": "Failed to commit transaction",
-		})
+		return c.Status(fiber.StatusConflict).JSON(
+			http.NewError(err, "Failed to commit transaction"),
+		)
 	}
 
 	tokenPair, err := h.deps.JWT.GenerateTokenPair(strconv.FormatInt(foundUser.ID, 10))
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "Failed to generate token pair",
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			http.NewError(err, "Failed to generate token pair"),
+		)
 	}
 
 	response := AuthGoogleHandlerResponse{
