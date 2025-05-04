@@ -9,6 +9,7 @@ import (
 	"os"
 	"syscall"
 
+	"github.com/benbjohnson/clock"
 	"github.com/solutionchallenge/ondaum-server/internal/dependency"
 	"github.com/solutionchallenge/ondaum-server/migration"
 	"github.com/solutionchallenge/ondaum-server/pkg/database"
@@ -25,10 +26,11 @@ func Run(config AppConfig) {
 		encoded := base64.StdEncoding.EncodeToString(buf)
 		if err == nil {
 			value := fmt.Sprintf("Starting HTTP server with config: %s", string(encoded))
-			utils.Log(utils.InfoLevel).Send(value)
+			utils.Log(utils.InfoLevel).Send("%s", value)
 		}
 	}
 	app := fx.New(
+		fx.Provide(clock.New),
 		fx.Supply(config.HttpConfig),
 		fx.Supply(config.DatabaseConfig),
 		fx.Supply(config.OAuthConfig),
@@ -37,7 +39,7 @@ func Run(config AppConfig) {
 		dependency.ProvideMiddleware(http.NewJWTAuthMiddleware),
 		dependency.NewHttpModule("/api/v1", PredefinedRoutes...),
 		dependency.NewOAuthModule(config.OAuthConfig),
-		fx.Supply(jwt.NewGenerator(config.JWTConfig)),
+		fx.Provide(jwt.NewGenerator),
 		fx.Invoke(func(db *sql.DB) {
 			if config.Migration.Enabled {
 				ctx := context.Background()

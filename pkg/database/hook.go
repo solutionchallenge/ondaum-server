@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/lithammer/shortuuid"
 	sqlhook "github.com/qustavo/sqlhooks/v2"
 	"github.com/solutionchallenge/ondaum-server/pkg/utils"
@@ -13,6 +14,7 @@ type hookContextKey string
 
 type QueryLoggingHook struct {
 	LogLevel utils.LogLevel
+	Clock    clock.Clock
 }
 
 var _ sqlhook.Hooks = (*QueryLoggingHook)(nil)
@@ -23,9 +25,10 @@ const (
 	dbQueryLoggingPlaceholder      string         = "-----"
 )
 
-func NewQueryLoggingHook(logLevel utils.LogLevel) QueryLoggingHook {
+func NewQueryLoggingHook(logLevel utils.LogLevel, timeClock clock.Clock) QueryLoggingHook {
 	return QueryLoggingHook{
 		LogLevel: logLevel,
+		Clock:    timeClock,
 	}
 }
 
@@ -35,7 +38,7 @@ func (hook *QueryLoggingHook) Before(ctx context.Context, query string, args ...
 	requestID := utils.GetRequestID(ctx)
 	utils.Log(hook.LogLevel).Ctx(ctx).RID(requestID).Send("[%s:%s]> %s %+v", queryUUID, dbQueryLoggingPlaceholder, query, args)
 
-	wrappedContext := utils.WithValue(ctx, dbQueryLoggingTimestampCtxKey, time.Now())
+	wrappedContext := utils.WithValue(ctx, dbQueryLoggingTimestampCtxKey, hook.Clock.Now())
 	wrappedContext = utils.WithValue(wrappedContext, dbQueryLoggingIdentifierCtxKey, queryUUID)
 	return wrappedContext, nil
 }

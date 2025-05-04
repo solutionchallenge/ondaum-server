@@ -3,6 +3,7 @@ package jwt
 import (
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -14,11 +15,13 @@ var (
 
 type Generator struct {
 	Config Config
+	Clock  clock.Clock
 }
 
-func NewGenerator(config Config) *Generator {
+func NewGenerator(config Config, clk clock.Clock) *Generator {
 	return &Generator{
 		Config: config,
+		Clock:  clk,
 	}
 }
 
@@ -55,14 +58,15 @@ func (g *Generator) GenerateTokenPair(value string, metadata ...map[string]any) 
 }
 
 func (g *Generator) GenerateToken(typ Type, value string, metadata map[string]any, duration time.Duration) (string, error) {
+	now := g.Clock.Now().UTC()
 	claims := Claims{
 		Type:     typ,
 		Value:    value,
 		Metadata: metadata,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(duration)),
-			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
-			NotBefore: jwt.NewNumericDate(time.Now().UTC()),
+			ExpiresAt: jwt.NewNumericDate(now.Add(duration)),
+			IssuedAt:  jwt.NewNumericDate(now),
+			NotBefore: jwt.NewNumericDate(now),
 		},
 	}
 
@@ -84,7 +88,7 @@ func (g *Generator) UnpackToken(tokenString string) (*Claims, error) {
 		return nil, jwt.ErrInvalidKey
 	}
 
-	if claims.ExpiresAt.Before(time.Now().UTC()) {
+	if claims.ExpiresAt.Before(g.Clock.Now().UTC()) {
 		return nil, jwt.ErrTokenExpired
 	}
 

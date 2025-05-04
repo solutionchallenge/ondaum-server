@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/benbjohnson/clock"
 	"github.com/solutionchallenge/ondaum-server/pkg/database"
 	"github.com/solutionchallenge/ondaum-server/pkg/database/memdb"
 	"github.com/solutionchallenge/ondaum-server/pkg/database/mysql"
@@ -17,8 +18,8 @@ func NewDatabaseModule(config database.Config, logLevel utils.LogLevel) fx.Optio
 		fx.Provide(func() (database.Connector, error) {
 			return instantiateDatabaseConnector(config)
 		}),
-		fx.Provide(func(conn database.Connector) (*bun.DB, error) {
-			hook := database.NewQueryLoggingHook(logLevel)
+		fx.Provide(func(conn database.Connector, clk clock.Clock) (*bun.DB, error) {
+			hook := database.NewQueryLoggingHook(logLevel, clk)
 			return conn.ToBunDB(&hook)
 		}),
 		fx.Invoke(func(lc fx.Lifecycle, db *bun.DB) {
@@ -31,8 +32,8 @@ func NewDatabaseModule(config database.Config, logLevel utils.LogLevel) fx.Optio
 				},
 			})
 		}),
-		fx.Provide(func(conn database.Connector) (*sql.DB, error) {
-			hook := database.NewQueryLoggingHook(logLevel)
+		fx.Provide(func(conn database.Connector, clk clock.Clock) (*sql.DB, error) {
+			hook := database.NewQueryLoggingHook(logLevel, clk)
 			return conn.ToSqlDB(&hook)
 		}),
 		fx.Invoke(func(lc fx.Lifecycle, db *sql.DB) {
