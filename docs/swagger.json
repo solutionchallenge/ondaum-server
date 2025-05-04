@@ -96,7 +96,7 @@
             }
         },
         "/user/addition": {
-            "post": {
+            "put": {
                 "security": [
                     {
                         "BearerAuth": []
@@ -154,7 +154,7 @@
             }
         },
         "/user/privacy": {
-            "post": {
+            "put": {
                 "security": [
                     {
                         "BearerAuth": []

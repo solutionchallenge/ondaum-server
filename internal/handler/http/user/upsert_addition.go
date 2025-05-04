@@ -42,7 +42,7 @@ func NewUpsertAdditionHandler(deps UpsertAdditionHandlerDependencies) (*UpsertAd
 // @Failure      400 {object} http.Error
 // @Failure      401 {object} http.Error
 // @Failure      500 {object} http.Error
-// @Router       /user/addition [post]
+// @Router       /user/addition [put]
 // @Security     BearerAuth
 func (h *UpsertAdditionHandler) Handle(c *fiber.Ctx) error {
 	userID, err := http.GetUserID(c)

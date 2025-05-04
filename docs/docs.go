@@ -102,7 +102,7 @@ const docTemplate = `{
             }
         },
         "/user/addition": {
-            "post": {
+            "put": {
                 "security": [
                     {
                         "BearerAuth": []
@@ -160,7 +160,7 @@ const docTemplate = `{
             }
         },
         "/user/privacy": {
-            "post": {
+            "put": {
                 "security": [
                     {
                         "BearerAuth": []

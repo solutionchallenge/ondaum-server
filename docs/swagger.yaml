@@ -169,7 +169,7 @@ paths:
       tags:
       - oauth
   /user/addition:
-    post:
+    put:
       consumes:
       - application/json
       description: Updates or creates the user's additional information including
@@ -207,7 +207,7 @@ paths:
       tags:
       - user
   /user/privacy:
-    post:
+    put:
       consumes:
       - application/json
       description: Updates or creates the user's privacy information including gender

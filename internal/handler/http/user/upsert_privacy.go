@@ -43,7 +43,7 @@ func NewUpsertPrivacyHandler(deps UpsertPrivacyHandlerDependencies) (*UpsertPriv
 // @Failure      400 {object} http.Error
 // @Failure      401 {object} http.Error
 // @Failure      500 {object} http.Error
-// @Router       /user/privacy [post]
+// @Router       /user/privacy [put]
 // @Security     BearerAuth
 func (h *UpsertPrivacyHandler) Handle(c *fiber.Ctx) error {
 	userID, err := http.GetUserID(c)
