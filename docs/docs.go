@@ -105,7 +105,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "BearerAuth \"JWT Bearer token for authentication\"": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Updates or creates the user's additional information including concerns and emotions.",
@@ -163,7 +163,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "BearerAuth \"JWT Bearer token for authentication\"": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Updates or creates the user's privacy information including gender and birthday.",
@@ -221,7 +221,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "BearerAuth \"JWT Bearer token for authentication\"": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Returns the authenticated user's profile, including basic information and optional onboarding data.",

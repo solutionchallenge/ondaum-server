@@ -44,7 +44,7 @@ func NewUpsertPrivacyHandler(deps UpsertPrivacyHandlerDependencies) (*UpsertPriv
 // @Failure      401 {object} http.Error
 // @Failure      500 {object} http.Error
 // @Router       /user/privacy [post]
-// @Security     BearerAuth "JWT Bearer token for authentication"
+// @Security     BearerAuth
 func (h *UpsertPrivacyHandler) Handle(c *fiber.Ctx) error {
 	userID, err := http.GetUserID(c)
 	if err != nil {

@@ -202,7 +202,7 @@ paths:
           schema:
             $ref: '#/definitions/http.Error'
       security:
-      - BearerAuth "JWT Bearer token for authentication": []
+      - BearerAuth: []
       summary: Update or Create User Additional Information
       tags:
       - user
@@ -240,7 +240,7 @@ paths:
           schema:
             $ref: '#/definitions/http.Error'
       security:
-      - BearerAuth "JWT Bearer token for authentication": []
+      - BearerAuth: []
       summary: Update or Create User Privacy Information
       tags:
       - user
@@ -271,7 +271,7 @@ paths:
           schema:
             $ref: '#/definitions/http.Error'
       security:
-      - BearerAuth "JWT Bearer token for authentication": []
+      - BearerAuth: []
       summary: Get Current Authenticated User Profile
       tags:
       - user

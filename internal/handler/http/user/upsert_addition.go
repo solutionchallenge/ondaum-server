@@ -43,7 +43,7 @@ func NewUpsertAdditionHandler(deps UpsertAdditionHandlerDependencies) (*UpsertAd
 // @Failure      401 {object} http.Error
 // @Failure      500 {object} http.Error
 // @Router       /user/addition [post]
-// @Security     BearerAuth "JWT Bearer token for authentication"
+// @Security     BearerAuth
 func (h *UpsertAdditionHandler) Handle(c *fiber.Ctx) error {
 	userID, err := http.GetUserID(c)
 	if err != nil {

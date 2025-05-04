@@ -59,7 +59,7 @@ func NewGetSelfHandler(deps GetSelfHandlerDependencies) (*GetSelfHandler, error)
 // @Failure      404 {object} http.Error
 // @Failure      500 {object} http.Error
 // @Router       /user/self [get]
-// @Security     BearerAuth "JWT Bearer token for authentication"
+// @Security     BearerAuth
 func (h *GetSelfHandler) Handle(c *fiber.Ctx) error {
 	id, err := http.GetUserID(c)
 	if err != nil {
