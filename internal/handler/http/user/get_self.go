@@ -17,10 +17,22 @@ type GetSelfHandlerDependencies struct {
 	DB *bun.DB
 }
 
+type GetSelfHandlerPrivacyPartial struct {
+	Gender   string `json:"gender"`
+	Birthday string `json:"birthday"`
+}
+
+type GetSelfHandlerAdditionPartial struct {
+	Concerns []string `json:"concerns"`
+	Emotions []string `json:"emotions"`
+}
+
 type GetSelfHandlerResponse struct {
-	ID       int64  `json:"id"`
-	Email    string `json:"email"`
-	Username string `json:"username"`
+	ID       int64                          `json:"id"`
+	Email    string                         `json:"email"`
+	Username string                         `json:"username"`
+	Privacy  *GetSelfHandlerPrivacyPartial  `json:"privacy,omitempty"`
+	Addition *GetSelfHandlerAdditionPartial `json:"addition,omitempty"`
 }
 
 type GetSelfHandler struct {
@@ -36,8 +48,11 @@ func NewGetSelfHandler(deps GetSelfHandlerDependencies) (*GetSelfHandler, error)
 }
 
 // @ID GetSelfUser
-// @Summary      Get Self User Information
-// @Description  This API returns the user's information.
+// @Summary      Get Current Authenticated User Profile
+// @Description  Returns the authenticated user's profile, including basic information and optional onboarding data.
+//   - The `privacy` and `addition` fields are optional and will be null if the user has not completed onboarding.
+//   - This API requires a valid Bearer token and returns the profile of the authenticated user only.
+//
 // @Tags         user
 // @Accept       json
 // @Produce      json
@@ -46,7 +61,7 @@ func NewGetSelfHandler(deps GetSelfHandlerDependencies) (*GetSelfHandler, error)
 // @Failure      404 {object} http.Error
 // @Failure      500 {object} http.Error
 // @Router       /user/self [get]
-// @Security     BearerAuth
+// @Security     BearerAuth "JWT Bearer token for authentication"
 func (h *GetSelfHandler) Handle(c *fiber.Ctx) error {
 	rid := http.GetRequestID(c)
 	id, err := http.GetUserID(c)
@@ -59,6 +74,8 @@ func (h *GetSelfHandler) Handle(c *fiber.Ctx) error {
 	user := user.User{}
 	err = h.deps.DB.NewSelect().
 		Model(&user).
+		Relation("Addition").
+		Relation("Privacy").
 		Where("id = ?", id).
 		Scan(c.UserContext())
 	if err != nil {

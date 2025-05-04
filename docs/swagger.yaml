@@ -22,12 +22,34 @@ definitions:
       auth_url:
         type: string
     type: object
+  user.GetSelfHandlerAdditionPartial:
+    properties:
+      concerns:
+        items:
+          type: string
+        type: array
+      emotions:
+        items:
+          type: string
+        type: array
+    type: object
+  user.GetSelfHandlerPrivacyPartial:
+    properties:
+      birthday:
+        type: string
+      gender:
+        type: string
+    type: object
   user.GetSelfHandlerResponse:
     properties:
+      addition:
+        $ref: '#/definitions/user.GetSelfHandlerAdditionPartial'
       email:
         type: string
       id:
         type: integer
+      privacy:
+        $ref: '#/definitions/user.GetSelfHandlerPrivacyPartial'
       username:
         type: string
     type: object
@@ -104,7 +126,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: This API returns the user's information.
+      description: Returns the authenticated user's profile, including basic information
+        and optional onboarding data.
       operationId: GetSelfUser
       produces:
       - application/json
@@ -126,8 +149,8 @@ paths:
           schema:
             $ref: '#/definitions/http.Error'
       security:
-      - BearerAuth: []
-      summary: Get Self User Information
+      - BearerAuth "JWT Bearer token for authentication": []
+      summary: Get Current Authenticated User Profile
       tags:
       - user
 securityDefinitions:

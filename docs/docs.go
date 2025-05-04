@@ -105,10 +105,10 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "BearerAuth \"JWT Bearer token for authentication\"": []
                     }
                 ],
-                "description": "This API returns the user's information.",
+                "description": "Returns the authenticated user's profile, including basic information and optional onboarding data.",
                 "consumes": [
                     "application/json"
                 ],
@@ -118,7 +118,7 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
-                "summary": "Get Self User Information",
+                "summary": "Get Current Authenticated User Profile",
                 "operationId": "GetSelfUser",
                 "responses": {
                     "200": {
@@ -185,14 +185,48 @@ const docTemplate = `{
                 }
             }
         },
+        "user.GetSelfHandlerAdditionPartial": {
+            "type": "object",
+            "properties": {
+                "concerns": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "emotions": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "user.GetSelfHandlerPrivacyPartial": {
+            "type": "object",
+            "properties": {
+                "birthday": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                }
+            }
+        },
         "user.GetSelfHandlerResponse": {
             "type": "object",
             "properties": {
+                "addition": {
+                    "$ref": "#/definitions/user.GetSelfHandlerAdditionPartial"
+                },
                 "email": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
+                },
+                "privacy": {
+                    "$ref": "#/definitions/user.GetSelfHandlerPrivacyPartial"
                 },
                 "username": {
                     "type": "string"

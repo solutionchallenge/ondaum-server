@@ -16,7 +16,9 @@ type User struct {
 	CreatedAt time.Time `json:"created_at" db:"created_at" bun:"created_at,notnull,default:CURRENT_TIMESTAMP"`
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at" bun:"updated_at,notnull,default:CURRENT_TIMESTAMP"`
 
-	OAuths []*UserOAuth `json:"oauths,omitempty" bun:"rel:has-many,join:id=user_id"`
+	OAuths   []*UserOAuth  `json:"oauths,omitempty" bun:"rel:has-many,join:id=user_id"`
+	Privacy  *UserPrivacy  `json:"privacy,omitempty" bun:"rel:has-one,join:id=user_id"`
+	Addition *UserAddition `json:"addition,omitempty" bun:"rel:has-one,join:id=user_id"`
 }
 
 func (u *User) GetOAuth(provider oauth.Provider) *UserOAuth {
