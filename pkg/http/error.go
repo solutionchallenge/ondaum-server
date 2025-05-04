@@ -1,5 +1,12 @@
 package http
 
+import (
+	"context"
+	"fmt"
+
+	"github.com/solutionchallenge/ondaum-server/pkg/utils"
+)
+
 var _ error = &Error{}
 
 type Error struct {
@@ -15,9 +22,11 @@ func (e *Error) Error() string {
 	return e.Message
 }
 
-func NewError(cause error, message string) *Error {
+func NewError(ctx context.Context, cause error, fmtstr string, args ...interface{}) *Error {
+	requestID := utils.GetRequestID(ctx)
+	utils.Log(utils.ErrorLevel).Ctx(ctx).Err(cause).RID(requestID).Send(fmtstr, args...)
 	return &Error{
 		Cause:   cause,
-		Message: message,
+		Message: fmt.Sprintf(fmtstr, args...),
 	}
 }

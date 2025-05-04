@@ -58,26 +58,26 @@ func (h *AuthGoogleHandler) Handle(c *fiber.Ctx) error {
 	request := &AuthGoogleHandlerRequest{}
 	if err := c.BodyParser(request); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(
-			http.NewError(err, "Invalid request"),
+			http.NewError(c.UserContext(), err, "Invalid request"),
 		)
 	}
 	if request.Code == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(
-			http.NewError(nil, "Code is required"),
+			http.NewError(c.UserContext(), nil, "Code is required"),
 		)
 	}
 
 	userInfo, err := h.deps.OAuth.Use(google.Provider).GetUserInfo(request.Code)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(err, "Failed to get user info"),
+			http.NewError(c.UserContext(), err, "Failed to get user info"),
 		)
 	}
 
 	dbTx, err := h.deps.DB.BeginTx(c.Context(), nil)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(err, "Failed to begin transaction"),
+			http.NewError(c.UserContext(), err, "Failed to begin transaction"),
 		)
 	}
 	defer dbTx.Rollback()
@@ -100,13 +100,13 @@ func (h *AuthGoogleHandler) Handle(c *fiber.Ctx) error {
 				Exec(c.Context())
 			if err != nil {
 				return c.Status(fiber.StatusInternalServerError).JSON(
-					http.NewError(err, "Failed to create user"),
+					http.NewError(c.UserContext(), err, "Failed to create user"),
 				)
 			}
 			foundUser = newUser
 		} else {
 			return c.Status(fiber.StatusInternalServerError).JSON(
-				http.NewError(err, "Failed to get user"),
+				http.NewError(c.UserContext(), err, "Failed to get user"),
 			)
 		}
 	}
@@ -122,20 +122,20 @@ func (h *AuthGoogleHandler) Handle(c *fiber.Ctx) error {
 		Exec(c.Context())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(err, "Failed to create user oauth"),
+			http.NewError(c.UserContext(), err, "Failed to create user oauth"),
 		)
 	}
 
 	if err := dbTx.Commit(); err != nil {
 		return c.Status(fiber.StatusConflict).JSON(
-			http.NewError(err, "Failed to commit transaction"),
+			http.NewError(c.UserContext(), err, "Failed to commit transaction"),
 		)
 	}
 
 	tokenPair, err := h.deps.JWT.GenerateTokenPair(strconv.FormatInt(foundUser.ID, 10))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(err, "Failed to generate token pair"),
+			http.NewError(c.UserContext(), err, "Failed to generate token pair"),
 		)
 	}
 

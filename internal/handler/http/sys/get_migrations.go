@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/solutionchallenge/ondaum-server/pkg/database"
+	"github.com/solutionchallenge/ondaum-server/pkg/http"
 	"github.com/solutionchallenge/ondaum-server/pkg/utils"
 	"github.com/uptrace/bun"
 	"go.uber.org/fx"
@@ -31,10 +32,9 @@ func NewGetMigrationsHandler(deps GetMigrationsHandlerDependencies) (*GetMigrati
 func (h *GetMigrationsHandler) Handle(c *fiber.Ctx) error {
 	migrations, err := database.GetMigrationHistories(c.UserContext(), h.deps.DB.DB)
 	if err != nil {
-		utils.Log(utils.ErrorLevel).Ctx(c.UserContext()).Err(err).Send("Failed to get migrations")
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "Failed to get migrations",
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			http.NewError(c.UserContext(), err, "Failed to get migrations"),
+		)
 	}
 
 	response := utils.Map(migrations, func(migration database.MigrationHistory) GetMigrationsHandlerResponse {

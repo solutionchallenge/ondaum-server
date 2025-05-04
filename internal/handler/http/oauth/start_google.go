@@ -45,24 +45,24 @@ func (h *StartGoogleHandler) Handle(c *fiber.Ctx) error {
 	redirectURI := c.Query("redirect")
 	if redirectURI == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(
-			http.NewError(nil, "Redirect URI is required"),
+			http.NewError(c.UserContext(), nil, "Redirect URI is required"),
 		)
 	}
 	if !strings.HasPrefix(redirectURI, "http://") && !strings.HasPrefix(redirectURI, "https://") {
 		return c.Status(fiber.StatusBadRequest).JSON(
-			http.NewError(nil, "Redirect URI must be a valid URL starting with http:// or https://"),
+			http.NewError(c.UserContext(), nil, "Redirect URI must be a valid URL starting with http:// or https://"),
 		)
 	}
 	parsedURL, err := url.Parse(redirectURI)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(
-			http.NewError(err, "Invalid redirect URI format"),
+			http.NewError(c.UserContext(), err, "Invalid redirect URI format"),
 		)
 	}
 
 	if parsedURL.Host == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(
-			http.NewError(nil, "Redirect URI must contain a valid host"),
+			http.NewError(c.UserContext(), nil, "Redirect URI must contain a valid host"),
 		)
 	}
 	authURL := h.deps.OAuth.Use(google.Provider).GetAuthURL(requestID)

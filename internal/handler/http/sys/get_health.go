@@ -2,6 +2,7 @@ package sys
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/solutionchallenge/ondaum-server/pkg/http"
 	"github.com/uptrace/bun"
 	"go.uber.org/fx"
 )
@@ -22,9 +23,9 @@ func NewGetHealthHandler(deps GetHealthHandlerDependencies) (*GetHealthHandler, 
 func (h *GetHealthHandler) Handle(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 	if err := h.deps.DB.PingContext(ctx); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "Failed to ping database",
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			http.NewError(c.UserContext(), err, "Failed to ping database"),
+		)
 	}
 	return c.JSON(fiber.Map{
 		"status": "ok",

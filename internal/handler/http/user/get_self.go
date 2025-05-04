@@ -2,12 +2,10 @@ package user
 
 import (
 	"database/sql"
-	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/solutionchallenge/ondaum-server/internal/domain/user"
 	"github.com/solutionchallenge/ondaum-server/pkg/http"
-	"github.com/solutionchallenge/ondaum-server/pkg/utils"
 	"github.com/uptrace/bun"
 	"go.uber.org/fx"
 )
@@ -63,12 +61,10 @@ func NewGetSelfHandler(deps GetSelfHandlerDependencies) (*GetSelfHandler, error)
 // @Router       /user/self [get]
 // @Security     BearerAuth "JWT Bearer token for authentication"
 func (h *GetSelfHandler) Handle(c *fiber.Ctx) error {
-	rid := http.GetRequestID(c)
 	id, err := http.GetUserID(c)
 	if err != nil {
-		utils.Log(utils.InfoLevel).Ctx(c.UserContext()).Err(err).RID(rid).Send("Unauthorized")
 		return c.Status(fiber.StatusUnauthorized).JSON(
-			http.NewError(err, "Unauthorized"),
+			http.NewError(c.UserContext(), err, "Unauthorized"),
 		)
 	}
 	user := user.User{}
@@ -80,14 +76,12 @@ func (h *GetSelfHandler) Handle(c *fiber.Ctx) error {
 		Scan(c.UserContext())
 	if err != nil {
 		if err == sql.ErrNoRows {
-			utils.Log(utils.InfoLevel).Ctx(c.UserContext()).Err(err).RID(rid).Send("User not found for id: %v", id)
 			return c.Status(fiber.StatusNotFound).JSON(
-				http.NewError(err, "User not found"),
+				http.NewError(c.UserContext(), err, "User not found for id: %v", id),
 			)
 		}
-		utils.Log(utils.InfoLevel).Ctx(c.UserContext()).Err(err).RID(rid).Send("Failed to get user for id: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(err, "Failed to get user for id: "+strconv.FormatInt(id, 10)),
+			http.NewError(c.UserContext(), err, "Failed to get user for id: %v", id),
 		)
 	}
 
