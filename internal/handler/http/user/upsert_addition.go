@@ -60,6 +60,12 @@ func (h *UpsertAdditionHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 
+	if !request.Emotions.Validate() {
+		return c.Status(fiber.StatusBadRequest).JSON(
+			http.NewError(c.UserContext(), nil, "Invalid emotions contained in request"),
+		)
+	}
+
 	addition := &user.UserAddition{
 		UserID:   userID,
 		Concerns: request.Concerns,
