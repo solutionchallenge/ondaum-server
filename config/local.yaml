@@ -27,7 +27,10 @@ oauth:
     enabled: true
     client_id: 
     client_secret: 
-    redirect_url: "http://localhost:8080/api/v1/oauth/google/callback"
+    default_redirection: "http://localhost:80/oauth/google"
+    allowed_redirections:
+      - "http://localhost:80/oauth/google"
+      - "https://ondaum.revimal.me/oauth/google"
 jwt:
   secret_key:
   access_expire: 3600

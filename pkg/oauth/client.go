@@ -2,6 +2,6 @@ package oauth
 
 type Client interface {
 	GetProvider() Provider
-	GetAuthURL(state string, override ...string) string
+	GetAuthURL(state string, override ...string) (string, error)
 	GetUserInfo(code string) (UserInfoOutput, error)
 }

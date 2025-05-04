@@ -1,6 +1,7 @@
 package oauth
 
 import (
+	"encoding/json"
 	"net/url"
 	"strings"
 
@@ -65,8 +66,16 @@ func (h *StartGoogleHandler) Handle(c *fiber.Ctx) error {
 			http.NewError(c.UserContext(), nil, "Redirect URI must contain a valid host"),
 		)
 	}
-	authURL := h.deps.OAuth.Use(google.Provider).GetAuthURL(requestID)
-	return c.Status(fiber.StatusTemporaryRedirect).JSON(StartGoogleHandlerResponse{
+	authURL, err := h.deps.OAuth.Use(google.Provider).GetAuthURL(requestID, redirectURI)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			http.NewError(c.UserContext(), err, "Unauthorized redirect URI"),
+		)
+	}
+
+	enc := json.NewEncoder(c.Response().BodyWriter())
+	enc.SetEscapeHTML(false)
+	return enc.Encode(StartGoogleHandlerResponse{
 		AuthURL: authURL,
 	})
 }

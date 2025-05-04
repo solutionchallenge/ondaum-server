@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -28,7 +29,7 @@ func NewClient(config oauth.Config) oauth.Client {
 	oauthConfig := oauth2.Config{
 		ClientID:     config.Google.ClientID,
 		ClientSecret: config.Google.ClientSecret,
-		RedirectURL:  config.Google.RedirectURL,
+		RedirectURL:  config.Google.DefaultRedirection,
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.email",
 			"https://www.googleapis.com/auth/userinfo.profile",
@@ -46,13 +47,20 @@ func (client *Client) GetProvider() oauth.Provider {
 	return Provider
 }
 
-func (client *Client) GetAuthURL(state string, override ...string) string {
+func (client *Client) GetAuthURL(state string, override ...string) (string, error) {
 	if len(override) > 0 && override[0] != "" {
+		if !slices.Contains(client.BaseConfig.Google.AllowedRedirections, override[0]) {
+			return "", fmt.Errorf("invalid override redirect URL: %s", override[0])
+		}
 		copied := client.coreConfig
 		copied.RedirectURL = override[0]
-		return copied.AuthCodeURL(state, oauth2.AccessTypeOffline)
+		return copied.AuthCodeURL(
+			state, oauth2.AccessTypeOffline, oauth2.SetAuthURLParam("response_type", "code"),
+		), nil
 	}
-	return client.coreConfig.AuthCodeURL(state, oauth2.AccessTypeOffline)
+	return client.coreConfig.AuthCodeURL(
+		state, oauth2.AccessTypeOffline, oauth2.SetAuthURLParam("response_type", "code"),
+	), nil
 }
 
 func (client *Client) GetUserInfo(code string) (oauth.UserInfoOutput, error) {
