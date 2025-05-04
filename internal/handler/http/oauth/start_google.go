@@ -1,7 +1,6 @@
 package oauth
 
 import (
-	"encoding/json"
 	"net/url"
 	"strings"
 
@@ -73,11 +72,7 @@ func (h *StartGoogleHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 
-	enc := json.NewEncoder(c.Response().BodyWriter())
-	enc.SetEscapeHTML(false)
-	return enc.Encode(StartGoogleHandlerResponse{
-		AuthURL: authURL,
-	})
+	return c.Status(fiber.StatusTemporaryRedirect).Redirect(authURL)
 }
 
 func (h *StartGoogleHandler) Identify() string {

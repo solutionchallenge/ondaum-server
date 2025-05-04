@@ -41,7 +41,7 @@ func NewOAuthCallbackHandler(deps OAuthCallbackHandlerDependencies) (*OAuthCallb
 }
 
 func (h *OAuthCallbackHandler) Handle(c *fiber.Ctx) error {
-	if os.Getenv("FLAG_USER_CREATION_ENABLED") != "true" {
+	if os.Getenv("FLAG_DEBUGGING_FEATURES_ENABLED") != "true" {
 		return c.SendStatus(fiber.StatusNotFound)
 	}
 

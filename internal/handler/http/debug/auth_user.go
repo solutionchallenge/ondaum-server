@@ -37,7 +37,7 @@ func NewAuthUserHandler(deps AuthUserHandlerDependencies) (*AuthUserHandler, err
 
 // Must not be documented. (Debugging purpose only!)
 func (h *AuthUserHandler) Handle(c *fiber.Ctx) error {
-	if os.Getenv("FLAG_USER_CREATION_ENABLED") != "true" {
+	if os.Getenv("FLAG_DEBUGGING_FEATURES_ENABLED") != "true" {
 		return c.SendStatus(fiber.StatusNotFound)
 	}
 

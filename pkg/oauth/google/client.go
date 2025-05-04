@@ -54,13 +54,9 @@ func (client *Client) GetAuthURL(state string, override ...string) (string, erro
 		}
 		copied := client.coreConfig
 		copied.RedirectURL = override[0]
-		return copied.AuthCodeURL(
-			state, oauth2.AccessTypeOffline, oauth2.SetAuthURLParam("response_type", "code"),
-		), nil
+		return copied.AuthCodeURL(state, oauth2.AccessTypeOffline), nil
 	}
-	return client.coreConfig.AuthCodeURL(
-		state, oauth2.AccessTypeOffline, oauth2.SetAuthURLParam("response_type", "code"),
-	), nil
+	return client.coreConfig.AuthCodeURL(state, oauth2.AccessTypeOffline), nil
 }
 
 func (client *Client) GetUserInfo(code string) (oauth.UserInfoOutput, error) {
