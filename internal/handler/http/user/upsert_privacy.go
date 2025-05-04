@@ -22,6 +22,7 @@ type UpsertPrivacyHandlerRequest struct {
 
 type UpsertPrivacyHandlerResponse struct {
 	Success bool `json:"success"`
+	Created bool `json:"created"`
 }
 
 type UpsertPrivacyHandler struct {
@@ -82,7 +83,7 @@ func (h *UpsertPrivacyHandler) Handle(c *fiber.Ctx) error {
 		Birthday: birthday,
 	}
 
-	_, err = h.deps.DB.NewInsert().
+	result, err := h.deps.DB.NewInsert().
 		Model(privacy).
 		On("DUPLICATE KEY UPDATE").
 		Set("gender = ?", gender).
@@ -96,7 +97,11 @@ func (h *UpsertPrivacyHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 
-	return c.JSON(UpsertPrivacyHandlerResponse{Success: true})
+	rowsAffected, _ := result.RowsAffected()
+	return c.JSON(UpsertPrivacyHandlerResponse{
+		Success: true,
+		Created: rowsAffected == 1,
+	})
 }
 
 func (h *UpsertPrivacyHandler) Identify() string {

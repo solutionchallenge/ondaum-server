@@ -21,6 +21,7 @@ type UpsertAdditionHandlerRequest struct {
 
 type UpsertAdditionHandlerResponse struct {
 	Success bool `json:"success"`
+	Created bool `json:"created"`
 }
 
 type UpsertAdditionHandler struct {
@@ -65,7 +66,7 @@ func (h *UpsertAdditionHandler) Handle(c *fiber.Ctx) error {
 		Emotions: request.Emotions,
 	}
 
-	_, err = h.deps.DB.NewInsert().
+	result, err := h.deps.DB.NewInsert().
 		Model(addition).
 		On("DUPLICATE KEY UPDATE").
 		Set("concerns = ?", request.Concerns).
@@ -79,7 +80,11 @@ func (h *UpsertAdditionHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 
-	return c.JSON(UpsertAdditionHandlerResponse{Success: true})
+	rowsAffected, _ := result.RowsAffected()
+	return c.JSON(UpsertAdditionHandlerResponse{
+		Success: true,
+		Created: rowsAffected == 1,
+	})
 }
 
 func (h *UpsertAdditionHandler) Identify() string {
