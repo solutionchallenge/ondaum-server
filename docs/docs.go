@@ -334,7 +334,7 @@ const docTemplate = `{
                 "emotions": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/common.Emotion"
                     }
                 }
             }

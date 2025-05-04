@@ -48,7 +48,7 @@ definitions:
         type: array
       emotions:
         items:
-          type: string
+          $ref: '#/definitions/common.Emotion'
         type: array
     type: object
   user.GetSelfHandlerPrivacyPartial:

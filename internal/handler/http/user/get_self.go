@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/solutionchallenge/ondaum-server/internal/domain/common"
 	"github.com/solutionchallenge/ondaum-server/internal/domain/user"
 	"github.com/solutionchallenge/ondaum-server/pkg/http"
 	"github.com/uptrace/bun"
@@ -21,8 +22,8 @@ type GetSelfHandlerPrivacyPartial struct {
 }
 
 type GetSelfHandlerAdditionPartial struct {
-	Concerns []string `json:"concerns"`
-	Emotions []string `json:"emotions"`
+	Concerns []string           `json:"concerns"`
+	Emotions common.EmotionList `json:"emotions"`
 }
 
 type GetSelfHandlerResponse struct {
@@ -89,6 +90,18 @@ func (h *GetSelfHandler) Handle(c *fiber.Ctx) error {
 		ID:       user.ID,
 		Email:    user.Email,
 		Username: user.Username,
+	}
+	if user.Privacy != nil {
+		response.Privacy = &GetSelfHandlerPrivacyPartial{
+			Gender:   string(user.Privacy.Gender),
+			Birthday: user.Privacy.Birthday.Format("2006-01-02"),
+		}
+	}
+	if user.Addition != nil {
+		response.Addition = &GetSelfHandlerAdditionPartial{
+			Concerns: user.Addition.Concerns,
+			Emotions: user.Addition.Emotions,
+		}
 	}
 	return c.JSON(response)
 }
