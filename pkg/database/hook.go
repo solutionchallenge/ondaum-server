@@ -38,7 +38,7 @@ func (hook *QueryLoggingHook) Before(ctx context.Context, query string, args ...
 	requestID := utils.GetRequestID(ctx)
 	utils.Log(hook.LogLevel).Ctx(ctx).RID(requestID).Send("[%s:%s]> %s %+v", queryUUID, dbQueryLoggingPlaceholder, query, args)
 
-	wrappedContext := utils.WithValue(ctx, dbQueryLoggingTimestampCtxKey, hook.Clock.Now())
+	wrappedContext := utils.WithValue(ctx, dbQueryLoggingTimestampCtxKey, hook.Clock.Now().UTC())
 	wrappedContext = utils.WithValue(wrappedContext, dbQueryLoggingIdentifierCtxKey, queryUUID)
 	return wrappedContext, nil
 }

@@ -58,7 +58,7 @@ func (g *Generator) GenerateTokenPair(value string, metadata ...map[string]any) 
 }
 
 func (g *Generator) GenerateToken(typ Type, value string, metadata map[string]any, duration time.Duration) (string, error) {
-	now := g.Clock.Now().UTC()
+	now := g.Clock.Now().UTC().UTC()
 	claims := Claims{
 		Type:     typ,
 		Value:    value,
@@ -88,7 +88,7 @@ func (g *Generator) UnpackToken(tokenString string) (*Claims, error) {
 		return nil, jwt.ErrInvalidKey
 	}
 
-	if claims.ExpiresAt.Before(g.Clock.Now().UTC()) {
+	if claims.ExpiresAt.Before(g.Clock.Now().UTC().UTC()) {
 		return nil, jwt.ErrTokenExpired
 	}
 
