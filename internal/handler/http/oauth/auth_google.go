@@ -39,17 +39,17 @@ func NewAuthGoogleHandler(deps AuthGoogleHandlerDependencies) (*AuthGoogleHandle
 	}, nil
 }
 
-// @ID GoogleOAuth
-// @Summary      Callback for Google OAuth
-// @Description  Must not be called directly!
+// @ID ExchangeGoogleOAuthCode
+// @Summary      Exchange Google OAuth Code for Tokens
+// @Description  Receives the authorization code (obtained from Google OAuth) and exchanges it for access and refresh tokens.
 // @Tags         oauth
 // @Accept       json
 // @Produce      json
-// @Param        code   query      string  true  "Google OAuth Code"
-// @Success      200  {object}  AuthGoogleHandlerResponse
-// @Failure      400  {object}  string
-// @Failure      500  {object}  string
-// @Router       /oauth/google/callback [get]
+// @Param        code query string true "Authorization Code (received from Google OAuth)"
+// @Success      200 {object} AuthGoogleHandlerResponse
+// @Failure      400 {object} string
+// @Failure      500 {object} string
+// @Router       /oauth/google/auth [get]
 func (h *AuthGoogleHandler) Handle(c *fiber.Ctx) error {
 	code := c.Query("code")
 	if code == "" {

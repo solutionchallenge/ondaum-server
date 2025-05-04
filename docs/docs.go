@@ -15,9 +15,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/oauth/google/callback": {
+        "/oauth/google/auth": {
             "get": {
-                "description": "Must not be called directly!",
+                "description": "Receives the authorization code (obtained from Google OAuth) and exchanges it for access and refresh tokens.",
                 "consumes": [
                     "application/json"
                 ],
@@ -27,12 +27,12 @@ const docTemplate = `{
                 "tags": [
                     "oauth"
                 ],
-                "summary": "Callback for Google OAuth",
-                "operationId": "GoogleOAuth",
+                "summary": "Exchange Google OAuth Code for Tokens",
+                "operationId": "ExchangeGoogleOAuthCode",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Google OAuth Code",
+                        "description": "Authorization Code (received from Google OAuth)",
                         "name": "code",
                         "in": "query",
                         "required": true
@@ -62,7 +62,7 @@ const docTemplate = `{
         },
         "/oauth/google/start": {
             "get": {
-                "description": "This API redirects to Google OAuth, and finally redirects to the callback URL. (GoogleOAuthCallback)",
+                "description": "Returns the Google OAuth authorization URL, which includes the specified redirect URI (the URL where Google will send the authorization code after login).",
                 "consumes": [
                     "application/json"
                 ],
@@ -72,11 +72,26 @@ const docTemplate = `{
                 "tags": [
                     "oauth"
                 ],
-                "summary": "Start Google OAuth",
+                "summary": "Get Google OAuth Authorization URL",
                 "operationId": "StartGoogleOAuth",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Redirect URI (the client's callback URL where Google will redirect with the code)",
+                        "name": "redirect",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
                 "responses": {
-                    "307": {
-                        "description": "Temporary Redirect",
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/oauth.StartGoogleHandlerResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "type": "string"
                         }
@@ -140,6 +155,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "oauth.StartGoogleHandlerResponse": {
+            "type": "object",
+            "properties": {
+                "auth_url": {
                     "type": "string"
                 }
             }

@@ -7,6 +7,11 @@ definitions:
       refresh_token:
         type: string
     type: object
+  oauth.StartGoogleHandlerResponse:
+    properties:
+      auth_url:
+        type: string
+    type: object
   user.GetSelfHandlerResponse:
     properties:
       email:
@@ -23,14 +28,15 @@ info:
   title: Ondaum API
   version: "1.0"
 paths:
-  /oauth/google/callback:
+  /oauth/google/auth:
     get:
       consumes:
       - application/json
-      description: Must not be called directly!
-      operationId: GoogleOAuth
+      description: Receives the authorization code (obtained from Google OAuth) and
+        exchanges it for access and refresh tokens.
+      operationId: ExchangeGoogleOAuthCode
       parameters:
-      - description: Google OAuth Code
+      - description: Authorization Code (received from Google OAuth)
         in: query
         name: code
         required: true
@@ -50,24 +56,36 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: Callback for Google OAuth
+      summary: Exchange Google OAuth Code for Tokens
       tags:
       - oauth
   /oauth/google/start:
     get:
       consumes:
       - application/json
-      description: This API redirects to Google OAuth, and finally redirects to the
-        callback URL. (GoogleOAuthCallback)
+      description: Returns the Google OAuth authorization URL, which includes the
+        specified redirect URI (the URL where Google will send the authorization code
+        after login).
       operationId: StartGoogleOAuth
+      parameters:
+      - description: Redirect URI (the client's callback URL where Google will redirect
+          with the code)
+        in: query
+        name: redirect
+        required: true
+        type: string
       produces:
       - application/json
       responses:
-        "307":
-          description: Temporary Redirect
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/oauth.StartGoogleHandlerResponse'
+        "400":
+          description: Bad Request
           schema:
             type: string
-      summary: Start Google OAuth
+      summary: Get Google OAuth Authorization URL
       tags:
       - oauth
   /user/self:
