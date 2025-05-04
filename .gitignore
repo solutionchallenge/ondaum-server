@@ -2,4 +2,5 @@
 .vscode
 .envrc
 .build
+.DS_Store
 __debug_*
