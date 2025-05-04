@@ -40,6 +40,13 @@ definitions:
       auth_url:
         type: string
     type: object
+  schema.GetSupportedEmotionResponse:
+    properties:
+      supported_emotions:
+        items:
+          $ref: '#/definitions/common.Emotion'
+        type: array
+    type: object
   user.GetSelfHandlerAdditionPartial:
     properties:
       concerns:
@@ -84,6 +91,8 @@ definitions:
     type: object
   user.UpsertAdditionHandlerResponse:
     properties:
+      created:
+        type: boolean
       success:
         type: boolean
     type: object
@@ -96,6 +105,8 @@ definitions:
     type: object
   user.UpsertPrivacyHandlerResponse:
     properties:
+      created:
+        type: boolean
       success:
         type: boolean
     type: object
@@ -106,6 +117,22 @@ info:
   title: Ondaum API
   version: "1.0"
 paths:
+  /_schema/supported-emotions:
+    get:
+      consumes:
+      - application/json
+      description: Get supported emotions
+      operationId: GetSupportedEmotions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schema.GetSupportedEmotionResponse'
+      summary: Get supported emotions
+      tags:
+      - schema
   /oauth/google/auth:
     post:
       consumes:

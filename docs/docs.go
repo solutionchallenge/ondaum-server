@@ -15,6 +15,30 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/_schema/supported-emotions": {
+            "get": {
+                "description": "Get supported emotions",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "schema"
+                ],
+                "summary": "Get supported emotions",
+                "operationId": "GetSupportedEmotions",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schema.GetSupportedEmotionResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/oauth/google/auth": {
             "post": {
                 "description": "Receives the authorization code (obtained from Google OAuth) and exchanges it for access and refresh tokens.",
@@ -322,6 +346,17 @@ const docTemplate = `{
                 }
             }
         },
+        "schema.GetSupportedEmotionResponse": {
+            "type": "object",
+            "properties": {
+                "supported_emotions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/common.Emotion"
+                    }
+                }
+            }
+        },
         "user.GetSelfHandlerAdditionPartial": {
             "type": "object",
             "properties": {
@@ -390,6 +425,9 @@ const docTemplate = `{
         "user.UpsertAdditionHandlerResponse": {
             "type": "object",
             "properties": {
+                "created": {
+                    "type": "boolean"
+                },
                 "success": {
                     "type": "boolean"
                 }
@@ -409,6 +447,9 @@ const docTemplate = `{
         "user.UpsertPrivacyHandlerResponse": {
             "type": "object",
             "properties": {
+                "created": {
+                    "type": "boolean"
+                },
                 "success": {
                     "type": "boolean"
                 }
