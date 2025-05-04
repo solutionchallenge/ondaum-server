@@ -95,6 +95,122 @@
                 }
             }
         },
+        "/user/addition": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth \"JWT Bearer token for authentication\"": []
+                    }
+                ],
+                "description": "Updates or creates the user's additional information including concerns and emotions.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Update or Create User Additional Information",
+                "operationId": "UpsertUserAddition",
+                "parameters": [
+                    {
+                        "description": "User additional information",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.UpsertAdditionHandlerRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.UpsertAdditionHandlerResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/privacy": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth \"JWT Bearer token for authentication\"": []
+                    }
+                ],
+                "description": "Updates or creates the user's privacy information including gender and birthday.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Update or Create User Privacy Information",
+                "operationId": "UpsertUserPrivacy",
+                "parameters": [
+                    {
+                        "description": "User privacy information",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.UpsertPrivacyHandlerRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.UpsertPrivacyHandlerResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/user/self": {
             "get": {
                 "security": [
@@ -144,6 +260,27 @@
         }
     },
     "definitions": {
+        "common.Emotion": {
+            "type": "string",
+            "enum": [
+                "joy",
+                "sadness",
+                "anger",
+                "surprise",
+                "fear",
+                "disgust",
+                "neutral"
+            ],
+            "x-enum-varnames": [
+                "EmotionJoy",
+                "EmotionSadness",
+                "EmotionAnger",
+                "EmotionSurprise",
+                "EmotionFear",
+                "EmotionDisgust",
+                "EmotionNeutral"
+            ]
+        },
         "http.Error": {
             "type": "object",
             "properties": {
@@ -224,6 +361,50 @@
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "user.UpsertAdditionHandlerRequest": {
+            "type": "object",
+            "properties": {
+                "concerns": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "emotions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/common.Emotion"
+                    }
+                }
+            }
+        },
+        "user.UpsertAdditionHandlerResponse": {
+            "type": "object",
+            "properties": {
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "user.UpsertPrivacyHandlerRequest": {
+            "type": "object",
+            "properties": {
+                "birthday": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.UpsertPrivacyHandlerResponse": {
+            "type": "object",
+            "properties": {
+                "success": {
+                    "type": "boolean"
                 }
             }
         }

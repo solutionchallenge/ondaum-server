@@ -17,8 +17,7 @@ const (
 type UserPrivacy struct {
 	bun.BaseModel `bun:"table:user_privacies,alias:up"`
 
-	ID        int64      `json:"id" db:"id" bun:"id,pk,autoincrement"`
-	UserID    int64      `json:"user_id" db:"user_id" bun:"user_id,notnull"`
+	UserID    int64      `json:"user_id" db:"user_id" bun:"user_id,pk"`
 	Gender    UserGender `json:"gender" db:"gender" bun:"gender,notnull"`
 	Birthday  time.Time  `json:"birthday" db:"birthday" bun:"birthday,notnull"`
 	CreatedAt time.Time  `json:"created_at" db:"created_at" bun:"created_at,notnull,default:CURRENT_TIMESTAMP"`

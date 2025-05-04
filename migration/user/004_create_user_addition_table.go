@@ -5,8 +5,7 @@ import "github.com/solutionchallenge/ondaum-server/pkg/database"
 const sqlUser004CreateUserAdditionTable = `
 CREATE TABLE IF NOT EXISTS user_additions
 (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT NOT NULL,
+    user_id BIGINT PRIMARY KEY,
 	concerns JSON NOT NULL COMMENT 'array of undefined user concerns',
 	emotions JSON NOT NULL COMMENT 'array of application-defined emotion enums',
 	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,

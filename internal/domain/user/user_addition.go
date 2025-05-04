@@ -10,8 +10,7 @@ import (
 type UserAddition struct {
 	bun.BaseModel `bun:"table:user_additions,alias:ua"`
 
-	ID        int64              `json:"id" db:"id" bun:"id,pk,autoincrement"`
-	UserID    int64              `json:"user_id" db:"user_id" bun:"user_id,notnull"`
+	UserID    int64              `json:"user_id" db:"user_id" bun:"user_id,pk"`
 	Concerns  []string           `json:"concerns" db:"concerns" bun:"concerns,type:json,notnull"`
 	Emotions  common.EmotionList `json:"emotions" db:"emotions" bun:"emotions,type:json,notnull"`
 	CreatedAt time.Time          `json:"created_at" db:"created_at" bun:"created_at,notnull,default:CURRENT_TIMESTAMP"`
