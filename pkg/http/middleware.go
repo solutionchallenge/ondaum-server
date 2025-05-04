@@ -19,7 +19,7 @@ func NewJWTAuthMiddleware(generator *jwt.Generator) MiddlewareFunc {
 		}
 
 		if len(authHeader) < 7 || authHeader[:7] != "Bearer " {
-			utils.Log(utils.WarnLevel).Ctx(c.UserContext()).RID(rid).Send("Invalid authorization header format")
+			utils.Log(utils.WarnLevel).Ctx(c.UserContext()).RID(rid).Send("Missing Bearer prefix in Authorization header")
 			return c.Next()
 		}
 
