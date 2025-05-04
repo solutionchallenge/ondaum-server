@@ -4,6 +4,7 @@ import (
 	"github.com/solutionchallenge/ondaum-server/internal/dependency"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/http/debug"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/http/oauth"
+	"github.com/solutionchallenge/ondaum-server/internal/handler/http/schema"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/http/sys"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/http/user"
 	"go.uber.org/fx"
@@ -20,4 +21,5 @@ var PredefinedRoutes = []fx.Option{
 	dependency.HttpRoute("PUT", "/user/addition", user.NewUpsertAdditionHandler),
 	dependency.HttpRoute("GET", "/oauth/google/start", oauth.NewStartGoogleHandler),
 	dependency.HttpRoute("POST", "/oauth/google/auth", oauth.NewAuthGoogleHandler),
+	dependency.HttpRoute("GET", "/_schema/supported-emotions", schema.NewGetSupportedEmotionHandler),
 }

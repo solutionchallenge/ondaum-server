@@ -4,6 +4,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
+	"slices"
 )
 
 type Emotion string
@@ -17,6 +18,16 @@ const (
 	EmotionDisgust  Emotion = "disgust"
 	EmotionNeutral  Emotion = "neutral"
 )
+
+var SupportedEmotions = EmotionList{
+	EmotionJoy,
+	EmotionSadness,
+	EmotionAnger,
+	EmotionSurprise,
+	EmotionFear,
+	EmotionDisgust,
+	EmotionNeutral,
+}
 
 type EmotionList []Emotion
 
@@ -33,23 +44,13 @@ func (e *EmotionList) Scan(src interface{}) error {
 	return nil
 }
 
-func (e EmotionList) Value() (driver.Value, error) {
+func (e *EmotionList) Value() (driver.Value, error) {
 	return json.Marshal(e)
 }
 
-func (e EmotionList) Validate() bool {
-	validEmotions := map[Emotion]bool{
-		EmotionJoy:      true,
-		EmotionSadness:  true,
-		EmotionAnger:    true,
-		EmotionSurprise: true,
-		EmotionFear:     true,
-		EmotionDisgust:  true,
-		EmotionNeutral:  true,
-	}
-
-	for _, emotion := range e {
-		if !validEmotions[emotion] {
+func (e *EmotionList) Validate() bool {
+	for _, emotion := range *e {
+		if !slices.Contains(SupportedEmotions, emotion) {
 			return false
 		}
 	}
