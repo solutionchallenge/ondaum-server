@@ -2,7 +2,7 @@ package user
 
 import "github.com/solutionchallenge/ondaum-server/pkg/database"
 
-const sqlUser004CreateUserAdditionTable = `
+const sqlUser004CreateAdditionTable = `
 CREATE TABLE IF NOT EXISTS user_additions
 (
     user_id BIGINT PRIMARY KEY,
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS user_additions
 	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 )`
 
-var MigrationUser004CreateUserAdditionTable = database.Migration{
-	Name:  "user.004.create_user_addition_table",
-	Query: sqlUser004CreateUserAdditionTable,
+var MigrationUser004CreateAdditionTable = database.Migration{
+	Name:  "user.004.create_addition_table",
+	Query: sqlUser004CreateAdditionTable,
 }

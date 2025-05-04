@@ -8,4 +8,6 @@ import (
 var Collection = []database.Migration{
 	user.MigrationUser001CreateUserTable,
 	user.MigrationUser002CreateOAuthTable,
+	user.MigrationUser003CreatePrivacyTable,
+	user.MigrationUser004CreateAdditionTable,
 }
