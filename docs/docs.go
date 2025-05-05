@@ -62,6 +62,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/oauth.AuthGoogleHandlerRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Redirect URI (optional, the client's callback URL where Google was redirect with the code)",
+                        "name": "redirect",
+                        "in": "query"
                     }
                 ],
                 "responses": {

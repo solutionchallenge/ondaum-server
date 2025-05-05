@@ -148,6 +148,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/oauth.AuthGoogleHandlerRequest'
+      - description: Redirect URI (optional, the client's callback URL where Google
+          was redirect with the code)
+        in: query
+        name: redirect
+        type: string
       produces:
       - application/json
       responses:

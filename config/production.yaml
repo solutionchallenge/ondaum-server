@@ -27,7 +27,7 @@ oauth:
     enabled: true
     client_id: 
     client_secret: 
-    default_redirection: "http://localhost:5173/oauth/google"
+    default_redirection: "https://ondaum.revimal.me/oauth/google"
     allowed_redirections:
       - "http://localhost/oauth/google"
       - "http://localhost:8080/oauth/google"

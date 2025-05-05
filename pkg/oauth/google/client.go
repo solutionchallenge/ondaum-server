@@ -59,13 +59,27 @@ func (client *Client) GetAuthURL(state string, override ...string) (string, erro
 	return client.coreConfig.AuthCodeURL(state, oauth2.AccessTypeOffline), nil
 }
 
-func (client *Client) GetUserInfo(code string) (oauth.UserInfoOutput, error) {
-	token, err := client.coreConfig.Exchange(context.Background(), code)
-	if err != nil {
+func (client *Client) GetUserInfo(code string, override ...string) (oauth.UserInfoOutput, error) {
+	token := (*oauth2.Token)(nil)
+	err := error(nil)
+	var current oauth2.Config
+	if len(override) > 0 && override[0] != "" {
+		if !slices.Contains(client.BaseConfig.Google.AllowedRedirections, override[0]) {
+			return oauth.UserInfoOutput{}, fmt.Errorf("invalid override redirect URL: %s", override[0])
+		}
+		copied := client.coreConfig
+		copied.RedirectURL = override[0]
+		token, err = copied.Exchange(context.Background(), code)
+		current = copied
+	} else {
+		token, err = client.coreConfig.Exchange(context.Background(), code)
+		current = client.coreConfig
+	}
+	if err != nil || token == nil {
 		return oauth.UserInfoOutput{}, fmt.Errorf("failed to exchange token: %v", err)
 	}
 
-	core := client.coreConfig.Client(context.Background(), token)
+	core := current.Client(context.Background(), token)
 	resp, err := core.Get("https://www.googleapis.com/oauth2/v2/userinfo")
 	if err != nil {
 		return oauth.UserInfoOutput{}, fmt.Errorf("failed to get user info: %v", err)

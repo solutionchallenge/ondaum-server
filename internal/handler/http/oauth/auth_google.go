@@ -49,11 +49,14 @@ func NewAuthGoogleHandler(deps AuthGoogleHandlerDependencies) (*AuthGoogleHandle
 // @Accept       json
 // @Produce      json
 // @Param request body AuthGoogleHandlerRequest true "Payload containing the authorization code received from Google OAuth"
+// @Param redirect query string false "Redirect URI (optional, the client's callback URL where Google was redirect with the code)"
 // @Success      200 {object} AuthGoogleHandlerResponse
 // @Failure      400 {object} http.Error
 // @Failure      500 {object} http.Error
 // @Router       /oauth/google/auth [post]
 func (h *AuthGoogleHandler) Handle(c *fiber.Ctx) error {
+	redirectURI := c.Query("redirect")
+
 	request := &AuthGoogleHandlerRequest{}
 	if err := c.BodyParser(request); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(
@@ -66,7 +69,13 @@ func (h *AuthGoogleHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 
-	userInfo, err := h.deps.OAuth.Use(google.Provider).GetUserInfo(request.Code)
+	var userInfo oauth.UserInfoOutput
+	var err error
+	if redirectURI != "" {
+		userInfo, err = h.deps.OAuth.Use(google.Provider).GetUserInfo(request.Code, redirectURI)
+	} else {
+		userInfo, err = h.deps.OAuth.Use(google.Provider).GetUserInfo(request.Code)
+	}
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
 			http.NewError(c.UserContext(), err, "Failed to get user info"),
