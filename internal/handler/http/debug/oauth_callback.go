@@ -1,7 +1,6 @@
 package debug
 
 import (
-	"database/sql"
 	"os"
 	"strconv"
 
@@ -67,37 +66,32 @@ func (h *OAuthCallbackHandler) Handle(c *fiber.Ctx) error {
 	}
 	defer dbTx.Rollback()
 
-	foundUser := &user.User{
-		Email: userInfo.Email,
+	userData := &user.User{
+		Email:    userInfo.Email,
+		Username: userInfo.Name,
 	}
+	_, err = dbTx.NewInsert().
+		Model(userData).
+		On("DUPLICATE KEY UPDATE username = VALUES(username)").
+		Exec(c.Context())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Failed to upsert user",
+		})
+	}
+
 	err = dbTx.NewSelect().
-		Model(foundUser).
+		Model(userData).
 		Where("email = ?", userInfo.Email).
 		Scan(c.Context())
 	if err != nil {
-		if err == sql.ErrNoRows {
-			newUser := &user.User{
-				Email:    userInfo.Email,
-				Username: userInfo.Name,
-			}
-			_, err = dbTx.NewInsert().
-				Model(newUser).
-				Exec(c.Context())
-			if err != nil {
-				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-					"message": "Failed to create user",
-				})
-			}
-			foundUser = newUser
-		} else {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"message": "Failed to get user",
-			})
-		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Failed to get user",
+		})
 	}
 
 	userOAuth := &user.UserOAuth{
-		UserID:       foundUser.ID,
+		UserID:       userData.ID,
 		Provider:     google.Provider,
 		ProviderCode: userInfo.ID,
 	}
@@ -117,7 +111,7 @@ func (h *OAuthCallbackHandler) Handle(c *fiber.Ctx) error {
 		})
 	}
 
-	tokenPair, err := h.deps.JWT.GenerateTokenPair(strconv.FormatInt(foundUser.ID, 10))
+	tokenPair, err := h.deps.JWT.GenerateTokenPair(strconv.FormatInt(userData.ID, 10))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": "Failed to generate token pair",
