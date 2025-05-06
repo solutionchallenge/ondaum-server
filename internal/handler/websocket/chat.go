@@ -112,7 +112,7 @@ func (h *ChatHandler) HandleMessage(c *fiberws.Conn, request wspkg.MessageWrappe
 	}
 
 	manager := newChatHistoryManager(h.deps.DB, request.SessionID)
-	conversation, err := h.deps.LLM.StartConversation(context.Background(), manager, request.SessionID)
+	conversation, err := h.deps.LLM.StartConversation(context.Background(), manager, "interactive_chat", request.SessionID)
 	if err != nil {
 		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).Send("Failed to start conversation")
 		return wspkg.ResponseWrapper{}, false, err
@@ -291,14 +291,14 @@ func (h *chatHistoryManager) Add(ctx context.Context, messages ...llm.Message) {
 			return err
 		}
 
-		histories := make([]domain.ChatHistory, 0, len(messages))
+		histories := make([]domain.History, 0, len(messages))
 		for _, message := range messages {
 			marshaled, err := json.Marshal(message.Metadata)
 			if err != nil {
 				utils.Log(utils.WarnLevel).CID(h.conversationID).Err(err).Send("Failed to marshal metadata")
 				continue
 			}
-			histories = append(histories, domain.ChatHistory{
+			histories = append(histories, domain.History{
 				ChatID:    chat.ID,
 				MessageID: message.ID,
 				Role:      string(message.Role),
@@ -320,7 +320,7 @@ func (h *chatHistoryManager) Add(ctx context.Context, messages ...llm.Message) {
 
 func (h *chatHistoryManager) Get(ctx context.Context, conversationID string) []llm.Message {
 	histories := []llm.Message{}
-	err := h.db.NewSelect().Model(&domain.ChatHistory{}).Where("session_id = ?", conversationID).Scan(ctx, &histories)
+	err := h.db.NewSelect().Model(&domain.History{}).Where("session_id = ?", conversationID).Scan(ctx, &histories)
 	if err != nil {
 		utils.Log(utils.WarnLevel).CID(conversationID).Err(err).Send("Failed to get chat history")
 		return h.memoryCache

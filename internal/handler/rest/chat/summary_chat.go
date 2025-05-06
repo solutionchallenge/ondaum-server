@@ -1,0 +1,147 @@
+package chat
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+
+	"github.com/gofiber/fiber/v2"
+	domain "github.com/solutionchallenge/ondaum-server/internal/domain/chat"
+	"github.com/solutionchallenge/ondaum-server/internal/domain/common"
+	"github.com/solutionchallenge/ondaum-server/internal/domain/user"
+	"github.com/solutionchallenge/ondaum-server/pkg/http"
+	"github.com/solutionchallenge/ondaum-server/pkg/llm"
+	"github.com/solutionchallenge/ondaum-server/pkg/utils"
+	"github.com/uptrace/bun"
+	"go.uber.org/fx"
+)
+
+type SummaryChatHandlerDependencies struct {
+	fx.In
+	DB  *bun.DB
+	LLM llm.Client
+}
+
+type SummaryChatHandlerResponse struct {
+	SimplifiedSummaryDTO domain.SimplifiedSummaryDTO `json:"summary"`
+}
+
+type SummaryChatHandler struct {
+	deps SummaryChatHandlerDependencies
+}
+
+func NewSummaryChatHandler(deps SummaryChatHandlerDependencies) (*SummaryChatHandler, error) {
+	return &SummaryChatHandler{deps: deps}, nil
+}
+
+func (h *SummaryChatHandler) Handle(c *fiber.Ctx) error {
+	userID, err := http.GetUserID(c)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(
+			http.NewError(c.UserContext(), err, "Unauthorized"),
+		)
+	}
+	user := &user.User{ID: userID}
+	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(context.Background()); err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(
+			http.NewError(c.UserContext(), err, "User not found"),
+		)
+	}
+
+	sessionID := c.Params("session_id")
+	if sessionID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(
+			http.NewError(c.UserContext(), errors.New("session_id is required"), "Bad Request"),
+		)
+	}
+
+	chat := &domain.Chat{}
+	err = h.deps.DB.NewSelect().
+		Model(chat).
+		Relation("Histories").
+		Where("session_id = ?", sessionID).
+		Where("user_id = ?", userID).
+		Order("created_at ASC").
+		Scan(context.Background())
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(
+			http.NewError(c.UserContext(), err, "Chat not found"),
+		)
+	}
+	if chat.ArchivedAt.IsZero() {
+		return c.Status(fiber.StatusNotFound).JSON(
+			http.NewError(c.UserContext(), errors.New("chat is not archived"), "Chat is not archived"),
+		)
+	}
+	if len(chat.Histories) == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(
+			http.NewError(c.UserContext(), errors.New("chat history not found"), "Chat history not found"),
+		)
+	}
+
+	histories := utils.Map(chat.Histories, func(h *domain.History) llm.Message {
+		return llm.Message{
+			Role:    llm.Role(h.Role),
+			Content: h.Content,
+		}
+	})
+
+	resolved, err := h.deps.LLM.ResolvePrompt(c.UserContext(), "interactive_chat", "summary_chat", histories...)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			http.NewError(c.UserContext(), err, "Failed to resolve prompt"),
+		)
+	}
+
+	summary := struct {
+		Title    string   `json:"title"`
+		Text     string   `json:"text"`
+		Keywords []string `json:"keywords"`
+		Emotions []struct {
+			Emotion common.Emotion `json:"emotion"`
+			Rate    float64        `json:"rate"`
+		} `json:"emotions"`
+	}{}
+	if err := json.Unmarshal([]byte(resolved.Content), &summary); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			http.NewError(c.UserContext(), err, "Failed to unmarshal response"),
+		)
+	}
+	emotions := utils.Map(summary.Emotions, func(e struct {
+		Emotion common.Emotion `json:"emotion"`
+		Rate    float64        `json:"rate"`
+	}) domain.EmotionRate {
+		return domain.EmotionRate{
+			Emotion: e.Emotion,
+			Rate:    e.Rate,
+		}
+	})
+	model := &domain.Summary{
+		ChatID:   chat.ID,
+		Title:    summary.Title,
+		Text:     summary.Text,
+		Keywords: summary.Keywords,
+		Emotions: emotions,
+	}
+	_, err = h.deps.DB.NewInsert().
+		Model(model).
+		On("DUPLICATE KEY UPDATE").
+		Set("title = ?", summary.Title).
+		Set("text = ?", summary.Text).
+		Set("keywords = ?", summary.Keywords).
+		Set("emotions = ?", emotions).
+		Exec(context.Background())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			http.NewError(c.UserContext(), err, "Failed to insert summary"),
+		)
+	}
+	response := &SummaryChatHandlerResponse{
+		SimplifiedSummaryDTO: model.ToSimplifiedSummaryDTO(),
+	}
+	return c.JSON(response)
+}
+
+func (h *SummaryChatHandler) Identify() string {
+	return "summary-chat"
+}

@@ -16,6 +16,7 @@ type GetSelfHandlerDependencies struct {
 	DB *bun.DB
 }
 
+// TODO: move to domain (dto)
 type GetSelfHandlerPrivacyPartial struct {
 	Gender   string `json:"gender"`
 	Birthday string `json:"birthday"`

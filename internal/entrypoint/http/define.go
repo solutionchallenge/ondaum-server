@@ -3,6 +3,7 @@ package http
 import (
 	"github.com/solutionchallenge/ondaum-server/internal/dependency"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/future"
+	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/chat"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/debug"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/oauth"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/schema"
@@ -26,6 +27,9 @@ var PredefinedRoutes = []fx.Option{
 	dependency.HttpRoute("PUT", "/user/addition", user.NewUpsertAdditionHandler),
 	dependency.HttpRoute("GET", "/oauth/google/start", oauth.NewStartGoogleHandler),
 	dependency.HttpRoute("POST", "/oauth/google/auth", oauth.NewAuthGoogleHandler),
+	dependency.HttpRoute("GET", "/chats", chat.NewListChatHandler),
+	dependency.HttpRoute("GET", "/chat/:session_id", chat.NewGetChatHandler),
+	dependency.HttpRoute("POST", "/chat/:session_id/summary", chat.NewSummaryChatHandler),
 	dependency.HttpRoute("GET", "/_schema/supported-emotions", schema.NewGetSupportedEmotionHandler),
 }
 

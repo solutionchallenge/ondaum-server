@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/solutionchallenge/ondaum-server/internal/domain/user"
 	"github.com/solutionchallenge/ondaum-server/pkg/http"
+	"github.com/solutionchallenge/ondaum-server/pkg/utils"
 	"github.com/uptrace/bun"
 	"go.uber.org/fx"
 )
@@ -62,7 +63,7 @@ func (h *UpsertPrivacyHandler) Handle(c *fiber.Ctx) error {
 	}
 
 	// Parse birthday string to time.Time
-	birthday, err := time.Parse("2006-01-02", request.Birthday)
+	birthday, err := time.Parse(utils.TIME_FORMAT_DATE, request.Birthday)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(
 			http.NewError(c.UserContext(), err, "Invalid birthday format. Use YYYY-MM-DD"),
