@@ -22,6 +22,7 @@ RUN apk add --no-cache ca-certificates tzdata
 
 COPY --from=builder /app/ondaum .
 COPY --from=builder /app/config ./config
+COPY --from=builder /app/resource ./resource
 
 EXPOSE 8080
 CMD ["/app/ondaum", "http"]
