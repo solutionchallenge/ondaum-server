@@ -1,0 +1,77 @@
+package future
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+
+	"github.com/benbjohnson/clock"
+	domain "github.com/solutionchallenge/ondaum-server/internal/domain/chat"
+	"github.com/solutionchallenge/ondaum-server/pkg/future"
+	"github.com/uptrace/bun"
+	"go.uber.org/fx"
+)
+
+const (
+	ChatJobType = future.JobType("chat")
+)
+
+type ChatFutureHandlerDependencies struct {
+	fx.In
+	DB    *bun.DB
+	Clock clock.Clock
+}
+
+type ChatFutureHandlerParams struct {
+	UserID         int64
+	ConversationID string
+}
+
+type ChatFutureHandler struct {
+	deps ChatFutureHandlerDependencies
+}
+
+func NewChatFutureHandler(deps ChatFutureHandlerDependencies) (*ChatFutureHandler, error) {
+	return &ChatFutureHandler{
+		deps: deps,
+	}, nil
+}
+
+func (h *ChatFutureHandler) Handle(ctx context.Context, job *future.Job) error {
+	var input ChatFutureHandlerParams
+	err := json.Unmarshal([]byte(job.ActionParams), &input)
+	if err != nil {
+		return err
+	}
+
+	tx, err := h.deps.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	chat := &domain.Chat{}
+	err = tx.NewSelect().
+		Model(chat).
+		Where("user_id = ? AND session_id = ?", input.UserID, input.ConversationID).
+		Scan(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to select chat: %w(%v:%v)", err, input.UserID, input.ConversationID)
+	}
+
+	chat.FinishedAt = h.deps.Clock.Now().UTC()
+	_, err = tx.NewUpdate().
+		Model(chat).
+		Column("finished_at").
+		WherePK().
+		Exec(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to update chat: %w(%v:%v)", err, input.UserID, input.ConversationID)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w(%v:%v)", err, input.UserID, input.ConversationID)
+	}
+
+	return nil
+}

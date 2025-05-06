@@ -6,7 +6,8 @@ import (
 )
 
 const (
-	CtxKeyForRequestID = "ctxval_request_id"
+	CtxKeyForRequestID     = "ctxval_request_id"
+	CtxKeyForCorrelationID = "ctxval_correlation_id"
 )
 
 func SleepWith(ctx context.Context, delay time.Duration) error {

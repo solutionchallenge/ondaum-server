@@ -110,6 +110,28 @@ definitions:
       success:
         type: boolean
     type: object
+  websocket.Action:
+    enum:
+    - noop
+    - reject
+    - data
+    - notify
+    type: string
+    x-enum-varnames:
+    - PredefinedActionNoop
+    - PredefinedActionReject
+    - PredefinedActionData
+    - PredefinedActionNotify
+  websocket.ResponseWrapper:
+    properties:
+      action:
+        $ref: '#/definitions/websocket.Action'
+      message_id:
+        type: string
+      payload: {}
+      session_id:
+        type: string
+    type: object
 host: ondaum.revimal.me
 info:
   contact: {}
@@ -133,6 +155,34 @@ paths:
       summary: Get supported emotions
       tags:
       - schema
+  /chat/ws:
+    get:
+      consumes:
+      - application/json
+      description: Connect Chat Websocket. Reference the notion page for more information.
+      operationId: ConnectChatWebsocket
+      parameters:
+      - description: Websocket Session ID (if not provided, the server will create
+          a new session)
+        in: query
+        name: session_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/websocket.ResponseWrapper'
+        "426":
+          description: Upgrade Required
+          schema:
+            $ref: '#/definitions/http.Error'
+      security:
+      - BearerAuth: []
+      summary: Connect Chat Websocket
+      tags:
+      - chat
   /oauth/google/auth:
     post:
       consumes:

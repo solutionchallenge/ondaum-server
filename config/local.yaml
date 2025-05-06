@@ -38,6 +38,30 @@ oauth:
       - "https://ondaum.revimal.me/oauth/google"
 jwt:
   secret_key:
-  access_expire: 3600
+  access_expire: 86400
   refresh_expire: 604800
-
+future:
+  enabled: true
+  schedule_cycle: 5m
+  delete_after_completion: false
+llm:
+  gemini:
+    enabled: true
+    api_key:
+    llm_model: gemini-1.5-pro
+    embedding_model: text-embedding-001
+    response_format: application/json
+    system_prompt: resource/llm/prompt/system-prompt-v1.md
+    cached_prompts:
+      - identifier: "phq_9_test"
+        prompt: resource/llm/prompt/phq-9-prompt-v1.txt
+        attachment: resource/llm/attachment/phq-9-test-v1.pdf
+    predefined_actions:
+      - identifier: "request_phq_9_test"
+        reference: "phq_9_test"
+    redaction_threshold:
+      harrasement: low
+      hate_speech: medium
+      sexually_explicit: high
+      dangerous_content: medium
+      civic_integrity: none

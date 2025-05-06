@@ -2,6 +2,8 @@ package utils
 
 import (
 	"context"
+	"fmt"
+	"path"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -38,6 +40,11 @@ func (logger Logger) Err(err error) Logger {
 	return logger
 }
 
+func (logger Logger) CID(cid string) Logger {
+	logger.Instance = logger.Instance.Str("correlation_id", cid)
+	return logger
+}
+
 func (logger Logger) RID(rid string) Logger {
 	logger.Instance = logger.Instance.Str("request_id", rid)
 	return logger
@@ -48,6 +55,9 @@ func (logger Logger) UID(uid string) Logger {
 	return logger
 }
 
-func (logger Logger) Send(fmt string, data ...any) {
-	logger.Instance.Msgf(fmt, data...)
+func (logger Logger) Send(fmtstr string, data ...any) {
+	filepath, filename, line := GetCallerInfo(1)
+	info := fmt.Sprintf("%s:%d", path.Join(filepath, filename), line)
+	logger.Instance = logger.Instance.Str("caller", info)
+	logger.Instance.Msgf(fmtstr, data...)
 }

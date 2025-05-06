@@ -33,6 +33,49 @@
                 }
             }
         },
+        "/chat/ws": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Connect Chat Websocket. Reference the notion page for more information.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Connect Chat Websocket",
+                "operationId": "ConnectChatWebsocket",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Websocket Session ID (if not provided, the server will create a new session)",
+                        "name": "session_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/websocket.ResponseWrapper"
+                        }
+                    },
+                    "426": {
+                        "description": "Upgrade Required",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/oauth/google/auth": {
             "post": {
                 "description": "Receives the authorization code (obtained from Google OAuth) and exchanges it for access and refresh tokens.",
@@ -452,6 +495,36 @@
                 },
                 "success": {
                     "type": "boolean"
+                }
+            }
+        },
+        "websocket.Action": {
+            "type": "string",
+            "enum": [
+                "noop",
+                "reject",
+                "data",
+                "notify"
+            ],
+            "x-enum-varnames": [
+                "PredefinedActionNoop",
+                "PredefinedActionReject",
+                "PredefinedActionData",
+                "PredefinedActionNotify"
+            ]
+        },
+        "websocket.ResponseWrapper": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "$ref": "#/definitions/websocket.Action"
+                },
+                "message_id": {
+                    "type": "string"
+                },
+                "payload": {},
+                "session_id": {
+                    "type": "string"
                 }
             }
         }

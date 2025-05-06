@@ -41,7 +41,7 @@ func NewDatabaseModule(config database.Config, logLevel utils.LogLevel) fx.Optio
 				OnStart: func(ctx context.Context) error {
 					return db.PingContext(ctx)
 				},
-				OnStop: func(ctx context.Context) error {
+				OnStop: func(_ context.Context) error {
 					return db.Close()
 				},
 			})

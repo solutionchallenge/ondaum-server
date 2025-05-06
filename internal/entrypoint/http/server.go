@@ -35,10 +35,15 @@ func Run(config AppConfig) {
 		fx.Supply(config.DatabaseConfig),
 		fx.Supply(config.OAuthConfig),
 		fx.Supply(config.JWTConfig),
-		dependency.NewDatabaseModule(config.DatabaseConfig, utils.InfoLevel),
+		fx.Supply(config.FutureConfig),
+		fx.Supply(config.LLMConfig),
+		dependency.NewDatabaseModule(config.DatabaseConfig, utils.DebugLevel),
 		dependency.ProvideMiddleware(http.NewJWTAuthMiddleware),
 		dependency.NewHttpModule("/api/v1", PredefinedRoutes...),
 		dependency.NewOAuthModule(config.OAuthConfig),
+		dependency.NewWebsocketModule(WebsocketRoutes...),
+		dependency.NewFutureModule(config.FutureConfig, FutureProcesses...),
+		dependency.NewLLMModule(config.LLMConfig),
 		fx.Provide(jwt.NewGenerator),
 		fx.Invoke(func(db *sql.DB) {
 			if config.Migration.Enabled {

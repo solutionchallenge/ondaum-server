@@ -49,10 +49,16 @@ func NewHttpModule(root string, routes ...fx.Option) fx.Option {
 			fx.Options(routes...),
 			fx.Invoke(func(lc fx.Lifecycle, server *fiber.App, config http.Config) {
 				lc.Append(fx.Hook{
-					OnStart: func(ctx context.Context) error {
-						return server.Listen(fmt.Sprintf("%s:%d", config.Host, config.Port))
+					OnStart: func(_ context.Context) error {
+						go func() {
+							err := server.Listen(fmt.Sprintf("%s:%d", config.Host, config.Port))
+							if err != nil {
+								panic(err)
+							}
+						}()
+						return nil
 					},
-					OnStop: func(ctx context.Context) error {
+					OnStop: func(_ context.Context) error {
 						return server.ShutdownWithTimeout(config.Timeout.Shutdown)
 					},
 				})
@@ -65,7 +71,6 @@ func ProvideMiddleware(constructor any) fx.Option {
 	return fx.Provide(
 		fx.Annotate(
 			constructor,
-			// fx.As(new(http.MiddlewareFunc)),
 			fx.ResultTags(`group:"middlewares"`),
 		),
 	)
@@ -73,7 +78,7 @@ func ProvideMiddleware(constructor any) fx.Option {
 
 func HttpRoute[H http.Handler, DEP any](method string, path string, constructor func(dependencies DEP) (H, error)) fx.Option {
 	return fx.Options(
-		fx.Provide(constructor),
+		fx.Provide(fx.Private, constructor),
 		fx.Invoke(func(router fiber.Router, instance H) {
 			router.Add(method, path, instance.Handle).Name(instance.Identify())
 		}),
