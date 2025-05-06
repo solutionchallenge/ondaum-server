@@ -51,14 +51,14 @@ llm:
     llm_model: gemini-1.5-pro
     embedding_model: text-embedding-001
     response_format: application/json
-    system_prompt: resource/llm/prompt/system-prompt-v1.md
-    cached_prompts:
-      - identifier: "phq_9_test"
-        prompt: resource/llm/prompt/phq-9-prompt-v1.txt
-        attachment: resource/llm/attachment/phq-9-test-v1.pdf
-    predefined_actions:
-      - identifier: "request_phq_9_test"
-        reference: "phq_9_test"
+    prepared_prompts:
+      - identifier: "interactive_chat"
+        prompt_file: resource/llm/prompt/interactive-chat-prompt-v1.md
+      - identifier: "counseling_psychology_101"
+        prompt_file: resource/llm/prompt/counseling-psychology-101-prompt-v1.md
+        attachment_file: resource/llm/attachment/counseling-psychology-101.pdf
+        attachment_mime: application/pdf
+        attachment_ttl: 1h
     redaction_threshold:
       harrasement: low
       hate_speech: medium

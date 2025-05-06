@@ -1,7 +1,10 @@
 package llm
 
+import "context"
+
 type Conversation interface {
-	Request(request Message) (Message, error)
+	Request(ctx context.Context, request Message) (Message, error)
+	GetHistory(ctx context.Context) []Message
 	GetStatistics() Statistics
 	End()
 }

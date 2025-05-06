@@ -112,15 +112,19 @@ func (h *ChatHandler) HandleMessage(c *fiberws.Conn, request wspkg.MessageWrappe
 	}
 
 	manager := newChatHistoryManager(h.deps.DB, request.SessionID)
-	conversation := h.deps.LLM.StartConversation(manager, request.SessionID)
-	llmResponse, err := conversation.Request(llm.Message{
+	conversation, err := h.deps.LLM.StartConversation(context.Background(), manager, request.SessionID)
+	if err != nil {
+		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).Send("Failed to start conversation")
+		return wspkg.ResponseWrapper{}, false, err
+	}
+	llmResponse, err := conversation.Request(context.Background(), llm.Message{
 		ConversationID: request.SessionID,
 		ID:             request.MessageID,
 		Role:           llm.RoleUser,
 		Content:        request.Payload.(string),
 	})
 	if err != nil {
-		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).Send("Failed to request to LLM")
+		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).Send("Failed to request to conversation")
 		return wspkg.ResponseWrapper{}, false, err
 	}
 	marshaled, _ := json.Marshal(llmResponse.Metadata)
@@ -277,9 +281,9 @@ func newChatHistoryManager(db *bun.DB, conversationID string) *chatHistoryManage
 	}
 }
 
-func (h *chatHistoryManager) Add(messages ...llm.Message) {
+func (h *chatHistoryManager) Add(ctx context.Context, messages ...llm.Message) {
 	h.memoryCache = append(h.memoryCache, messages...)
-	h.db.RunInTx(context.Background(), nil, func(ctx context.Context, tx bun.Tx) error {
+	h.db.RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
 		chat := domain.Chat{}
 		err := tx.NewSelect().Model(&chat).Where("session_id = ?", h.conversationID).Scan(ctx)
 		if err != nil || chat.ID == 0 {
@@ -314,9 +318,9 @@ func (h *chatHistoryManager) Add(messages ...llm.Message) {
 	})
 }
 
-func (h *chatHistoryManager) Get(conversationID string) []llm.Message {
+func (h *chatHistoryManager) Get(ctx context.Context, conversationID string) []llm.Message {
 	histories := []llm.Message{}
-	err := h.db.NewSelect().Model(&domain.ChatHistory{}).Where("session_id = ?", conversationID).Scan(context.Background(), &histories)
+	err := h.db.NewSelect().Model(&domain.ChatHistory{}).Where("session_id = ?", conversationID).Scan(ctx, &histories)
 	if err != nil {
 		utils.Log(utils.WarnLevel).CID(conversationID).Err(err).Send("Failed to get chat history")
 		return h.memoryCache

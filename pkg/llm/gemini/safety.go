@@ -1,8 +1,10 @@
 package gemini
 
 import (
-	"github.com/google/generative-ai-go/genai"
+	"fmt"
+
 	"github.com/solutionchallenge/ondaum-server/pkg/llm"
+	"google.golang.org/genai"
 )
 
 func ConfigToSafetySetting(config llm.Config) []*genai.SafetySetting {
@@ -23,24 +25,72 @@ func ConfigToSafetySetting(config llm.Config) []*genai.SafetySetting {
 			Category:  genai.HarmCategoryDangerousContent,
 			Threshold: parseSafetyThreshold(config.Gemini.RedactionThreshold.DangerousContent),
 		},
-		// { // not supported yet
-		// 	Category:  genai.HarmCategoryCivicIntegrity,
-		// 	Threshold: parseSafetyThreshold(config.Gemini.RedactionThreshold.CivicIntegrity),
-		// },
+		{
+			Category:  genai.HarmCategoryCivicIntegrity,
+			Threshold: parseSafetyThreshold(config.Gemini.RedactionThreshold.CivicIntegrity),
+		},
 	}
 }
 
 func parseSafetyThreshold(threshold string) genai.HarmBlockThreshold {
 	switch threshold {
 	case "none":
-		return genai.HarmBlockNone
+		return genai.HarmBlockThresholdBlockNone
 	case "low":
-		return genai.HarmBlockLowAndAbove
+		return genai.HarmBlockThresholdBlockLowAndAbove
 	case "medium":
-		return genai.HarmBlockMediumAndAbove
+		return genai.HarmBlockThresholdBlockMediumAndAbove
 	case "high":
-		return genai.HarmBlockOnlyHigh
+		return genai.HarmBlockThresholdBlockOnlyHigh
 	default:
-		return genai.HarmBlockUnspecified
+		return genai.HarmBlockThresholdUnspecified
 	}
+}
+
+func checkPromptBlocked(response *genai.GenerateContentResponse) error {
+	if response.PromptFeedback != nil {
+		switch response.PromptFeedback.BlockReason {
+		case genai.BlockedReasonProhibitedContent, genai.BlockedReasonSafety:
+			return fmt.Errorf(
+				"blocked by gemini by inappropriate prompt: %v(%v)",
+				response.PromptFeedback.BlockReasonMessage,
+				response.PromptFeedback.SafetyRatings,
+			)
+		default:
+			return fmt.Errorf(
+				"blocked by gemini with unknown reason: %v(%v)",
+				response.PromptFeedback.BlockReasonMessage,
+				response.PromptFeedback.SafetyRatings,
+			)
+		}
+	}
+	return nil
+}
+
+func checkContentBlocked(feedbacks []map[string]any) error {
+	for _, feedback := range feedbacks {
+		if feedback["blocked"] == true {
+			return fmt.Errorf("blocked by gemini by inappropriate content: %v(%v)", feedback["category"], feedback["probability"])
+		}
+	}
+	return nil
+}
+
+func buildContentFeedbacks(response *genai.GenerateContentResponse) []map[string]any {
+	feedback := []map[string]any{}
+	for idx, candidate := range response.Candidates {
+		if feedback[idx] == nil {
+			feedback[idx] = map[string]any{}
+		}
+		if len(candidate.SafetyRatings) > 0 {
+			for _, result := range candidate.SafetyRatings {
+				feedback[idx] = map[string]any{
+					"blocked":     result.Blocked,
+					"category":    result.Category,
+					"probability": result.Probability,
+				}
+			}
+		}
+	}
+	return feedback
 }

@@ -4,6 +4,7 @@ type Statistics struct {
 	TotalTokens      int64
 	PromptTokens     int64
 	CompletionTokens int64
+	ThoughtsTokens   int64
 	CachedTokens     int64
 }
 
