@@ -110,10 +110,22 @@ definitions:
       success:
         type: boolean
     type: object
+  websocket.Action:
+    enum:
+    - noop
+    - reject
+    - data
+    - notify
+    type: string
+    x-enum-varnames:
+    - PredefinedActionNoop
+    - PredefinedActionReject
+    - PredefinedActionData
+    - PredefinedActionNotify
   websocket.ResponseWrapper:
     properties:
       action:
-        type: string
+        $ref: '#/definitions/websocket.Action'
       message_id:
         type: string
       payload: {}

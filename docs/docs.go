@@ -504,11 +504,26 @@ const docTemplate = `{
                 }
             }
         },
+        "websocket.Action": {
+            "type": "string",
+            "enum": [
+                "noop",
+                "reject",
+                "data",
+                "notify"
+            ],
+            "x-enum-varnames": [
+                "PredefinedActionNoop",
+                "PredefinedActionReject",
+                "PredefinedActionData",
+                "PredefinedActionNotify"
+            ]
+        },
         "websocket.ResponseWrapper": {
             "type": "object",
             "properties": {
                 "action": {
-                    "type": "string"
+                    "$ref": "#/definitions/websocket.Action"
                 },
                 "message_id": {
                     "type": "string"
