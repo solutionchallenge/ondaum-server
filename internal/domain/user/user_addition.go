@@ -25,5 +25,8 @@ type SimplifiedAdditionDTO struct {
 }
 
 func (a *Addition) ToSimplifiedAdditionDTO() SimplifiedAdditionDTO {
-	return SimplifiedAdditionDTO{}
+	return SimplifiedAdditionDTO{
+		Concerns: a.Concerns,
+		Emotions: a.Emotions,
+	}
 }

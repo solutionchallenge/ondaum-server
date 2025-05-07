@@ -117,6 +117,7 @@ func (h *ChatHandler) HandleMessage(c *fiberws.Conn, request wspkg.MessageWrappe
 		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).Send("Failed to start conversation")
 		return wspkg.ResponseWrapper{}, false, err
 	}
+	// TODO: apply user addition to the conversation
 	llmResponse, err := conversation.Request(context.Background(), llm.Message{
 		ConversationID: request.SessionID,
 		ID:             request.MessageID,
