@@ -46,7 +46,9 @@ func (h *ChatHandler) HandleConnect(c *fiberws.Conn, request wspkg.ConnectWrappe
 	return impl.HandleConnect(h.deps.DB, h.deps.Clock, request)
 }
 
-func (h *ChatHandler) HandleClose(_ *fiberws.Conn, _ wspkg.CloseWrapper) {}
+func (h *ChatHandler) HandleClose(_ *fiberws.Conn, request wspkg.CloseWrapper) {
+	impl.HandleClose(h.deps.DB, request, h.deps.LLM)
+}
 
 func (h *ChatHandler) HandlePing(c *fiberws.Conn, request wspkg.PingWrapper) (wspkg.ResponseWrapper, bool, error) {
 	return impl.HandlePing(h.deps.DB, request)

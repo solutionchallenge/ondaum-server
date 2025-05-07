@@ -142,12 +142,22 @@ func (client *Client) GetStatistics() llm.Statistics {
 	return client.Statistics
 }
 
-func (client *Client) Close() error {
+func (client *Client) Close(ids ...string) error {
 	client.Mutex.Lock()
 	defer client.Mutex.Unlock()
-	for _, conversation := range client.Conversations {
-		conversation.End()
+	if len(ids) > 0 {
+		for _, id := range ids {
+			conversation, ok := client.Conversations[id]
+			if !ok {
+				continue
+			}
+			conversation.End()
+		}
+	} else {
+		for _, conversation := range client.Conversations {
+			conversation.End()
+		}
+		client.Conversations = make(map[string]llm.Conversation)
 	}
-	client.Conversations = make(map[string]llm.Conversation)
 	return nil
 }
