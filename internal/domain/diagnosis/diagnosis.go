@@ -26,6 +26,7 @@ type Diagnosis struct {
 }
 
 type DiagnosisDTO struct {
+	ID                int64            `json:"id"`
 	Diagnosis         common.Diagnosis `json:"diagnosis"`
 	TotalScore        int64            `json:"total_score"`
 	ResultScore       int64            `json:"result_score"`
@@ -36,6 +37,7 @@ type DiagnosisDTO struct {
 
 func (i *Diagnosis) ToDiagnosisDTO() DiagnosisDTO {
 	return DiagnosisDTO{
+		ID:                i.ID,
 		Diagnosis:         i.Diagnosis,
 		TotalScore:        i.TotalScore,
 		ResultScore:       i.ResultScore,
