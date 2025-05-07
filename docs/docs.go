@@ -69,7 +69,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/chat/ws": {
+        "/_ws/chat": {
             "get": {
                 "security": [
                     {
@@ -91,7 +91,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Websocket Session ID (if not provided, the server will create a new session)",
+                        "description": "Websocket Session ID (optional; if not provided, the server will use the most recent non-archived conversation or create a new one if none exists)",
                         "name": "session_id",
                         "in": "query"
                     }
@@ -145,6 +145,57 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/chat.ChatWithSimplifiedSummaryAndHistoriesDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/chat/:session_id/archive": {
+            "post": {
+                "description": "Archive a chat to prevent it from being accessed again and allow to summarize it.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Archive a chat",
+                "operationId": "ArchiveChat",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/chat.ArchiveChatHandlerResponse"
                         }
                     },
                     "401": {
@@ -300,7 +351,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Redirect URI (optional, the client's callback URL where Google was redirect with the code)",
+                        "description": "Redirect URI (optional; the client's callback URL where Google was redirect with the code)",
                         "name": "redirect",
                         "in": "query"
                     }
@@ -531,6 +582,17 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "chat.ArchiveChatHandlerResponse": {
+            "type": "object",
+            "properties": {
+                "finished": {
+                    "type": "boolean"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
         "chat.ChatWithSimplifiedSummaryAndHistoriesDTO": {
             "type": "object",
             "properties": {

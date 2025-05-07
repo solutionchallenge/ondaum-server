@@ -1,5 +1,12 @@
 basePath: /api/v1
 definitions:
+  chat.ArchiveChatHandlerResponse:
+    properties:
+      finished:
+        type: boolean
+      success:
+        type: boolean
+    type: object
   chat.ChatWithSimplifiedSummaryAndHistoriesDTO:
     properties:
       histories:
@@ -244,6 +251,35 @@ paths:
       summary: List supported features
       tags:
       - schema
+  /_ws/chat:
+    get:
+      consumes:
+      - application/json
+      description: Connect Chat Websocket. Reference the notion page for more information.
+      operationId: ConnectChatWebsocket
+      parameters:
+      - description: Websocket Session ID (optional; if not provided, the server will
+          use the most recent non-archived conversation or create a new one if none
+          exists)
+        in: query
+        name: session_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/websocket.ResponseWrapper'
+        "426":
+          description: Upgrade Required
+          schema:
+            $ref: '#/definitions/http.Error'
+      security:
+      - BearerAuth: []
+      summary: Connect Chat Websocket
+      tags:
+      - chat
   /chat/:session_id:
     get:
       consumes:
@@ -280,6 +316,41 @@ paths:
       summary: Get chat
       tags:
       - chat
+  /chat/:session_id/archive:
+    post:
+      consumes:
+      - application/json
+      description: Archive a chat to prevent it from being accessed again and allow
+        to summarize it.
+      operationId: ArchiveChat
+      parameters:
+      - description: Session ID
+        in: path
+        name: session_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/chat.ArchiveChatHandlerResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Error'
+      summary: Archive a chat
+      tags:
+      - chat
   /chat/:session_id/summary:
     get:
       consumes:
@@ -314,34 +385,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Get summary
-      tags:
-      - chat
-  /chat/ws:
-    get:
-      consumes:
-      - application/json
-      description: Connect Chat Websocket. Reference the notion page for more information.
-      operationId: ConnectChatWebsocket
-      parameters:
-      - description: Websocket Session ID (if not provided, the server will create
-          a new session)
-        in: query
-        name: session_id
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/websocket.ResponseWrapper'
-        "426":
-          description: Upgrade Required
-          schema:
-            $ref: '#/definitions/http.Error'
-      security:
-      - BearerAuth: []
-      summary: Connect Chat Websocket
       tags:
       - chat
   /chats:
@@ -391,7 +434,7 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/oauth.AuthGoogleHandlerRequest'
-      - description: Redirect URI (optional, the client's callback URL where Google
+      - description: Redirect URI (optional; the client's callback URL where Google
           was redirect with the code)
         in: query
         name: redirect

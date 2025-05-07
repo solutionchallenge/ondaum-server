@@ -28,22 +28,47 @@ func HandleConnect(db *bun.DB, clk clock.Clock, request wspkg.ConnectWrapper) (w
 		utils.Log(utils.ErrorLevel).CID(request.SessionID).Err(err).BT().Send("Failed to query chat")
 		return wspkg.ResponseWrapper{}, err
 	}
-
 	if err == sql.ErrNoRows {
-		chat = &domain.Chat{
-			UserID:       request.UserID,
-			SessionID:    request.SessionID,
-			StartedDate:  clk.Now().Truncate(24 * time.Hour),
-			UserTimezone: clk.Now().Location().String(),
-		}
-		_, err = db.NewInsert().Model(chat).Exec(context.Background())
-		if err != nil {
-			utils.Log(utils.ErrorLevel).CID(request.SessionID).Err(err).BT().Send("Failed to create chat")
+		chat = &domain.Chat{}
+		err = db.NewSelect().
+			Model(chat).
+			Where("user_id = ? AND archived_at IS NULL", request.UserID).
+			Order("started_date DESC").
+			Limit(1).
+			Scan(context.Background())
+
+		if err != nil && err != sql.ErrNoRows {
+			utils.Log(utils.ErrorLevel).CID(request.SessionID).Err(err).BT().Send("Failed to query recent chat")
 			return wspkg.ResponseWrapper{}, err
+		}
+
+		if err == sql.ErrNoRows {
+			chat = &domain.Chat{
+				UserID:       request.UserID,
+				SessionID:    request.SessionID,
+				StartedDate:  clk.Now().Truncate(24 * time.Hour),
+				UserTimezone: clk.Now().Location().String(),
+			}
+			_, err = db.NewInsert().Model(chat).Exec(context.Background())
+			if err != nil {
+				utils.Log(utils.ErrorLevel).CID(request.SessionID).Err(err).BT().Send("Failed to create chat")
+				return wspkg.ResponseWrapper{}, err
+			}
+			return wspkg.BuildResponseFrom(
+				request, uuid.New().String(),
+				wspkg.PredefinedActionNotify, ChatPayloadNotifyNewConversation,
+			), nil
+		}
+
+		if !chat.FinishedAt.IsZero() {
+			return wspkg.BuildResponseFrom(
+				request, uuid.New().String(),
+				wspkg.PredefinedActionNotify, ChatPayloadNotifyConversationFinished,
+			), nil
 		}
 		return wspkg.BuildResponseFrom(
 			request, uuid.New().String(),
-			wspkg.PredefinedActionNotify, ChatPayloadNotifyNewConversation,
+			wspkg.PredefinedActionNotify, ChatPayloadNotifyExistingConversation,
 		), nil
 	}
 

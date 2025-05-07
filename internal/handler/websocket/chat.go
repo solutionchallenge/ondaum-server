@@ -33,7 +33,7 @@ func NewChatHandler(deps ChatHandlerDependencies) (*ChatHandler, error) {
 // @Tags         chat
 // @Accept       json
 // @Produce      json
-// @Param        session_id query string false "Websocket Session ID (if not provided, the server will create a new session)"
+// @Param        session_id query string false "Websocket Session ID (optional; if not provided, the server will use the most recent non-archived conversation or create a new one if none exists)"
 // @Success      200 {object} wspkg.ResponseWrapper
 // @Failure      426 {object} http.Error
 // @Router       /_ws/chat [get]

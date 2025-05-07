@@ -49,7 +49,7 @@ func NewAuthGoogleHandler(deps AuthGoogleHandlerDependencies) (*AuthGoogleHandle
 // @Accept       json
 // @Produce      json
 // @Param request body AuthGoogleHandlerRequest true "Payload containing the authorization code received from Google OAuth"
-// @Param redirect query string false "Redirect URI (optional, the client's callback URL where Google was redirect with the code)"
+// @Param redirect query string false "Redirect URI (optional; the client's callback URL where Google was redirect with the code)"
 // @Success      200 {object} AuthGoogleHandlerResponse
 // @Failure      400 {object} http.Error
 // @Failure      500 {object} http.Error
