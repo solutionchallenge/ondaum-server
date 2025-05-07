@@ -1,10 +1,10 @@
 package diagnosis
 
 import (
-	"os/user"
 	"time"
 
 	"github.com/solutionchallenge/ondaum-server/internal/domain/common"
+	"github.com/solutionchallenge/ondaum-server/internal/domain/user"
 	"github.com/uptrace/bun"
 )
 
