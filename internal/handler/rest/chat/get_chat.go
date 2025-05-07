@@ -24,6 +24,19 @@ func NewGetChatHandler(deps GetChatHandlerDependencies) (*GetChatHandler, error)
 	return &GetChatHandler{deps: deps}, nil
 }
 
+// @ID GetChat
+// @Summary Get chat
+// @Description Get chat with histories and summary
+// @Tags chat
+// @Accept json
+// @Produce json
+// @Param session_id path string true "Session ID"
+// @Success 200 {object} domain.ChatWithSimplifiedSummaryAndHistoriesDTO
+// @Failure 401 {object} http.Error
+// @Failure 404 {object} http.Error
+// @Failure 500 {object} http.Error
+// @Router /chat/{session_id} [get]
+// @Security BearerAuth
 func (h *GetChatHandler) Handle(c *fiber.Ctx) error {
 	userID, err := http.GetUserID(c)
 	if err != nil {

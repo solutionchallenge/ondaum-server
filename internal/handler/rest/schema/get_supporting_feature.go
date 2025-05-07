@@ -26,7 +26,7 @@ func NewListSupportedFeatureHandler(deps ListSupportedFeatureHandlerDependencies
 // @Tags schema
 // @Accept json
 // @Produce json
-// @Success 200 {object} common.SupportedFeatures
+// @Success 200 {object} common.FeatureList
 // @Router /_schema/supported-features [get]
 func (h *ListSupportedFeatureHandler) Handle(c *fiber.Ctx) error {
 	return c.JSON(common.SupportedFeatures)

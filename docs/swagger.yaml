@@ -1,5 +1,67 @@
 basePath: /api/v1
 definitions:
+  chat.ChatWithSimplifiedSummaryAndHistoriesDTO:
+    properties:
+      histories:
+        items:
+          $ref: '#/definitions/chat.HistoryDTO'
+        type: array
+      id:
+        type: string
+      is_archived:
+        type: boolean
+      is_finished:
+        type: boolean
+      session_id:
+        type: string
+      started_date:
+        type: string
+      summary:
+        $ref: '#/definitions/chat.SimplifiedSummaryDTO'
+      user_id:
+        type: string
+      user_timezone:
+        type: string
+    type: object
+  chat.ChatWithSimplifiedSummaryDTO:
+    properties:
+      id:
+        type: string
+      is_archived:
+        type: boolean
+      is_finished:
+        type: boolean
+      session_id:
+        type: string
+      started_date:
+        type: string
+      summary:
+        $ref: '#/definitions/chat.SimplifiedSummaryDTO'
+      user_id:
+        type: string
+      user_timezone:
+        type: string
+    type: object
+  chat.HistoryDTO:
+    properties:
+      content:
+        type: string
+      metadata:
+        items:
+          type: integer
+        type: array
+      role:
+        type: string
+      when:
+        type: string
+    type: object
+  chat.SimplifiedSummaryDTO:
+    properties:
+      text:
+        type: string
+      title:
+        type: string
+    type: object
   common.Emotion:
     enum:
     - joy
@@ -18,6 +80,20 @@ definitions:
     - EmotionFear
     - EmotionDisgust
     - EmotionNeutral
+  common.Feature:
+    enum:
+    - escalate_crisis
+    - suggest_test_phq9
+    - suggest_test_gad7
+    - suggest_test_pss
+    - end_conversation
+    type: string
+    x-enum-varnames:
+    - FeatureEscalateCrisis
+    - FeatureSuggestTestPHQ9
+    - FeatureSuggestTestGAD7
+    - FeatureSuggestTestPSS
+    - FeatureEndConversation
   http.Error:
     properties:
       message:
@@ -40,14 +116,7 @@ definitions:
       auth_url:
         type: string
     type: object
-  schema.GetSupportedEmotionResponse:
-    properties:
-      supported_emotions:
-        items:
-          $ref: '#/definitions/common.Emotion'
-        type: array
-    type: object
-  user.GetSelfHandlerAdditionPartial:
+  user.SimplifiedAdditionDTO:
     properties:
       concerns:
         items:
@@ -58,23 +127,23 @@ definitions:
           $ref: '#/definitions/common.Emotion'
         type: array
     type: object
-  user.GetSelfHandlerPrivacyPartial:
+  user.SimplifiedPrivacyDTO:
     properties:
       birthday:
         type: string
       gender:
         type: string
     type: object
-  user.GetSelfHandlerResponse:
+  user.SimplifiedUserDTO:
     properties:
       addition:
-        $ref: '#/definitions/user.GetSelfHandlerAdditionPartial'
+        $ref: '#/definitions/user.SimplifiedAdditionDTO'
       email:
         type: string
       id:
         type: integer
       privacy:
-        $ref: '#/definitions/user.GetSelfHandlerPrivacyPartial'
+        $ref: '#/definitions/user.SimplifiedPrivacyDTO'
       username:
         type: string
     type: object
@@ -143,18 +212,110 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get supported emotions
-      operationId: GetSupportedEmotions
+      description: List supported emotions
+      operationId: ListSupportedEmotion
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/schema.GetSupportedEmotionResponse'
-      summary: Get supported emotions
+            items:
+              $ref: '#/definitions/common.Emotion'
+            type: array
+      summary: List supported emotions
       tags:
       - schema
+  /_schema/supported-features:
+    get:
+      consumes:
+      - application/json
+      description: List supported features
+      operationId: ListSupportedFeature
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/common.Feature'
+            type: array
+      summary: List supported features
+      tags:
+      - schema
+  /chat/{session_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get chat with histories and summary
+      operationId: GetChat
+      parameters:
+      - description: Session ID
+        in: path
+        name: session_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/chat.ChatWithSimplifiedSummaryAndHistoriesDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Error'
+      security:
+      - BearerAuth: []
+      summary: Get chat
+      tags:
+      - chat
+  /chat/{session_id}/summary:
+    get:
+      consumes:
+      - application/json
+      description: Get summary of the chat
+      operationId: GetSummary
+      parameters:
+      - description: Session ID
+        in: path
+        name: session_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/chat.SimplifiedSummaryDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Error'
+      security:
+      - BearerAuth: []
+      summary: Get summary
+      tags:
+      - chat
   /chat/ws:
     get:
       consumes:
@@ -181,6 +342,38 @@ paths:
       security:
       - BearerAuth: []
       summary: Connect Chat Websocket
+      tags:
+      - chat
+  /chats:
+    get:
+      consumes:
+      - application/json
+      description: List chats with summaries
+      operationId: ListChat
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/chat.ChatWithSimplifiedSummaryDTO'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Error'
+      security:
+      - BearerAuth: []
+      summary: List chats
       tags:
       - chat
   /oauth/google/auth:
@@ -339,7 +532,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/user.GetSelfHandlerResponse'
+            $ref: '#/definitions/user.SimplifiedUserDTO'
         "401":
           description: Unauthorized
           schema:

@@ -36,7 +36,7 @@ func NewGetSelfHandler(deps GetSelfHandlerDependencies) (*GetSelfHandler, error)
 // @Tags         user
 // @Accept       json
 // @Produce      json
-// @Success      200 {object} GetSelfHandlerResponse
+// @Success      200 {object} user.SimplifiedUserDTO
 // @Failure      401 {object} http.Error
 // @Failure      404 {object} http.Error
 // @Failure      500 {object} http.Error

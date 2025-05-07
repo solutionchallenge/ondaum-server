@@ -23,7 +23,9 @@ type UpsertSummaryHandlerDependencies struct {
 }
 
 type UpsertSummaryHandlerResponse struct {
-	SimplifiedSummaryDTO domain.SimplifiedSummaryDTO `json:"summary"`
+	Success   bool                        `json:"success"`
+	Created   bool                        `json:"created"`
+	Returning domain.SimplifiedSummaryDTO `json:"returning"`
 }
 
 type UpsertSummaryHandler struct {
@@ -123,7 +125,7 @@ func (h *UpsertSummaryHandler) Handle(c *fiber.Ctx) error {
 		Keywords: summary.Keywords,
 		Emotions: emotions,
 	}
-	_, err = h.deps.DB.NewInsert().
+	result, err := h.deps.DB.NewInsert().
 		Model(model).
 		On("DUPLICATE KEY UPDATE").
 		Set("title = ?", summary.Title).
@@ -136,8 +138,11 @@ func (h *UpsertSummaryHandler) Handle(c *fiber.Ctx) error {
 			http.NewError(c.UserContext(), err, "Failed to insert summary"),
 		)
 	}
+	rowsAffected, _ := result.RowsAffected()
 	response := &UpsertSummaryHandlerResponse{
-		SimplifiedSummaryDTO: model.ToSimplifiedSummaryDTO(),
+		Success:   true,
+		Created:   rowsAffected == 1,
+		Returning: model.ToSimplifiedSummaryDTO(),
 	}
 	return c.JSON(response)
 }

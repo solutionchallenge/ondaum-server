@@ -26,7 +26,7 @@ func NewListSupportedEmotionHandler(deps ListSupportedEmotionHandlerDependencies
 // @Tags schema
 // @Accept json
 // @Produce json
-// @Success 200 {object} common.SupportedEmotions
+// @Success 200 {object} common.EmotionList
 // @Router /_schema/supported-emotions [get]
 func (h *ListSupportedEmotionHandler) Handle(c *fiber.Ctx) error {
 	return c.JSON(common.SupportedEmotions)

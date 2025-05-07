@@ -17,10 +17,6 @@ type ListChatHandlerDependencies struct {
 	DB *bun.DB
 }
 
-type ListChatHandlerResponse struct {
-	Chats []chat.ChatWithSimplifiedSummaryDTO `json:"chats"`
-}
-
 type ListChatHandler struct {
 	deps ListChatHandlerDependencies
 }
@@ -29,6 +25,18 @@ func NewListChatHandler(deps ListChatHandlerDependencies) (*ListChatHandler, err
 	return &ListChatHandler{deps: deps}, nil
 }
 
+// @ID ListChat
+// @Summary List chats
+// @Description List chats with summaries
+// @Tags chat
+// @Accept json
+// @Produce json
+// @Success 200 {object} []chat.ChatWithSimplifiedSummaryDTO
+// @Failure 401 {object} http.Error
+// @Failure 404 {object} http.Error
+// @Failure 500 {object} http.Error
+// @Router /chats [get]
+// @Security BearerAuth
 func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 	userID, err := http.GetUserID(c)
 	if err != nil {
@@ -57,10 +65,7 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 	dtos := utils.Map(chats, func(c *chat.Chat) chat.ChatWithSimplifiedSummaryDTO {
 		return c.ToChatWithSimplifiedSummaryDTO()
 	})
-	response := ListChatHandlerResponse{
-		Chats: dtos,
-	}
-	return c.JSON(response)
+	return c.JSON(dtos)
 }
 
 func (h *ListChatHandler) Identify() string {

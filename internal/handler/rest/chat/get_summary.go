@@ -25,6 +25,19 @@ func NewGetSummaryHandler(deps GetSummaryHandlerDependencies) (*GetSummaryHandle
 	return &GetSummaryHandler{deps: deps}, nil
 }
 
+// @ID GetSummary
+// @Summary Get summary
+// @Description Get summary of the chat
+// @Tags chat
+// @Accept json
+// @Produce json
+// @Param session_id path string true "Session ID"
+// @Success 200 {object} chat.SimplifiedSummaryDTO
+// @Failure 401 {object} http.Error
+// @Failure 404 {object} http.Error
+// @Failure 500 {object} http.Error
+// @Router /chat/{session_id}/summary [get]
+// @Security BearerAuth
 func (h *GetSummaryHandler) Handle(c *fiber.Ctx) error {
 	userID, err := http.GetUserID(c)
 	if err != nil {
