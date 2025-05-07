@@ -30,6 +30,7 @@ func NewReportDiagnosisResultHandler(deps ReportDiagnosisResultHandlerDependenci
 // @ID ReportDiagnosisResult
 // @Summary Report diagnosis result
 // @Description Report diagnosis result
+// @Tags diagnosis
 // @Accept json
 // @Produce json
 // @Param request body diagnosis.DiagnosisDTO true "Diagnosis result"

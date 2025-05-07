@@ -28,6 +28,7 @@ func NewGetDiagnosisResultHandler(deps GetDiagnosisResultHandlerDependencies) (*
 // @ID GetDiagnosisResult
 // @Summary Get diagnosis result
 // @Description Get diagnosis result
+// @Tags diagnosis
 // @Accept json
 // @Produce json
 // @Param diagnosis_id path string true "Diagnosis ID"

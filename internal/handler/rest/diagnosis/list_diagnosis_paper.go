@@ -27,6 +27,7 @@ func NewListDiagnosisPaperHandler(deps ListDiagnosisPaperHandlerDependencies) (*
 // @ID ListDiagnosisPaper
 // @Summary List diagnosis papers
 // @Description List diagnosis papers
+// @Tags diagnosis
 // @Accept json
 // @Produce json
 // @Success 200 {array} ListDiagnosisPaperHandlerResponse

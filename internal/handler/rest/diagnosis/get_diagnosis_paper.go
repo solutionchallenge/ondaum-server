@@ -22,13 +22,14 @@ func NewGetDiagnosisPaperHandler(deps GetDiagnosisPaperHandlerDependencies) (*Ge
 // @ID GetDiagnosisPaper
 // @Summary Get diagnosis paper
 // @Description Get diagnosis paper as JSON format
+// @Tags diagnosis
 // @Accept json
 // @Produce json
 // @Param paper_id path string true "Diagnosis Paper ID"
 // @Success 200 {object} common.DiagnosisPaper
 // @Failure 404 {object} http.Error
 // @Failure 500 {object} http.Error
-// @Router /diagnosis-papers/{paper_id [get]
+// @Router /diagnosis-papers/{paper_id} [get]
 // @Security BearerAuth
 func (h *GetDiagnosisPaperHandler) Handle(c *fiber.Ctx) error {
 	identifier := c.Params("paper_id")

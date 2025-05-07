@@ -26,6 +26,7 @@ func NewListDiagnosisResultHandler(deps ListDiagnosisResultHandlerDependencies) 
 // @ID ListDiagnosisResult
 // @Summary List diagnosis result
 // @Description List diagnosis result
+// @Tags diagnosis
 // @Accept json
 // @Produce json
 // @Success 200 {object} diagnosis.DiagnosisDTO

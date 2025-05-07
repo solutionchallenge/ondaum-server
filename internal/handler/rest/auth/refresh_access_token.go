@@ -33,6 +33,7 @@ func NewRefreshAccessTokenHandler(deps RefreshAccessTokenHandlerDependencies) (*
 // @ID RefreshAccessToken
 // @Summary Refresh access token
 // @Description Refresh access token
+// @Tags auth
 // @Accept json
 // @Produce json
 // @Param request body RefreshAccessTokenHandlerRequest true "Refresh token"
