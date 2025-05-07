@@ -22,7 +22,7 @@ type Diagnosis struct {
 	CreatedAt         time.Time        `json:"created_at" db:"created_at" bun:"created_at,notnull,default:CURRENT_TIMESTAMP"`
 	UpdatedAt         time.Time        `json:"updated_at" db:"updated_at" bun:"updated_at,notnull,default:CURRENT_TIMESTAMP"`
 
-	User *user.User `bun:"rel:belongs-to,join:user_id=id"`
+	User *user.User `json:"user,omitempty" bun:"rel:belongs-to,join:user_id=id"`
 }
 
 type DiagnosisDTO struct {
