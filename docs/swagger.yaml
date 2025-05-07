@@ -125,24 +125,24 @@ definitions:
     - FeatureSuggestTestGAD7
     - FeatureSuggestTestPSS
     - FeatureEndConversation
-  common.Inspection:
+  common.Diagnosis:
     enum:
     - phq-9
     - gad-7
     - pss
     type: string
     x-enum-varnames:
-    - InspectionPHQ9
-    - InspectionGAD7
-    - InspectionPSS
-  common.InspectionAnswer:
+    - DiagnosisPHQ9
+    - DiagnosisGAD7
+    - DiagnosisPSS
+  common.DiagnosisAnswer:
     properties:
       score:
         type: integer
       text:
         type: string
     type: object
-  common.InspectionPaper:
+  common.DiagnosisPaper:
     properties:
       guides:
         type: string
@@ -150,27 +150,27 @@ definitions:
         type: string
       questions:
         items:
-          $ref: '#/definitions/common.InspectionQuestion'
+          $ref: '#/definitions/common.DiagnosisQuestion'
         type: array
       results:
         items:
-          $ref: '#/definitions/common.InspectionResult'
+          $ref: '#/definitions/common.DiagnosisResult'
         type: array
       scoring:
-        $ref: '#/definitions/common.InspectionScoring'
+        $ref: '#/definitions/common.DiagnosisScoring'
     type: object
-  common.InspectionQuestion:
+  common.DiagnosisQuestion:
     properties:
       answers:
         items:
-          $ref: '#/definitions/common.InspectionAnswer'
+          $ref: '#/definitions/common.DiagnosisAnswer'
         type: array
       index:
         type: integer
       question:
         type: string
     type: object
-  common.InspectionResult:
+  common.DiagnosisResult:
     properties:
       critical:
         type: boolean
@@ -183,7 +183,7 @@ definitions:
       name:
         type: string
     type: object
-  common.InspectionScoring:
+  common.DiagnosisScoring:
     properties:
       max:
         type: integer
@@ -340,7 +340,7 @@ paths:
       summary: List supported features
       tags:
       - schema
-  /_schema/supported-inspections:
+  /_schema/supported-diagnoses:
     get:
       consumes:
       - application/json
@@ -353,7 +353,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/common.Inspection'
+              $ref: '#/definitions/common.Diagnosis'
             type: array
       summary: List supported tests
       tags:
@@ -563,16 +563,16 @@ paths:
       summary: Create or update chat summary
       tags:
       - chat
-  /inspection/:inspection_id:
+  /diagnosis/:diagnosis_id:
     get:
       consumes:
       - application/json
-      description: Get inspection paper as JSON format
-      operationId: GetInspectionPaper
+      description: Get diagnosis paper as JSON format
+      operationId: GetDiagnosisPaper
       parameters:
-      - description: Inspection ID
+      - description: Diagnosis ID
         in: path
-        name: inspection_id
+        name: diagnosis_id
         required: true
         type: string
       produces:
@@ -581,7 +581,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/common.InspectionPaper'
+            $ref: '#/definitions/common.DiagnosisPaper'
         "404":
           description: Not Found
           schema:
@@ -590,7 +590,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/http.Error'
-      summary: Get inspection paper
+      summary: Get diagnosis paper
   /oauth/google/auth:
     post:
       consumes:

@@ -5,7 +5,7 @@ import (
 	"github.com/solutionchallenge/ondaum-server/internal/handler/future"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/chat"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/debug"
-	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/inspection"
+	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/diagnosis"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/oauth"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/schema"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/sys"
@@ -33,10 +33,10 @@ var PredefinedRoutes = []fx.Option{
 	dependency.HttpRoute("GET", "/chat/:session_id/summary", chat.NewGetChatSummaryHandler),
 	dependency.HttpRoute("PUT", "/chat/:session_id/summary", chat.NewUpsertChatSummaryHandler),
 	dependency.HttpRoute("POST", "/chat/:session_id/archive", chat.NewArchiveChatHandler),
-	dependency.HttpRoute("GET", "/inspection/:inspection_id", inspection.NewGetInspectionPaperHandler),
+	dependency.HttpRoute("GET", "/diagnosis/:diagnosis_id", diagnosis.NewGetDiagnosisPaperHandler),
 	dependency.HttpRoute("GET", "/_schema/supported-emotions", schema.NewListSupportedEmotionHandler),
 	dependency.HttpRoute("GET", "/_schema/supported-features", schema.NewListSupportedFeatureHandler),
-	dependency.HttpRoute("GET", "/_schema/supported-inspections", schema.NewListSupportedInspectionHandler),
+	dependency.HttpRoute("GET", "/_schema/supported-diagnoses", schema.NewListSupportedDiagnosisHandler),
 }
 
 var WebsocketRoutes = []fx.Option{

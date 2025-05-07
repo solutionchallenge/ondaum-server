@@ -69,7 +69,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/_schema/supported-inspections": {
+        "/_schema/supported-diagnoses": {
             "get": {
                 "description": "List supported tests",
                 "consumes": [
@@ -89,7 +89,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/common.Inspection"
+                                "$ref": "#/definitions/common.Diagnosis"
                             }
                         }
                     }
@@ -408,22 +408,22 @@ const docTemplate = `{
                 }
             }
         },
-        "/inspection/:inspection_id": {
+        "/diagnosis/:diagnosis_id": {
             "get": {
-                "description": "Get inspection paper as JSON format",
+                "description": "Get diagnosis paper as JSON format",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Get inspection paper",
-                "operationId": "GetInspectionPaper",
+                "summary": "Get diagnosis paper",
+                "operationId": "GetDiagnosisPaper",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Inspection ID",
-                        "name": "inspection_id",
+                        "description": "Diagnosis ID",
+                        "name": "diagnosis_id",
                         "in": "path",
                         "required": true
                     }
@@ -432,7 +432,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/common.InspectionPaper"
+                            "$ref": "#/definitions/common.DiagnosisPaper"
                         }
                     },
                     "404": {
@@ -888,7 +888,7 @@ const docTemplate = `{
                 "FeatureEndConversation"
             ]
         },
-        "common.Inspection": {
+        "common.Diagnosis": {
             "type": "string",
             "enum": [
                 "phq-9",
@@ -896,12 +896,12 @@ const docTemplate = `{
                 "pss"
             ],
             "x-enum-varnames": [
-                "InspectionPHQ9",
-                "InspectionGAD7",
-                "InspectionPSS"
+                "DiagnosisPHQ9",
+                "DiagnosisGAD7",
+                "DiagnosisPSS"
             ]
         },
-        "common.InspectionAnswer": {
+        "common.DiagnosisAnswer": {
             "type": "object",
             "properties": {
                 "score": {
@@ -912,7 +912,7 @@ const docTemplate = `{
                 }
             }
         },
-        "common.InspectionPaper": {
+        "common.DiagnosisPaper": {
             "type": "object",
             "properties": {
                 "guides": {
@@ -924,27 +924,27 @@ const docTemplate = `{
                 "questions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/common.InspectionQuestion"
+                        "$ref": "#/definitions/common.DiagnosisQuestion"
                     }
                 },
                 "results": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/common.InspectionResult"
+                        "$ref": "#/definitions/common.DiagnosisResult"
                     }
                 },
                 "scoring": {
-                    "$ref": "#/definitions/common.InspectionScoring"
+                    "$ref": "#/definitions/common.DiagnosisScoring"
                 }
             }
         },
-        "common.InspectionQuestion": {
+        "common.DiagnosisQuestion": {
             "type": "object",
             "properties": {
                 "answers": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/common.InspectionAnswer"
+                        "$ref": "#/definitions/common.DiagnosisAnswer"
                     }
                 },
                 "index": {
@@ -955,7 +955,7 @@ const docTemplate = `{
                 }
             }
         },
-        "common.InspectionResult": {
+        "common.DiagnosisResult": {
             "type": "object",
             "properties": {
                 "critical": {
@@ -975,7 +975,7 @@ const docTemplate = `{
                 }
             }
         },
-        "common.InspectionScoring": {
+        "common.DiagnosisScoring": {
             "type": "object",
             "properties": {
                 "max": {
