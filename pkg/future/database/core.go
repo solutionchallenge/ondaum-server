@@ -146,7 +146,7 @@ func (c *Core) RunNext(ctx context.Context, ignoreTriggerAfter bool) (*future.Jo
 	err = query.Scan(ctx)
 	if err != nil {
 		tx.Rollback()
-		if err.Error() == "sql: no rows in result set" {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil, nil
 		}
 		return nil, nil, err
@@ -154,7 +154,7 @@ func (c *Core) RunNext(ctx context.Context, ignoreTriggerAfter bool) (*future.Jo
 
 	_, err = tx.NewUpdate().Model(&job).
 		Set("status = ?", future.JobStatusRunning).
-		Where("id = ? AND status = ?", job.ID, future.JobStatusPending).
+		Where("id = ?", job.ID).
 		Exec(ctx)
 	if err != nil {
 		tx.Rollback()

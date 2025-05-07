@@ -19,7 +19,8 @@ func HandlePing(db *bun.DB, request wspkg.PingWrapper) (wspkg.ResponseWrapper, b
 	chat := &domain.Chat{}
 	err := db.NewSelect().
 		Model(chat).
-		Where("user_id = ? AND session_id = ?", request.UserID, request.SessionID).
+		Where("session_id = ?", request.SessionID).
+		Where("user_id = ?", request.UserID).
 		Scan(context.Background())
 	if err != nil {
 		utils.Log(utils.ErrorLevel).CID(request.SessionID).Err(err).BT().Send("Failed to query chat")

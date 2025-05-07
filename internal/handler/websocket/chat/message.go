@@ -28,7 +28,8 @@ func HandleMessage(
 		chat := &domain.Chat{}
 		err := tx.NewSelect().
 			Model(chat).
-			Where("session_id = ? AND user_id = ?", request.SessionID, request.UserID).
+			Where("session_id = ?", request.SessionID).
+			Where("user_id = ?", request.UserID).
 			Scan(ctx)
 		if err != nil {
 			utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).BT().Send("Failed to query chat")
