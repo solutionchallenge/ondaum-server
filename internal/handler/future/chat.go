@@ -59,14 +59,15 @@ func (h *ChatFutureHandler) Handle(ctx context.Context, job *future.Job) error {
 		return fmt.Errorf("failed to select chat: %w(%v:%v)", err, input.UserID, input.ConversationID)
 	}
 
-	chat.FinishedAt = h.deps.Clock.Now().UTC()
-	_, err = tx.NewUpdate().
-		Model(chat).
-		Column("finished_at").
-		WherePK().
-		Exec(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to update chat: %w(%v:%v)", err, input.UserID, input.ConversationID)
+	if chat.FinishedAt.IsZero() {
+		_, err = tx.NewUpdate().
+			Model(chat).
+			Set("finished_at = CURRENT_TIMESTAMP").
+			WherePK().
+			Exec(ctx)
+		if err != nil {
+			return fmt.Errorf("failed to update chat: %w(%v:%v)", err, input.UserID, input.ConversationID)
+		}
 	}
 
 	if err := tx.Commit(); err != nil {
