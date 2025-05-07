@@ -7,6 +7,11 @@ import (
 	"github.com/uptrace/bun"
 )
 
+type EmotionRate struct {
+	Emotion common.Emotion `json:"emotion"`
+	Rate    float64        `json:"rate"`
+}
+
 type Summary struct {
 	bun.BaseModel `bun:"table:chat_summaries,alias:cs"`
 
@@ -32,11 +37,6 @@ type DetailedSummaryDTO struct {
 type SimplifiedSummaryDTO struct {
 	Title string `json:"title"`
 	Text  string `json:"text"`
-}
-
-type EmotionRate struct {
-	Emotion common.Emotion `json:"emotion"`
-	Rate    float64        `json:"rate"`
 }
 
 func (s *Summary) ToDetailedSummaryDTO() DetailedSummaryDTO {

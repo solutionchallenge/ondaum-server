@@ -34,7 +34,7 @@ type ChatWithSimplifiedSummaryDTO struct {
 	UserTimezone string                `json:"user_timezone"`
 	IsFinished   bool                  `json:"is_finished"`
 	IsArchived   bool                  `json:"is_archived"`
-	Summary      *SimplifiedSummaryDTO `json:"summary"`
+	Summary      *SimplifiedSummaryDTO `json:"summary,omitempty"`
 }
 
 type ChatWithSimplifiedSummaryAndHistoriesDTO struct {

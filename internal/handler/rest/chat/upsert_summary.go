@@ -16,25 +16,25 @@ import (
 	"go.uber.org/fx"
 )
 
-type SummaryChatHandlerDependencies struct {
+type UpsertSummaryHandlerDependencies struct {
 	fx.In
 	DB  *bun.DB
 	LLM llm.Client
 }
 
-type SummaryChatHandlerResponse struct {
+type UpsertSummaryHandlerResponse struct {
 	SimplifiedSummaryDTO domain.SimplifiedSummaryDTO `json:"summary"`
 }
 
-type SummaryChatHandler struct {
-	deps SummaryChatHandlerDependencies
+type UpsertSummaryHandler struct {
+	deps UpsertSummaryHandlerDependencies
 }
 
-func NewSummaryChatHandler(deps SummaryChatHandlerDependencies) (*SummaryChatHandler, error) {
-	return &SummaryChatHandler{deps: deps}, nil
+func NewUpsertSummaryHandler(deps UpsertSummaryHandlerDependencies) (*UpsertSummaryHandler, error) {
+	return &UpsertSummaryHandler{deps: deps}, nil
 }
 
-func (h *SummaryChatHandler) Handle(c *fiber.Ctx) error {
+func (h *UpsertSummaryHandler) Handle(c *fiber.Ctx) error {
 	userID, err := http.GetUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(
@@ -136,12 +136,12 @@ func (h *SummaryChatHandler) Handle(c *fiber.Ctx) error {
 			http.NewError(c.UserContext(), err, "Failed to insert summary"),
 		)
 	}
-	response := &SummaryChatHandlerResponse{
+	response := &UpsertSummaryHandlerResponse{
 		SimplifiedSummaryDTO: model.ToSimplifiedSummaryDTO(),
 	}
 	return c.JSON(response)
 }
 
-func (h *SummaryChatHandler) Identify() string {
+func (h *UpsertSummaryHandler) Identify() string {
 	return "summary-chat"
 }

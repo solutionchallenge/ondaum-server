@@ -90,7 +90,7 @@ func (h *OAuthCallbackHandler) Handle(c *fiber.Ctx) error {
 		})
 	}
 
-	userOAuth := &user.UserOAuth{
+	userOAuth := &user.OAuth{
 		UserID:       userData.ID,
 		Provider:     google.Provider,
 		ProviderCode: userInfo.ID,

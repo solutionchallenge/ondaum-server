@@ -7,7 +7,7 @@ import (
 	"github.com/uptrace/bun"
 )
 
-type UserAddition struct {
+type Addition struct {
 	bun.BaseModel `bun:"table:user_additions,alias:ua"`
 
 	UserID    int64              `json:"user_id" db:"user_id" bun:"user_id,pk"`
@@ -17,4 +17,13 @@ type UserAddition struct {
 	UpdatedAt time.Time          `json:"updated_at" db:"updated_at" bun:"updated_at,notnull,default:CURRENT_TIMESTAMP"`
 
 	User *User `json:"user,omitempty" bun:"rel:belongs-to,join:user_id=id"`
+}
+
+type SimplifiedAdditionDTO struct {
+	Concerns []string           `json:"concerns"`
+	Emotions common.EmotionList `json:"emotions"`
+}
+
+func (a *Addition) ToSimplifiedAdditionDTO() SimplifiedAdditionDTO {
+	return SimplifiedAdditionDTO{}
 }

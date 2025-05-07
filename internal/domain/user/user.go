@@ -16,12 +16,40 @@ type User struct {
 	CreatedAt time.Time `json:"created_at" db:"created_at" bun:"created_at,notnull,default:CURRENT_TIMESTAMP"`
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at" bun:"updated_at,notnull,default:CURRENT_TIMESTAMP"`
 
-	OAuths   []*UserOAuth  `json:"oauths,omitempty" bun:"rel:has-many,join:id=user_id"`
-	Privacy  *UserPrivacy  `json:"privacy,omitempty" bun:"rel:has-one,join:id=user_id"`
-	Addition *UserAddition `json:"addition,omitempty" bun:"rel:has-one,join:id=user_id"`
+	OAuths   []*OAuth  `json:"oauths,omitempty" bun:"rel:has-many,join:id=user_id"`
+	Privacy  *Privacy  `json:"privacy,omitempty" bun:"rel:has-one,join:id=user_id"`
+	Addition *Addition `json:"addition,omitempty" bun:"rel:has-one,join:id=user_id"`
 }
 
-func (u *User) GetOAuth(provider oauth.Provider) *UserOAuth {
+type SimplifiedUserDTO struct {
+	ID       int64                  `json:"id"`
+	Email    string                 `json:"email"`
+	Username string                 `json:"username"`
+	Privacy  *SimplifiedPrivacyDTO  `json:"privacy,omitempty"`
+	Addition *SimplifiedAdditionDTO `json:"addition,omitempty"`
+}
+
+func (u *User) ToSimplifiedUserDTO() SimplifiedUserDTO {
+	privacy := (*SimplifiedPrivacyDTO)(nil)
+	if u.Privacy != nil {
+		dto := u.Privacy.ToSimplifiedPrivacyDTO()
+		privacy = &dto
+	}
+	addition := (*SimplifiedAdditionDTO)(nil)
+	if u.Addition != nil {
+		dto := u.Addition.ToSimplifiedAdditionDTO()
+		addition = &dto
+	}
+	return SimplifiedUserDTO{
+		ID:       u.ID,
+		Email:    u.Email,
+		Username: u.Username,
+		Privacy:  privacy,
+		Addition: addition,
+	}
+}
+
+func (u *User) GetOAuth(provider oauth.Provider) *OAuth {
 	for _, oauth := range u.OAuths {
 		if oauth.Provider == provider {
 			return oauth

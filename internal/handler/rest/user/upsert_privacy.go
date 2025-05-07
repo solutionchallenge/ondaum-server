@@ -78,7 +78,7 @@ func (h *UpsertPrivacyHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 
-	privacy := &user.UserPrivacy{
+	privacy := &user.Privacy{
 		UserID:   userID,
 		Gender:   gender,
 		Birthday: birthday,

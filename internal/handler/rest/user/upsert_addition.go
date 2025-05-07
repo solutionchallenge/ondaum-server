@@ -66,7 +66,7 @@ func (h *UpsertAdditionHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 
-	addition := &user.UserAddition{
+	addition := &user.Addition{
 		UserID:   userID,
 		Concerns: request.Concerns,
 		Emotions: request.Emotions,
