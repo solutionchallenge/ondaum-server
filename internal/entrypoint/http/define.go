@@ -31,6 +31,7 @@ var PredefinedRoutes = []fx.Option{
 	dependency.HttpRoute("GET", "/chat/:session_id", chat.NewGetChatHandler),
 	dependency.HttpRoute("GET", "/chat/:session_id/summary", chat.NewGetSummaryHandler),
 	dependency.HttpRoute("PUT", "/chat/:session_id/summary", chat.NewUpsertSummaryHandler),
+	dependency.HttpRoute("POST", "/chat/:session_id/archive", chat.NewArchiveChatHandler),
 	dependency.HttpRoute("GET", "/_schema/supported-emotions", schema.NewListSupportedEmotionHandler),
 	dependency.HttpRoute("GET", "/_schema/supported-features", schema.NewListSupportedFeatureHandler),
 }

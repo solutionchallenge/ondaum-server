@@ -112,7 +112,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/chat/{session_id}": {
+        "/chat/:session_id": {
             "get": {
                 "security": [
                     {
@@ -168,7 +168,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/chat/{session_id}/summary": {
+        "/chat/:session_id/summary": {
             "get": {
                 "security": [
                     {

@@ -9,18 +9,16 @@ import (
 
 type Feature string
 
-/*
-* `"escalate_crisis"`: 사용자가 심각한 위기 상황(자살/자해 위험)임을 감지했을 때, 즉시 모든 대화를 중단하고 이 액션을 반환합니다. (애플리케이션은 이 액션을 받아 전문가 연결 안내 등 비상 대응 절차를 수행해야 함)
-* `"suggest_test_phq9"`: 사용자에게 간이 우울증 검사(PHQ-9) 기능 사용을 제안할 때 사용합니다.
-* `"suggest_test_gad7"`: 사용자에게 간이 불안 증상 검사(PHQ-9) 기능 사용을 제안할 때 사용합니다.
-* `"suggest_test_pss"`: 사용자에게 간이 스트레스 척도 검사(PHQ-9) 기능 사용을 제안할 때 사용합니다.
-* `"end_conversation"`: 사용자와 협의 하에 대화를 종료한 경우에 사용합니다.
- */
 const (
-	FeatureEscalateCrisis  Feature = "escalate_crisis"
+	// 사용자가 심각한 위기 상황(자살/자해 위험)임을 감지했을 때, 즉시 모든 대화를 중단하고 이 액션을 반환합니다. (애플리케이션은 이 액션을 받아 전문가 연결 안내 등 비상 대응 절차를 수행해야 함)
+	FeatureEscalateCrisis Feature = "escalate_crisis"
+	// 사용자에게 간이 우울증 검사(PHQ-9) 기능 사용을 제안할 때 사용합니다.
 	FeatureSuggestTestPHQ9 Feature = "suggest_test_phq9"
+	// 사용자에게 간이 불안 증상 검사(PHQ-9) 기능 사용을 제안할 때 사용합니다.
 	FeatureSuggestTestGAD7 Feature = "suggest_test_gad7"
-	FeatureSuggestTestPSS  Feature = "suggest_test_pss"
+	// 사용자에게 간이 스트레스 척도 검사(PHQ-9) 기능 사용을 제안할 때 사용합니다.
+	FeatureSuggestTestPSS Feature = "suggest_test_pss"
+	// 사용자와 협의 하에 대화를 종료한 경우에 사용합니다.
 	FeatureEndConversation Feature = "end_conversation"
 )
 

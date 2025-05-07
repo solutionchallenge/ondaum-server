@@ -244,7 +244,7 @@ paths:
       summary: List supported features
       tags:
       - schema
-  /chat/{session_id}:
+  /chat/:session_id:
     get:
       consumes:
       - application/json
@@ -280,7 +280,7 @@ paths:
       summary: Get chat
       tags:
       - chat
-  /chat/{session_id}/summary:
+  /chat/:session_id/summary:
     get:
       consumes:
       - application/json

@@ -35,7 +35,7 @@ func NewGetChatHandler(deps GetChatHandlerDependencies) (*GetChatHandler, error)
 // @Failure 401 {object} http.Error
 // @Failure 404 {object} http.Error
 // @Failure 500 {object} http.Error
-// @Router /chat/{session_id} [get]
+// @Router /chat/:session_id [get]
 // @Security BearerAuth
 func (h *GetChatHandler) Handle(c *fiber.Ctx) error {
 	userID, err := http.GetUserID(c)
