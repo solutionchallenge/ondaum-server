@@ -3,8 +3,10 @@ package http
 import (
 	"github.com/solutionchallenge/ondaum-server/internal/dependency"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/future"
+	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/auth"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/chat"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/debug"
+	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/diagnosis"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/oauth"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/schema"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/sys"
@@ -22,18 +24,25 @@ var PredefinedRoutes = []fx.Option{
 	dependency.HttpRoute("GET", "/_debug/oauth", debug.NewOAuthCallbackHandler),
 	dependency.HttpRoute("GET", "/_debug/users", debug.NewListUserHandler),
 	dependency.HttpRoute("GET", "/_debug/chats", debug.NewListChatHandler),
+	dependency.HttpRoute("POST", "/auth/refresh", auth.NewRefreshAccessTokenHandler),
 	dependency.HttpRoute("GET", "/user/self", user.NewGetSelfHandler),
-	dependency.HttpRoute("PUT", "/user/privacy", user.NewUpsertPrivacyHandler),
-	dependency.HttpRoute("PUT", "/user/addition", user.NewUpsertAdditionHandler),
+	dependency.HttpRoute("PUT", "/user/privacy", user.NewUpsertUserPrivacyHandler),
+	dependency.HttpRoute("PUT", "/user/addition", user.NewUpsertUserAdditionHandler),
 	dependency.HttpRoute("GET", "/oauth/google/start", oauth.NewStartGoogleHandler),
 	dependency.HttpRoute("POST", "/oauth/google/auth", oauth.NewAuthGoogleHandler),
 	dependency.HttpRoute("GET", "/chats", chat.NewListChatHandler),
-	dependency.HttpRoute("GET", "/chat/:session_id", chat.NewGetChatHandler),
-	dependency.HttpRoute("GET", "/chat/:session_id/summary", chat.NewGetSummaryHandler),
-	dependency.HttpRoute("PUT", "/chat/:session_id/summary", chat.NewUpsertSummaryHandler),
-	dependency.HttpRoute("POST", "/chat/:session_id/archive", chat.NewArchiveChatHandler),
+	dependency.HttpRoute("GET", "/chats/:session_id", chat.NewGetChatHandler),
+	dependency.HttpRoute("GET", "/chats/:session_id/summary", chat.NewGetChatSummaryHandler),
+	dependency.HttpRoute("PUT", "/chats/:session_id/summary", chat.NewUpsertChatSummaryHandler),
+	dependency.HttpRoute("POST", "/chats/:session_id/archive", chat.NewArchiveChatHandler),
+	dependency.HttpRoute("GET", "/diagnoses", diagnosis.NewListDiagnosisResultHandler),
+	dependency.HttpRoute("POST", "/diagnoses", diagnosis.NewReportDiagnosisResultHandler),
+	dependency.HttpRoute("GET", "/diagnoses/:diagnosis_id", diagnosis.NewGetDiagnosisResultHandler),
+	dependency.HttpRoute("GET", "/diagnosis-papers", diagnosis.NewListDiagnosisPaperHandler),
+	dependency.HttpRoute("GET", "/diagnosis-papers/:paper_id", diagnosis.NewGetDiagnosisPaperHandler),
 	dependency.HttpRoute("GET", "/_schema/supported-emotions", schema.NewListSupportedEmotionHandler),
 	dependency.HttpRoute("GET", "/_schema/supported-features", schema.NewListSupportedFeatureHandler),
+	dependency.HttpRoute("GET", "/_schema/supported-diagnoses", schema.NewListSupportedDiagnosisHandler),
 }
 
 var WebsocketRoutes = []fx.Option{

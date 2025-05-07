@@ -2,6 +2,7 @@ package gemini
 
 import (
 	"github.com/solutionchallenge/ondaum-server/pkg/llm"
+	"github.com/solutionchallenge/ondaum-server/pkg/utils"
 	"google.golang.org/genai"
 )
 
@@ -17,7 +18,7 @@ func BuildGenerativeConfig(client *Client, promptIdentifier string, rootpath ...
 	}
 	systemInstruction := (*genai.Content)(nil)
 	if preparedPrompt != nil {
-		promptData, err := readPromptFile(preparedPrompt.PromptFile, rootpath...)
+		promptData, err := utils.ReadFileFrom(preparedPrompt.PromptFile, rootpath...)
 		if err != nil {
 			return nil, err
 		}

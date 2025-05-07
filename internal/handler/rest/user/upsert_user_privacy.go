@@ -11,27 +11,27 @@ import (
 	"go.uber.org/fx"
 )
 
-type UpsertPrivacyHandlerDependencies struct {
+type UpsertUserPrivacyHandlerDependencies struct {
 	fx.In
 	DB *bun.DB
 }
 
-type UpsertPrivacyHandlerRequest struct {
+type UpsertUserPrivacyHandlerRequest struct {
 	Gender   string `json:"gender"`
 	Birthday string `json:"birthday"`
 }
 
-type UpsertPrivacyHandlerResponse struct {
+type UpsertUserPrivacyHandlerResponse struct {
 	Success bool `json:"success"`
 	Created bool `json:"created"`
 }
 
-type UpsertPrivacyHandler struct {
-	deps UpsertPrivacyHandlerDependencies
+type UpsertUserPrivacyHandler struct {
+	deps UpsertUserPrivacyHandlerDependencies
 }
 
-func NewUpsertPrivacyHandler(deps UpsertPrivacyHandlerDependencies) (*UpsertPrivacyHandler, error) {
-	return &UpsertPrivacyHandler{deps: deps}, nil
+func NewUpsertUserPrivacyHandler(deps UpsertUserPrivacyHandlerDependencies) (*UpsertUserPrivacyHandler, error) {
+	return &UpsertUserPrivacyHandler{deps: deps}, nil
 }
 
 // @ID UpsertUserPrivacy
@@ -40,14 +40,14 @@ func NewUpsertPrivacyHandler(deps UpsertPrivacyHandlerDependencies) (*UpsertPriv
 // @Tags         user
 // @Accept       json
 // @Produce      json
-// @Param request body UpsertPrivacyHandlerRequest true "User privacy information"
-// @Success      200 {object} UpsertPrivacyHandlerResponse
+// @Param request body UpsertUserPrivacyHandlerRequest true "User privacy information"
+// @Success      200 {object} UpsertUserPrivacyHandlerResponse
 // @Failure      400 {object} http.Error
 // @Failure      401 {object} http.Error
 // @Failure      500 {object} http.Error
 // @Router       /user/privacy [put]
 // @Security     BearerAuth
-func (h *UpsertPrivacyHandler) Handle(c *fiber.Ctx) error {
+func (h *UpsertUserPrivacyHandler) Handle(c *fiber.Ctx) error {
 	userID, err := http.GetUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(
@@ -55,7 +55,7 @@ func (h *UpsertPrivacyHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 
-	request := &UpsertPrivacyHandlerRequest{}
+	request := &UpsertUserPrivacyHandlerRequest{}
 	if err := c.BodyParser(request); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(
 			http.NewError(c.UserContext(), err, "Invalid request"),
@@ -99,12 +99,12 @@ func (h *UpsertPrivacyHandler) Handle(c *fiber.Ctx) error {
 	}
 
 	rowsAffected, _ := result.RowsAffected()
-	return c.JSON(UpsertPrivacyHandlerResponse{
+	return c.JSON(UpsertUserPrivacyHandlerResponse{
 		Success: true,
 		Created: rowsAffected == 1,
 	})
 }
 
-func (h *UpsertPrivacyHandler) Identify() string {
-	return "upsert-privacy"
+func (h *UpsertUserPrivacyHandler) Identify() string {
+	return "upsert-user-privacy"
 }

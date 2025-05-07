@@ -1,8 +1,6 @@
 package chat
 
 import (
-	"context"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/solutionchallenge/ondaum-server/internal/domain/chat"
 	"github.com/solutionchallenge/ondaum-server/internal/domain/user"
@@ -45,7 +43,7 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 	user := &user.User{ID: userID}
-	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(context.Background()); err != nil {
+	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(c.UserContext()); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
 			http.NewError(c.UserContext(), err, "User not found"),
 		)
@@ -56,7 +54,7 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 		Relation("Summary").
 		Where("user_id = ?", userID).
 		Order("created_at DESC").
-		Scan(context.Background()); err != nil {
+		Scan(c.UserContext()); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
 			http.NewError(c.UserContext(), err, "Failed to list chats"),
 		)

@@ -3,13 +3,11 @@ package schema
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/solutionchallenge/ondaum-server/internal/domain/common"
-	"github.com/uptrace/bun"
 	"go.uber.org/fx"
 )
 
 type ListSupportedEmotionHandlerDependencies struct {
 	fx.In
-	DB *bun.DB
 }
 
 type ListSupportedEmotionHandler struct {

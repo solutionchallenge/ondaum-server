@@ -1,7 +1,6 @@
 package chat
 
 import (
-	"context"
 	"errors"
 
 	"github.com/gofiber/fiber/v2"
@@ -12,17 +11,17 @@ import (
 	"go.uber.org/fx"
 )
 
-type GetSummaryHandlerDependencies struct {
+type GetChatSummaryHandlerDependencies struct {
 	fx.In
 	DB *bun.DB
 }
 
-type GetSummaryHandler struct {
-	deps GetSummaryHandlerDependencies
+type GetChatSummaryHandler struct {
+	deps GetChatSummaryHandlerDependencies
 }
 
-func NewGetSummaryHandler(deps GetSummaryHandlerDependencies) (*GetSummaryHandler, error) {
-	return &GetSummaryHandler{deps: deps}, nil
+func NewGetChatSummaryHandler(deps GetChatSummaryHandlerDependencies) (*GetChatSummaryHandler, error) {
+	return &GetChatSummaryHandler{deps: deps}, nil
 }
 
 // @ID GetSummary
@@ -36,9 +35,9 @@ func NewGetSummaryHandler(deps GetSummaryHandlerDependencies) (*GetSummaryHandle
 // @Failure 401 {object} http.Error
 // @Failure 404 {object} http.Error
 // @Failure 500 {object} http.Error
-// @Router /chat/:session_id/summary [get]
+// @Router /chats/{session_id}/summary [get]
 // @Security BearerAuth
-func (h *GetSummaryHandler) Handle(c *fiber.Ctx) error {
+func (h *GetChatSummaryHandler) Handle(c *fiber.Ctx) error {
 	userID, err := http.GetUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(
@@ -46,7 +45,7 @@ func (h *GetSummaryHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 	user := &user.User{ID: userID}
-	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(context.Background()); err != nil {
+	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(c.UserContext()); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
 			http.NewError(c.UserContext(), err, "User not found"),
 		)
@@ -63,7 +62,7 @@ func (h *GetSummaryHandler) Handle(c *fiber.Ctx) error {
 		Relation("Summary").
 		Where("session_id = ?", sessionID).
 		Where("user_id = ?", userID).
-		Scan(context.Background()); err != nil {
+		Scan(c.UserContext()); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
 			http.NewError(c.UserContext(), err, "Failed to get summary"),
 		)
@@ -77,6 +76,6 @@ func (h *GetSummaryHandler) Handle(c *fiber.Ctx) error {
 	return c.JSON(response)
 }
 
-func (h *GetSummaryHandler) Identify() string {
-	return "get-summary"
+func (h *GetChatSummaryHandler) Identify() string {
+	return "get-chat-summary"
 }

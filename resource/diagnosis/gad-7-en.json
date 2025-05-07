@@ -1,0 +1,194 @@
+{
+    "name": "GAD-7",
+    "guides": "Over the last 2 weeks, how often have you been bothered by the following problems?",
+    "questions": [
+        {
+            "index": 1,
+            "question": "Feeling nervous, anxious, or on edge",
+            "answers": [
+                {
+                    "score": 0,
+                    "text": "Not at all"
+                },
+                {
+                    "score": 1,
+                    "text": "Several days"
+                },
+                {
+                    "score": 2,
+                    "text": "More than half the days"
+                },
+                {
+                    "score": 3,
+                    "text": "Nearly every day"
+                }
+            ]
+        },
+        {
+            "index": 2,
+            "question": "Not being able to stop or control worrying",
+            "answers": [
+                {
+                    "score": 0,
+                    "text": "Not at all"
+                },
+                {
+                    "score": 1,
+                    "text": "Several days"
+                },
+                {
+                    "score": 2,
+                    "text": "More than half the days"
+                },
+                {
+                    "score": 3,
+                    "text": "Nearly every day"
+                }
+            ]
+        },
+        {
+            "index": 3,
+            "question": "Worrying too much about different things",
+            "answers": [
+                {
+                    "score": 0,
+                    "text": "Not at all"
+                },
+                {
+                    "score": 1,
+                    "text": "Several days"
+                },
+                {
+                    "score": 2,
+                    "text": "More than half the days"
+                },
+                {
+                    "score": 3,
+                    "text": "Nearly every day"
+                }
+            ]
+        },
+        {
+            "index": 4,
+            "question": "Trouble relaxing",
+            "answers": [
+                {
+                    "score": 0,
+                    "text": "Not at all"
+                },
+                {
+                    "score": 1,
+                    "text": "Several days"
+                },
+                {
+                    "score": 2,
+                    "text": "More than half the days"
+                },
+                {
+                    "score": 3,
+                    "text": "Nearly every day"
+                }
+            ]
+        },
+        {
+            "index": 5,
+            "question": "Being so restless that it's hard to sit still",
+            "answers": [
+                {
+                    "score": 0,
+                    "text": "Not at all"
+                },
+                {
+                    "score": 1,
+                    "text": "Several days"
+                },
+                {
+                    "score": 2,
+                    "text": "More than half the days"
+                },
+                {
+                    "score": 3,
+                    "text": "Nearly every day"
+                }
+            ]
+        },
+        {
+            "index": 6,
+            "question": "Becoming easily annoyed or irritable",
+            "answers": [
+                {
+                    "score": 0,
+                    "text": "Not at all"
+                },
+                {
+                    "score": 1,
+                    "text": "Several days"
+                },
+                {
+                    "score": 2,
+                    "text": "More than half the days"
+                },
+                {
+                    "score": 3,
+                    "text": "Nearly every day"
+                }
+            ]
+        },
+        {
+            "index": 7,
+            "question": "Feeling afraid as if something awful might happen",
+            "answers": [
+                {
+                    "score": 0,
+                    "text": "Not at all"
+                },
+                {
+                    "score": 1,
+                    "text": "Several days"
+                },
+                {
+                    "score": 2,
+                    "text": "More than half the days"
+                },
+                {
+                    "score": 3,
+                    "text": "Nearly every day"
+                }
+            ]
+        }
+    ],
+    "results": [
+        {
+            "min": 0,
+            "max": 4,
+            "name": "Minimal anxiety",
+            "description": "Very little or no anxiety symptoms.",
+            "critical": false
+        },
+        {
+            "min": 5,
+            "max": 9,
+            "name": "Mild anxiety",
+            "description": "Mild anxiety symptoms. Monitoring and light support may be helpful.",
+            "critical": false
+        },
+        {
+            "min": 10,
+            "max": 14,
+            "name": "Moderate anxiety",
+            "description": "Moderate anxiety. Consider stress management strategies or talking to someone.",
+            "critical": true
+        },
+        {
+            "min": 15,
+            "max": 21,
+            "name": "Severe anxiety",
+            "description": "High levels of anxiety. We recommend speaking with a mental health professional.",
+            "critical": true
+        }
+    ],
+    "scoring": {
+        "min": 0,
+        "max": 21
+    }
+}

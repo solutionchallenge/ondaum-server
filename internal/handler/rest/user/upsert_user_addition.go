@@ -9,27 +9,27 @@ import (
 	"go.uber.org/fx"
 )
 
-type UpsertAdditionHandlerDependencies struct {
+type UpsertUserAdditionHandlerDependencies struct {
 	fx.In
 	DB *bun.DB
 }
 
-type UpsertAdditionHandlerRequest struct {
+type UpsertUserAdditionHandlerRequest struct {
 	Concerns []string           `json:"concerns"`
 	Emotions common.EmotionList `json:"emotions"`
 }
 
-type UpsertAdditionHandlerResponse struct {
+type UpsertUserAdditionHandlerResponse struct {
 	Success bool `json:"success"`
 	Created bool `json:"created"`
 }
 
-type UpsertAdditionHandler struct {
-	deps UpsertAdditionHandlerDependencies
+type UpsertUserAdditionHandler struct {
+	deps UpsertUserAdditionHandlerDependencies
 }
 
-func NewUpsertAdditionHandler(deps UpsertAdditionHandlerDependencies) (*UpsertAdditionHandler, error) {
-	return &UpsertAdditionHandler{deps: deps}, nil
+func NewUpsertUserAdditionHandler(deps UpsertUserAdditionHandlerDependencies) (*UpsertUserAdditionHandler, error) {
+	return &UpsertUserAdditionHandler{deps: deps}, nil
 }
 
 // @ID UpsertUserAddition
@@ -38,14 +38,14 @@ func NewUpsertAdditionHandler(deps UpsertAdditionHandlerDependencies) (*UpsertAd
 // @Tags         user
 // @Accept       json
 // @Produce      json
-// @Param request body UpsertAdditionHandlerRequest true "User additional information"
-// @Success      200 {object} UpsertAdditionHandlerResponse
+// @Param request body UpsertUserAdditionHandlerRequest true "User additional information"
+// @Success      200 {object} UpsertUserAdditionHandlerResponse
 // @Failure      400 {object} http.Error
 // @Failure      401 {object} http.Error
 // @Failure      500 {object} http.Error
 // @Router       /user/addition [put]
 // @Security     BearerAuth
-func (h *UpsertAdditionHandler) Handle(c *fiber.Ctx) error {
+func (h *UpsertUserAdditionHandler) Handle(c *fiber.Ctx) error {
 	userID, err := http.GetUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(
@@ -53,7 +53,7 @@ func (h *UpsertAdditionHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 
-	request := &UpsertAdditionHandlerRequest{}
+	request := &UpsertUserAdditionHandlerRequest{}
 	if err := c.BodyParser(request); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(
 			http.NewError(c.UserContext(), err, "Invalid request"),
@@ -87,12 +87,12 @@ func (h *UpsertAdditionHandler) Handle(c *fiber.Ctx) error {
 	}
 
 	rowsAffected, _ := result.RowsAffected()
-	return c.JSON(UpsertAdditionHandlerResponse{
+	return c.JSON(UpsertUserAdditionHandlerResponse{
 		Success: true,
 		Created: rowsAffected == 1,
 	})
 }
 
-func (h *UpsertAdditionHandler) Identify() string {
-	return "upsert-addition"
+func (h *UpsertUserAdditionHandler) Identify() string {
+	return "upsert-user-addition"
 }

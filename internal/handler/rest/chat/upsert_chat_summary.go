@@ -1,7 +1,6 @@
 package chat
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 
@@ -16,40 +15,40 @@ import (
 	"go.uber.org/fx"
 )
 
-type UpsertSummaryHandlerDependencies struct {
+type UpsertChatSummaryHandlerDependencies struct {
 	fx.In
 	DB  *bun.DB
 	LLM llm.Client
 }
 
-type UpsertSummaryHandlerResponse struct {
+type UpsertChatSummaryHandlerResponse struct {
 	Success   bool              `json:"success"`
 	Created   bool              `json:"created"`
 	Returning domain.SummaryDTO `json:"returning"`
 }
 
-type UpsertSummaryHandler struct {
-	deps UpsertSummaryHandlerDependencies
+type UpsertChatSummaryHandler struct {
+	deps UpsertChatSummaryHandlerDependencies
 }
 
-func NewUpsertSummaryHandler(deps UpsertSummaryHandlerDependencies) (*UpsertSummaryHandler, error) {
-	return &UpsertSummaryHandler{deps: deps}, nil
+func NewUpsertChatSummaryHandler(deps UpsertChatSummaryHandlerDependencies) (*UpsertChatSummaryHandler, error) {
+	return &UpsertChatSummaryHandler{deps: deps}, nil
 }
 
-// @ID UpsertSummary
-// @Summary Create or update summary
-// @Description Create or update summary and return the created/updated summary
+// @ID UpsertChatSummary
+// @Summary Create or update chat summary
+// @Description Create or update chat summary and return the created/updated chat summary
 // @Tags chat
 // @Accept json
 // @Produce json
 // @Param session_id path string true "Session ID"
-// @Success 200 {object} UpsertSummaryHandlerResponse
+// @Success 200 {object} UpsertChatSummaryHandlerResponse
 // @Failure 401 {object} http.Error
 // @Failure 404 {object} http.Error
 // @Failure 500 {object} http.Error
-// @Router /chats/:session_id/summary [post]
+// @Router /chats/{session_id}/summary [post]
 // @Security BearerAuth
-func (h *UpsertSummaryHandler) Handle(c *fiber.Ctx) error {
+func (h *UpsertChatSummaryHandler) Handle(c *fiber.Ctx) error {
 	userID, err := http.GetUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(
@@ -57,7 +56,7 @@ func (h *UpsertSummaryHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 	user := &user.User{ID: userID}
-	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(context.Background()); err != nil {
+	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(c.UserContext()); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
 			http.NewError(c.UserContext(), err, "User not found"),
 		)
@@ -77,7 +76,7 @@ func (h *UpsertSummaryHandler) Handle(c *fiber.Ctx) error {
 		Where("session_id = ?", sessionID).
 		Where("user_id = ?", userID).
 		Order("created_at ASC").
-		Scan(context.Background())
+		Scan(c.UserContext())
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
 			http.NewError(c.UserContext(), err, "Chat not found"),
@@ -146,14 +145,14 @@ func (h *UpsertSummaryHandler) Handle(c *fiber.Ctx) error {
 		Set("keywords = ?", summary.Keywords).
 		Set("emotions = ?", emotions.ToString()).
 		Set("updated_at = CURRENT_TIMESTAMP").
-		Exec(context.Background())
+		Exec(c.UserContext())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
 			http.NewError(c.UserContext(), err, "Failed to insert summary"),
 		)
 	}
 	rowsAffected, _ := result.RowsAffected()
-	response := &UpsertSummaryHandlerResponse{
+	response := &UpsertChatSummaryHandlerResponse{
 		Success:   true,
 		Created:   rowsAffected == 1,
 		Returning: model.ToSummaryDTO(),
@@ -161,6 +160,6 @@ func (h *UpsertSummaryHandler) Handle(c *fiber.Ctx) error {
 	return c.JSON(response)
 }
 
-func (h *UpsertSummaryHandler) Identify() string {
-	return "summary-chat"
+func (h *UpsertChatSummaryHandler) Identify() string {
+	return "upsert-chat-summary"
 }
