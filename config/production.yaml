@@ -57,7 +57,7 @@ llm:
         prompt_file: resource/llm/prompt/interactive-chat-prompt-v1.md
       - identifier: summary_chat
         prompt_type: action_prompt
-        prompt_file: resource/llm/prompt/summart-chat-prompt-v1.md
+        prompt_file: resource/llm/prompt/summary-chat-prompt-v1.md
         attachment_file: resource/llm/attachment/counseling-psychology-101.pdf
         attachment_mime: application/pdf
         attachment_ttl: 1h

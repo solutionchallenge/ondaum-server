@@ -61,7 +61,9 @@ func (h *GetChatHandler) Handle(c *fiber.Ctx) error {
 	chat := &domain.Chat{}
 	err = h.deps.DB.NewSelect().
 		Model(chat).
-		Relation("Histories").
+		Relation("Histories", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.Order("inserted_at ASC")
+		}).
 		Relation("Summary").
 		Where("session_id = ?", sessionID).
 		Where("user_id = ?", userID).
