@@ -59,7 +59,7 @@ func (client *Client) StartConversation(ctx context.Context, historyManager llm.
 func (client *Client) RunActionPrompt(ctx context.Context, instructionIdentifier string, promptIdentifier string, histories ...llm.Message) (llm.Message, error) {
 	config, err := BuildGenerativeConfig(client, instructionIdentifier)
 	if err != nil {
-		return llm.Message{}, err
+		return llm.Message{}, fmt.Errorf("BuildGenerativeConfig failed: %w", err)
 	}
 
 	var prepared *llm.PreparedPrompt = nil
@@ -70,52 +70,68 @@ func (client *Client) RunActionPrompt(ctx context.Context, instructionIdentifier
 		}
 	}
 	if prepared == nil {
-		return llm.Message{}, fmt.Errorf("identifier not found")
+		return llm.Message{}, fmt.Errorf("prepared prompt identifier '%s' not found", promptIdentifier)
 	}
 
 	prompt, err := readPromptFile(prepared.PromptFile)
 	if err != nil {
-		return llm.Message{}, err
+		return llm.Message{}, fmt.Errorf("readPromptFile failed for %s: %w", prepared.PromptFile, err)
 	}
+
+	finalContents := []*genai.Content{}
+	if len(histories) > 0 {
+		historyContents := utils.Map(histories, func(message llm.Message) *genai.Content {
+			return genai.NewContentFromText(message.Content, genai.Role(message.Role))
+		})
+		finalContents = append(finalContents, historyContents...)
+	}
+
+	currentUserTurnParts := []*genai.Part{genai.NewPartFromText(prompt)}
 	if prepared.AttachmentFile != "" {
 		reader, err := openAttachmentFile(prepared.AttachmentFile)
 		if err != nil {
-			return llm.Message{}, err
+			return llm.Message{}, fmt.Errorf("openAttachmentFile failed for %s: %w", prepared.AttachmentFile, err)
 		}
 		defer reader.Close()
-		uploaded, err := client.Core.Files.Upload(ctx, reader, &genai.UploadFileConfig{
-			MIMEType: prepared.AttachmentMime,
+
+		uploadedFile, uploadErr := client.Core.Files.Upload(ctx, reader, &genai.UploadFileConfig{
+			MIMEType:    prepared.AttachmentMime,
+			DisplayName: prepared.AttachmentFile,
 		})
-		if err != nil {
-			return llm.Message{}, err
+		if uploadErr != nil {
+			return llm.Message{}, fmt.Errorf("file upload failed for %s: %w", prepared.AttachmentFile, uploadErr)
 		}
-		attachment := genai.NewContentFromURI(uploaded.URI, prepared.AttachmentMime, genai.RoleUser)
-		cached, err := client.Core.Caches.Create(ctx, client.Config.Gemini.LLMModel, &genai.CreateCachedContentConfig{
-			Contents:          []*genai.Content{attachment},
+
+		fileDataPart := genai.NewPartFromURI(uploadedFile.URI, prepared.AttachmentMime)
+
+		contentForCaching := &genai.Content{
+			Parts: []*genai.Part{fileDataPart},
+		}
+
+		cached, cacheErr := client.Core.Caches.Create(ctx, client.Config.Gemini.LLMModel, &genai.CreateCachedContentConfig{
+			Contents:          []*genai.Content{contentForCaching},
 			SystemInstruction: config.SystemInstruction,
 			TTL:               prepared.AttachmentTTL,
+			DisplayName:       fmt.Sprintf("cache_for_%s", prepared.AttachmentFile),
 		})
-		if err != nil {
-			return llm.Message{}, err
+		if cacheErr != nil {
+			config.CachedContent = ""
+			currentUserTurnParts = append(currentUserTurnParts, fileDataPart)
+		} else {
+			config.CachedContent = cached.Name
 		}
-		config.CachedContent = cached.Name
 	}
 
-	request := []*genai.Content{}
-	if len(histories) > 0 {
-		basements := utils.Map(histories, func(message llm.Message) *genai.Content {
-			return genai.NewContentFromText(message.Content, genai.Role(message.Role))
-		})
-		request = basements
-	}
-
+	currentUserTurnContent := genai.NewContentFromParts(currentUserTurnParts, genai.RoleUser)
+	finalContents = append(finalContents, currentUserTurnContent)
 	response, err := client.Core.Models.GenerateContent(
-		ctx, client.Config.Gemini.LLMModel,
-		append(request, genai.NewContentFromText(prompt, genai.RoleUser)),
+		ctx,
+		client.Config.Gemini.LLMModel,
+		finalContents,
 		config,
 	)
 	if err != nil {
-		return llm.Message{}, err
+		return llm.Message{}, fmt.Errorf("GenerateContent failed: %w", err)
 	}
 
 	if err := checkPromptBlocked(response); err != nil {

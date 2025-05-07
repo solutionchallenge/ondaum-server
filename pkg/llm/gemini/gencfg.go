@@ -21,7 +21,7 @@ func BuildGenerativeConfig(client *Client, promptIdentifier string, rootpath ...
 		if err != nil {
 			return nil, err
 		}
-		systemInstruction = genai.NewContentFromText(promptData, genai.Role("system"))
+		systemInstruction = genai.NewContentFromText(promptData, genai.RoleUser)
 	}
 	chatConfig := &genai.GenerateContentConfig{
 		ResponseMIMEType:  client.Config.Gemini.ResponseFormat,
