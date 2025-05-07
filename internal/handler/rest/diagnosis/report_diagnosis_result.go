@@ -37,7 +37,7 @@ func NewReportDiagnosisResultHandler(deps ReportDiagnosisResultHandlerDependenci
 // @Failure 401 {object} http.Error
 // @Failure 404 {object} http.Error
 // @Failure 500 {object} http.Error
-// @Router /diagnoses/report [post]
+// @Router /diagnoses [post]
 // @Security BearerAuth
 func (h *ReportDiagnosisResultHandler) Handle(c *fiber.Ctx) error {
 	userID, err := http.GetUserID(c)

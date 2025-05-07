@@ -34,7 +34,7 @@ var PredefinedRoutes = []fx.Option{
 	dependency.HttpRoute("PUT", "/chats/:session_id/summary", chat.NewUpsertChatSummaryHandler),
 	dependency.HttpRoute("POST", "/chats/:session_id/archive", chat.NewArchiveChatHandler),
 	dependency.HttpRoute("GET", "/diagnoses", diagnosis.NewListDiagnosisResultHandler),
-	dependency.HttpRoute("POST", "/diagnoses/report", diagnosis.NewReportDiagnosisResultHandler),
+	dependency.HttpRoute("POST", "/diagnoses", diagnosis.NewReportDiagnosisResultHandler),
 	dependency.HttpRoute("GET", "/diagnoses/:diagnosis_id", diagnosis.NewGetDiagnosisResultHandler),
 	dependency.HttpRoute("GET", "/diagnosis-papers", diagnosis.NewListDiagnosisPaperHandler),
 	dependency.HttpRoute("GET", "/diagnosis-papers/:paper_id", diagnosis.NewGetDiagnosisPaperHandler),

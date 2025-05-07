@@ -448,33 +448,7 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/diagnoses/papers": {
-            "get": {
-                "description": "List diagnosis papers",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "List diagnosis papers",
-                "operationId": "ListDiagnosisPaper",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/diagnosis.ListDiagnosisPaperHandlerResponse"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/diagnoses/report": {
+            },
             "post": {
                 "security": [
                     {
@@ -524,6 +498,30 @@ const docTemplate = `{
                         "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/diagnoses/papers": {
+            "get": {
+                "description": "List diagnosis papers",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "List diagnosis papers",
+                "operationId": "ListDiagnosisPaper",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/diagnosis.ListDiagnosisPaperHandlerResponse"
+                            }
                         }
                     }
                 }
