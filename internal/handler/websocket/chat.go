@@ -60,7 +60,7 @@ func (h *ChatHandler) Identify() string {
 // @Param        session_id query string false "Websocket Session ID (if not provided, the server will create a new session)"
 // @Success      200 {object} wspkg.ResponseWrapper
 // @Failure      426 {object} http.Error
-// @Router       /chat/ws [get]
+// @Router       /_ws/chat [get]
 // @Security     BearerAuth
 func (h *ChatHandler) HandleMessage(c *fiberws.Conn, request wspkg.MessageWrapper) (wspkg.ResponseWrapper, bool, error) {
 	if !request.Authorized || !h.checkAuthorization(request.UserID) {

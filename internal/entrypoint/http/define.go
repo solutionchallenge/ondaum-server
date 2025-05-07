@@ -36,7 +36,7 @@ var PredefinedRoutes = []fx.Option{
 }
 
 var WebsocketRoutes = []fx.Option{
-	dependency.WebsocketRoute("/chat/ws", websocket.NewChatHandler),
+	dependency.WebsocketRoute("/_ws/chat", websocket.NewChatHandler),
 }
 
 var FutureProcesses = []fx.Option{
