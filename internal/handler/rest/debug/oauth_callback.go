@@ -1,6 +1,7 @@
 package debug
 
 import (
+	"errors"
 	"os"
 	"strconv"
 
@@ -46,23 +47,23 @@ func (h *OAuthCallbackHandler) Handle(c *fiber.Ctx) error {
 
 	code := c.Query("code")
 	if code == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Code is required",
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(
+			http.NewError(c.UserContext(), errors.New("code is required"), "Code is required"),
+		)
 	}
 
 	userInfo, err := h.deps.OAuth.Use(google.Provider).GetUserInfo(code)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(http.NewError(
+			c.UserContext(), err, "Failed to get user info",
+		))
 	}
 
 	dbTx, err := h.deps.DB.BeginTx(c.Context(), nil)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "Failed to begin transaction",
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			http.NewError(c.UserContext(), err, "Failed to begin transaction"),
+		)
 	}
 	defer dbTx.Rollback()
 
@@ -75,9 +76,9 @@ func (h *OAuthCallbackHandler) Handle(c *fiber.Ctx) error {
 		On("DUPLICATE KEY UPDATE username = VALUES(username)").
 		Exec(c.Context())
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "Failed to upsert user",
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			http.NewError(c.UserContext(), err, "Failed to upsert user"),
+		)
 	}
 
 	err = dbTx.NewSelect().
@@ -85,9 +86,9 @@ func (h *OAuthCallbackHandler) Handle(c *fiber.Ctx) error {
 		Where("email = ?", userInfo.Email).
 		Scan(c.Context())
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "Failed to get user",
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			http.NewError(c.UserContext(), err, "Failed to get user"),
+		)
 	}
 
 	userOAuth := &user.OAuth{
@@ -100,22 +101,22 @@ func (h *OAuthCallbackHandler) Handle(c *fiber.Ctx) error {
 		On("DUPLICATE KEY UPDATE provider_code = VALUES(provider_code)").
 		Exec(c.Context())
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "Failed to create user oauth",
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			http.NewError(c.UserContext(), err, "Failed to create user oauth"),
+		)
 	}
 
 	if err := dbTx.Commit(); err != nil {
-		return c.Status(fiber.StatusConflict).JSON(fiber.Map{
-			"message": "Failed to commit transaction",
-		})
+		return c.Status(fiber.StatusConflict).JSON(
+			http.NewError(c.UserContext(), err, "Failed to commit transaction"),
+		)
 	}
 
 	tokenPair, err := h.deps.JWT.GenerateTokenPair(strconv.FormatInt(userData.ID, 10))
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "Failed to generate token pair",
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			http.NewError(c.UserContext(), err, "Failed to generate token pair"),
+		)
 	}
 
 	response := OAuthCallbackHandlerResponse{
