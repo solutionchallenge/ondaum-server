@@ -1,7 +1,5 @@
 package llm
 
-import "time"
-
 type Config struct {
 	Gemini GenericConfig `mapstructure:"gemini"`
 }
@@ -14,12 +12,11 @@ const (
 )
 
 type PreparedPrompt struct {
-	Identifier     string        `mapstructure:"identifier"`
-	PromptType     PromptType    `mapstructure:"prompt_type"`
-	PromptFile     string        `mapstructure:"prompt_file"`
-	AttachmentFile string        `mapstructure:"attachment_file"`
-	AttachmentMime string        `mapstructure:"attachment_mime"`
-	AttachmentTTL  time.Duration `mapstructure:"attachment_ttl"`
+	Identifier     string     `mapstructure:"identifier"`
+	PromptType     PromptType `mapstructure:"prompt_type"`
+	PromptFile     string     `mapstructure:"prompt_file"`
+	AttachmentFile string     `mapstructure:"attachment_file"`
+	AttachmentMime string     `mapstructure:"attachment_mime"`
 }
 
 type RedactionThreshold struct {

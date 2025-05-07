@@ -103,23 +103,7 @@ func (client *Client) RunActionPrompt(ctx context.Context, instructionIdentifier
 		}
 
 		fileDataPart := genai.NewPartFromURI(uploadedFile.URI, prepared.AttachmentMime)
-
-		contentForCaching := &genai.Content{
-			Parts: []*genai.Part{fileDataPart},
-		}
-
-		cached, cacheErr := client.Core.Caches.Create(ctx, client.Config.Gemini.LLMModel, &genai.CreateCachedContentConfig{
-			Contents:          []*genai.Content{contentForCaching},
-			SystemInstruction: config.SystemInstruction,
-			TTL:               prepared.AttachmentTTL,
-			DisplayName:       fmt.Sprintf("cache_for_%s", prepared.AttachmentFile),
-		})
-		if cacheErr != nil {
-			config.CachedContent = ""
-			currentUserTurnParts = append(currentUserTurnParts, fileDataPart)
-		} else {
-			config.CachedContent = cached.Name
-		}
+		currentUserTurnParts = append(currentUserTurnParts, fileDataPart)
 	}
 
 	currentUserTurnContent := genai.NewContentFromParts(currentUserTurnParts, genai.RoleUser)
