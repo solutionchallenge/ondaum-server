@@ -48,7 +48,11 @@ func (e *FeatureList) Scan(src interface{}) error {
 }
 
 func (e *FeatureList) Value() (driver.Value, error) {
-	return json.Marshal(e)
+	buf, err := json.Marshal(e)
+	if err != nil {
+		return nil, err
+	}
+	return string(buf), nil
 }
 
 func (e *FeatureList) Validate() bool {
@@ -58,4 +62,9 @@ func (e *FeatureList) Validate() bool {
 		}
 	}
 	return true
+}
+
+func (e *FeatureList) ToString() string {
+	result, _ := e.Value()
+	return result.(string)
 }

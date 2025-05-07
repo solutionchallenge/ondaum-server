@@ -76,7 +76,7 @@ func (h *UpsertAdditionHandler) Handle(c *fiber.Ctx) error {
 		Model(addition).
 		On("DUPLICATE KEY UPDATE").
 		Set("concerns = ?", request.Concerns).
-		Set("emotions = ?", request.Emotions).
+		Set("emotions = ?", request.Emotions.ToString()).
 		Set("updated_at = CURRENT_TIMESTAMP").
 		Exec(c.UserContext())
 

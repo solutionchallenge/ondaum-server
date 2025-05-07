@@ -109,11 +109,11 @@ func (h *UpsertSummaryHandler) Handle(c *fiber.Ctx) error {
 			http.NewError(c.UserContext(), err, "Failed to unmarshal response"),
 		)
 	}
-	emotions := utils.Map(summary.Emotions, func(e struct {
+	var emotions common.EmotionRateList = utils.Map(summary.Emotions, func(e struct {
 		Emotion common.Emotion `json:"emotion"`
 		Rate    float64        `json:"rate"`
-	}) domain.EmotionRate {
-		return domain.EmotionRate{
+	}) common.EmotionRate {
+		return common.EmotionRate{
 			Emotion: e.Emotion,
 			Rate:    e.Rate,
 		}
@@ -131,7 +131,7 @@ func (h *UpsertSummaryHandler) Handle(c *fiber.Ctx) error {
 		Set("title = ?", summary.Title).
 		Set("text = ?", summary.Text).
 		Set("keywords = ?", summary.Keywords).
-		Set("emotions = ?", emotions).
+		Set("emotions = ?", emotions.ToString()).
 		Set("updated_at = CURRENT_TIMESTAMP").
 		Exec(context.Background())
 	if err != nil {
