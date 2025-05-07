@@ -1,17 +1,18 @@
 package migration
 
 import (
-	"github.com/solutionchallenge/ondaum-server/migration/user"
+	"github.com/solutionchallenge/ondaum-server/migration/sql"
 	"github.com/solutionchallenge/ondaum-server/pkg/database"
 )
 
 var Collection = []database.Migration{
-	user.MigrationUser001CreateUserTable,
-	user.MigrationUser002CreateOAuthTable,
-	user.MigrationUser003CreatePrivacyTable,
-	user.MigrationUser004CreateAdditionTable,
-	user.MigrationUser005CreateFutureJobTable,
-	user.MigrationUser006CreateChatTable,
-	user.MigrationUser007CreateChatHistoryTable,
-	user.MigrationUser008CreateChatSummaryTable,
+	sql.MigrationUser001CreateUserTable,
+	sql.MigrationUser002CreateOAuthTable,
+	sql.MigrationUser003CreatePrivacyTable,
+	sql.MigrationUser004CreateAdditionTable,
+	sql.MigrationUser005CreateFutureJobTable,
+	sql.MigrationUser006CreateChatTable,
+	sql.MigrationUser007CreateChatHistoryTable,
+	sql.MigrationUser008CreateChatSummaryTable,
+	sql.MigrationUser009CreateDiagnosisTable,
 }

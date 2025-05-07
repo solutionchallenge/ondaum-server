@@ -1,4 +1,4 @@
-package user
+package sql
 
 import (
 	"github.com/solutionchallenge/ondaum-server/pkg/database"
