@@ -24,7 +24,7 @@ func HandleConnect(db *bun.DB, clk clock.Clock, request wspkg.ConnectWrapper) (w
 		Model(chat).
 		Where("user_id = ?", request.UserID).
 		Where("archived_at IS NULL").
-		Order("started_date DESC").
+		Order("created_at DESC").
 		Limit(1).
 		Scan(context.Background())
 

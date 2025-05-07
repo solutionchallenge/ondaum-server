@@ -53,7 +53,8 @@ func (h *ChatFutureHandler) Handle(ctx context.Context, job *future.Job) error {
 	chat := &domain.Chat{}
 	err = tx.NewSelect().
 		Model(chat).
-		Where("user_id = ? AND session_id = ?", input.UserID, input.ConversationID).
+		Where("session_id = ?", input.ConversationID).
+		Where("user_id = ?", input.UserID).
 		Scan(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to select chat: %w(%v:%v)", err, input.UserID, input.ConversationID)

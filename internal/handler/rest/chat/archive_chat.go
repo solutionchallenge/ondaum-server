@@ -81,8 +81,8 @@ func (h *ArchiveChatHandler) Handle(c *fiber.Ctx) error {
 			http.NewError(c.UserContext(), err, "Chat not found"),
 		)
 	}
-	wasFinished := !chat.FinishedAt.IsZero()
 
+	wasFinished := chat.FinishedAt.IsZero()
 	mutation := tx.NewUpdate().
 		Model(chat).
 		Set("archived_at = CURRENT_TIMESTAMP").
