@@ -1,5 +1,7 @@
 package llm
 
+import "context"
+
 type HistoryRole string
 
 const (
@@ -9,6 +11,6 @@ const (
 )
 
 type HistoryManager interface {
-	Add(messages ...Message)
-	Get(conversationID string) []Message
+	Add(ctx context.Context, messages ...Message)
+	Get(ctx context.Context, conversationID string) []Message
 }

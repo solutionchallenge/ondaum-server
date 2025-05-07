@@ -55,9 +55,17 @@ func (logger Logger) UID(uid string) Logger {
 	return logger
 }
 
-func (logger Logger) Send(fmtstr string, data ...any) {
-	filepath, filename, line := GetCallerInfo(1)
+func (logger Logger) BT(depth ...int) Logger {
+	skip := 1
+	if len(depth) > 0 && depth[0] > 0 {
+		skip += depth[0]
+	}
+	filepath, filename, line := GetCallerInfo(skip)
 	info := fmt.Sprintf("%s:%d", path.Join(filepath, filename), line)
 	logger.Instance = logger.Instance.Str("caller", info)
+	return logger
+}
+
+func (logger Logger) Send(fmtstr string, data ...any) {
 	logger.Instance.Msgf(fmtstr, data...)
 }

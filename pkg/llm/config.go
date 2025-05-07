@@ -4,15 +4,19 @@ type Config struct {
 	Gemini GenericConfig `mapstructure:"gemini"`
 }
 
-type CachedPrompt struct {
-	Identifier string `mapstructure:"identifier"`
-	Prompt     string `mapstructure:"prompt"`
-	Attachment string `mapstructure:"attachment"`
-}
+type PromptType string
 
-type PredefinedAction struct {
-	Identifier string `mapstructure:"identifier"`
-	Reference  string `mapstructure:"reference"`
+const (
+	PromptTypeSystemInstruction PromptType = "system_instruction"
+	PromptTypeActionPrompt      PromptType = "action_prompt"
+)
+
+type PreparedPrompt struct {
+	Identifier     string     `mapstructure:"identifier"`
+	PromptType     PromptType `mapstructure:"prompt_type"`
+	PromptFile     string     `mapstructure:"prompt_file"`
+	AttachmentFile string     `mapstructure:"attachment_file"`
+	AttachmentMime string     `mapstructure:"attachment_mime"`
 }
 
 type RedactionThreshold struct {
@@ -29,8 +33,6 @@ type GenericConfig struct {
 	LLMModel           string             `mapstructure:"llm_model"`
 	EmbeddingModel     string             `mapstructure:"embedding_model"`
 	ResponseFormat     string             `mapstructure:"response_format"`
-	SystemPrompt       string             `mapstructure:"system_prompt"`
-	CachedPrompts      []CachedPrompt     `mapstructure:"cached_prompts"`
-	PredefinedActions  []PredefinedAction `mapstructure:"predefined_actions"`
+	PreparedPrompts    []PreparedPrompt   `mapstructure:"prepared_prompts"`
 	RedactionThreshold RedactionThreshold `mapstructure:"redaction_threshold"`
 }

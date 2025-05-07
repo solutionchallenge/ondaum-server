@@ -14,19 +14,19 @@ func NewJWTAuthMiddleware(generator *jwt.Generator) MiddlewareFunc {
 
 		authHeader := c.Get("Authorization")
 		if authHeader == "" {
-			utils.Log(utils.DebugLevel).Ctx(c.UserContext()).RID(rid).Send("No authorization header")
+			utils.Log(utils.DebugLevel).Ctx(c.UserContext()).RID(rid).BT().Send("No authorization header")
 			return c.Next()
 		}
 
 		if len(authHeader) < 7 || authHeader[:7] != "Bearer " {
-			utils.Log(utils.WarnLevel).Ctx(c.UserContext()).RID(rid).Send("Missing Bearer prefix in Authorization header")
+			utils.Log(utils.WarnLevel).Ctx(c.UserContext()).RID(rid).BT().Send("Missing Bearer prefix in Authorization header")
 			return c.Next()
 		}
 
 		tokenString := authHeader[7:]
 		tokenType, err := generator.GetTokenType(tokenString)
 		if err != nil {
-			utils.Log(utils.WarnLevel).Ctx(c.UserContext()).Err(err).RID(rid).Send("Failed to get token type")
+			utils.Log(utils.WarnLevel).Ctx(c.UserContext()).Err(err).RID(rid).BT().Send("Failed to get token type")
 			return c.Next()
 		}
 
@@ -35,27 +35,27 @@ func NewJWTAuthMiddleware(generator *jwt.Generator) MiddlewareFunc {
 		case jwt.AccessTokenType:
 			claims, err = generator.UnpackToken(tokenString)
 			if err != nil {
-				utils.Log(utils.InfoLevel).Ctx(c.UserContext()).Err(err).RID(rid).Send("Failed to unpack access token")
+				utils.Log(utils.InfoLevel).Ctx(c.UserContext()).Err(err).RID(rid).BT().Send("Failed to unpack access token")
 				return c.Next()
 			}
 		case jwt.RefreshTokenType:
 			tokenPair, err := generator.RefreshTokenPair(tokenString)
 			if err != nil {
-				utils.Log(utils.InfoLevel).Ctx(c.UserContext()).Err(err).RID(rid).Send("Failed to refresh token pair")
+				utils.Log(utils.InfoLevel).Ctx(c.UserContext()).Err(err).RID(rid).BT().Send("Failed to refresh token pair")
 				return c.Next()
 			}
 			tokenString = tokenPair.AccessToken
 			claims, err = generator.UnpackToken(tokenString)
 			if err != nil {
-				utils.Log(utils.WarnLevel).Ctx(c.UserContext()).Err(err).RID(rid).Send("Failed to unpack access token")
+				utils.Log(utils.WarnLevel).Ctx(c.UserContext()).Err(err).RID(rid).BT().Send("Failed to unpack access token")
 				return c.Next()
 			}
 		default:
-			utils.Log(utils.WarnLevel).Ctx(c.UserContext()).RID(rid).Send("Invalid token type")
+			utils.Log(utils.WarnLevel).Ctx(c.UserContext()).RID(rid).BT().Send("Invalid token type")
 			return c.Next()
 		}
 
-		utils.Log(utils.InfoLevel).Ctx(c.UserContext()).RID(rid).Send("Unpacked User: %v (%+v)", claims.Value, claims.Metadata)
+		utils.Log(utils.InfoLevel).Ctx(c.UserContext()).RID(rid).BT().Send("Unpacked User: %v (%+v)", claims.Value, claims.Metadata)
 		c.Locals("X-User-Metadata", claims.Metadata)
 		c.Locals("X-User-ID", claims.Value)
 

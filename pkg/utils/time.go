@@ -1,0 +1,6 @@
+package utils
+
+const (
+	TIME_FORMAT_ISO8601 = "2006-01-02T15:04:05Z"
+	TIME_FORMAT_DATE    = "2006-01-02"
+)

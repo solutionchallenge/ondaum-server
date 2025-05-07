@@ -46,7 +46,7 @@ func (s *Scheduler) Start() {
 		for {
 			select {
 			case <-s.CancelableCtx.Done():
-				utils.Log(utils.InfoLevel).Send("Scheduler is shutting down...")
+				utils.Log(utils.InfoLevel).BT().Send("Scheduler is shutting down...")
 				return
 			case <-time.After(s.Config.ScheduleCycle):
 				s.processJobs()
@@ -56,36 +56,36 @@ func (s *Scheduler) Start() {
 }
 
 func (s *Scheduler) Stop() {
-	utils.Log(utils.InfoLevel).Send("Initiating scheduler shutdown...")
+	utils.Log(utils.InfoLevel).BT().Send("Initiating scheduler shutdown...")
 	s.CancelFunc()
 	s.WaitGroup.Wait()
-	utils.Log(utils.InfoLevel).Send("Scheduler shutdown completed")
+	utils.Log(utils.InfoLevel).BT().Send("Scheduler shutdown completed")
 }
 
 func (s *Scheduler) processJobs() {
 	for {
 		select {
 		case <-s.CancelableCtx.Done():
-			utils.Log(utils.InfoLevel).Send("Scheduler is stopping, exiting burst mode...")
+			utils.Log(utils.InfoLevel).BT().Send("Scheduler is stopping, exiting burst mode...")
 			return
 		default:
 			job, tx, err := s.Core.RunNext(s.CancelableCtx, false)
 			if err != nil {
-				utils.Log(utils.WarnLevel).Err(err).Send("Failed to get next job")
+				utils.Log(utils.WarnLevel).Err(err).BT().Send("Failed to get next job")
 				return
 			}
 			if job == nil {
 				return
 			}
 			if tx == nil {
-				utils.Log(utils.WarnLevel).Send("No transaction found for job: %s", job.ID)
+				utils.Log(utils.WarnLevel).BT().Send("No transaction found for job: %s", job.ID)
 				s.Core.Cancel(s.CancelableCtx, job.ID)
 				continue
 			}
 
 			handler, ok := s.Handlers[job.ActionType]
 			if !ok {
-				utils.Log(utils.WarnLevel).Send("Failed to get handler for action type: %s", job.ActionType)
+				utils.Log(utils.WarnLevel).BT().Send("Failed to get handler for action type: %s", job.ActionType)
 				tx.Fail(s.CancelableCtx, "Failed to get handler for action type")
 				continue
 			}
@@ -97,14 +97,14 @@ func (s *Scheduler) processJobs() {
 						if err, ok := r.(error); ok {
 							errMsg = err.Error()
 						}
-						utils.Log(utils.ErrorLevel).Err(fmt.Errorf("%v", r)).Send("Handler panicked for job: %s", job.ID)
+						utils.Log(utils.ErrorLevel).Err(fmt.Errorf("%v", r)).BT().Send("Handler panicked for job: %s", job.ID)
 						tx.Fail(s.CancelableCtx, errMsg)
 					}
 				}()
 
 				err = handler.Handle(s.CancelableCtx, job)
 				if err != nil {
-					utils.Log(utils.WarnLevel).Err(err).Send("Failed to handle job")
+					utils.Log(utils.WarnLevel).Err(err).BT().Send("Failed to handle job")
 					tx.Fail(s.CancelableCtx, err.Error())
 					return
 				}
@@ -112,7 +112,7 @@ func (s *Scheduler) processJobs() {
 			}()
 
 			if s.Config.DeleteAfterCompletion {
-				utils.Log(utils.DebugLevel).Send("Job completed: %s", job.ID)
+				utils.Log(utils.DebugLevel).BT().Send("Job completed: %s", job.ID)
 				s.Core.DeletePermanently(s.CancelableCtx, job.ID)
 			}
 		}

@@ -2,43 +2,50 @@ package gemini
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/google/generative-ai-go/genai"
 	"github.com/google/uuid"
 	"github.com/solutionchallenge/ondaum-server/pkg/llm"
 	"github.com/solutionchallenge/ondaum-server/pkg/utils"
+	"google.golang.org/genai"
 )
 
 type Conversation struct {
 	ID         string
 	Client     *Client
-	Session    *genai.ChatSession
+	Session    *genai.Chat
 	Statistics llm.Statistics
 	Manager    llm.HistoryManager
 }
 
-func NewConversation(id string, client *Client, manager llm.HistoryManager) *Conversation {
-	histories := utils.Map(manager.Get(id), func(message llm.Message) *genai.Content {
-		return &genai.Content{
-			Role:  string(message.Role),
-			Parts: []genai.Part{genai.Text(message.Content)},
-		}
+func NewConversation(ctx context.Context, id string, client *Client, prompt string, manager llm.HistoryManager) (*Conversation, error) {
+	histories := utils.Map(manager.Get(ctx, id), func(message llm.Message) *genai.Content {
+		return genai.NewContentFromText(message.Content, genai.Role(message.Role))
 	})
-	session := client.Model.StartChat()
-	session.History = append(session.History, histories...)
+	config, err := BuildGenerativeConfig(client, prompt)
+	if err != nil {
+		return nil, err
+	}
+	session, err := client.Core.Chats.Create(
+		ctx,
+		client.Config.Gemini.LLMModel,
+		config,
+		histories,
+	)
+	if err != nil {
+		return nil, err
+	}
 	return &Conversation{
 		ID:         id,
 		Client:     client,
 		Session:    session,
 		Statistics: llm.Statistics{},
 		Manager:    manager,
-	}
+	}, nil
 }
 
-func (conversation *Conversation) Request(request llm.Message) (llm.Message, error) {
-	prompt := genai.Text(request.Content)
-	response, err := conversation.Session.SendMessage(context.Background(), prompt)
+func (conversation *Conversation) Request(ctx context.Context, request llm.Message) (llm.Message, error) {
+	prompt := genai.NewPartFromText(request.Content)
+	response, err := conversation.Session.SendMessage(ctx, *prompt)
 	if err != nil {
 		return llm.Message{}, err
 	}
@@ -46,48 +53,33 @@ func (conversation *Conversation) Request(request llm.Message) (llm.Message, err
 	AddStatistics(&conversation.Statistics, response.UsageMetadata)
 	AddStatistics(&conversation.Client.Statistics, response.UsageMetadata)
 
-	if len(response.Candidates) == 0 {
-		switch response.PromptFeedback.BlockReason {
-		case genai.BlockReasonSafety:
-			return llm.Message{}, fmt.Errorf("blocked by gemini by inappropriate prompt: %v", response.PromptFeedback.BlockReason.String())
-		default:
-			return llm.Message{}, fmt.Errorf("blocked by gemini with unknown reason: %v", response.PromptFeedback.BlockReason.String())
-		}
+	if err := checkPromptBlocked(response); err != nil {
+		return llm.Message{}, err
 	}
-
-	candidate := response.Candidates[0]
-	metadata := map[string]any{}
-	if len(candidate.SafetyRatings) > 0 {
-		for _, result := range candidate.SafetyRatings {
-			if result.Blocked {
-				return llm.Message{}, fmt.Errorf("blocked by gemini by inappropriate content: %v(%v)", result.Category, result.Probability)
-			}
-			metadata["feedback"] = map[string]any{
-				"category":    result.Category,
-				"probability": result.Probability,
-			}
-		}
-	}
-	contents := ""
-	for _, part := range candidate.Content.Parts {
-		contents += string(part.(genai.Text))
+	feedbacks := buildContentFeedbacks(response)
+	if err := checkContentBlocked(feedbacks); err != nil {
+		return llm.Message{}, err
 	}
 	message := llm.Message{
-		ID:       uuid.New().String(),
-		Role:     llm.RoleAssistant,
-		Content:  contents,
-		Metadata: metadata,
+		ID:      uuid.New().String(),
+		Role:    llm.RoleAssistant,
+		Content: response.Text(),
+		Metadata: map[string]any{
+			"feedbacks": feedbacks,
+		},
 	}
-	conversation.Manager.Add(request, message)
+	conversation.Manager.Add(ctx, request, message)
 	return message, nil
+}
+
+func (conversation *Conversation) GetHistory(ctx context.Context) []llm.Message {
+	return conversation.Manager.Get(ctx, conversation.ID)
 }
 
 func (conversation *Conversation) GetStatistics() llm.Statistics {
 	return conversation.Statistics
 }
 
-func (conversation *Conversation) GetHistory() []llm.Message {
-	return conversation.Manager.Get(conversation.ID)
+func (conversation *Conversation) End() {
+	conversation.Client.Conversations[conversation.ID] = nil
 }
-
-func (conversation *Conversation) End() {}

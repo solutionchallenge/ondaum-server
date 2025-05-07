@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/_schema/supported-emotions": {
             "get": {
-                "description": "Get supported emotions",
+                "description": "List supported emotions",
                 "consumes": [
                     "application/json"
                 ],
@@ -27,19 +27,49 @@ const docTemplate = `{
                 "tags": [
                     "schema"
                 ],
-                "summary": "Get supported emotions",
-                "operationId": "GetSupportedEmotions",
+                "summary": "List supported emotions",
+                "operationId": "ListSupportedEmotion",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/schema.GetSupportedEmotionResponse"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/common.Emotion"
+                            }
                         }
                     }
                 }
             }
         },
-        "/chat/ws": {
+        "/_schema/supported-features": {
+            "get": {
+                "description": "List supported features",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "schema"
+                ],
+                "summary": "List supported features",
+                "operationId": "ListSupportedFeature",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/common.Feature"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/_ws/chat": {
             "get": {
                 "security": [
                     {
@@ -61,7 +91,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Websocket Session ID (if not provided, the server will create a new session)",
+                        "description": "Websocket Session ID (optional; if not provided, the server will use the most recent non-archived conversation or create a new one if none exists)",
                         "name": "session_id",
                         "in": "query"
                     }
@@ -75,6 +105,275 @@ const docTemplate = `{
                     },
                     "426": {
                         "description": "Upgrade Required",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/chat/:session_id": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get chat with histories and summary",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Get chat",
+                "operationId": "GetChat",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/chat.ChatWithSummaryAndHistoriesDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/chat/:session_id/archive": {
+            "post": {
+                "description": "Archive a chat to prevent it from being accessed again and allow to summarize it.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Archive a chat",
+                "operationId": "ArchiveChat",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/chat.ArchiveChatHandlerResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/chat/:session_id/summary": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get summary of the chat",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Get summary",
+                "operationId": "GetSummary",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/chat.SummaryDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/chats": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "List chats with summaries",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "List chats",
+                "operationId": "ListChat",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/chat.ChatWithSummaryDTO"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/chats/:session_id/summary": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create or update summary and return the created/updated summary",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Create or update summary",
+                "operationId": "UpsertSummary",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/chat.UpsertSummaryHandlerResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/http.Error"
                         }
@@ -108,7 +407,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Redirect URI (optional, the client's callback URL where Google was redirect with the code)",
+                        "description": "Redirect URI (optional; the client's callback URL where Google was redirect with the code)",
                         "name": "redirect",
                         "in": "query"
                     }
@@ -313,7 +612,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/user.GetSelfHandlerResponse"
+                            "$ref": "#/definitions/user.SimplifiedUserDTO"
                         }
                     },
                     "401": {
@@ -339,6 +638,138 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "chat.ArchiveChatHandlerResponse": {
+            "type": "object",
+            "properties": {
+                "finished": {
+                    "type": "boolean"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "chat.ChatWithSummaryAndHistoriesDTO": {
+            "type": "object",
+            "properties": {
+                "histories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/chat.HistoryDTO"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_archived": {
+                    "type": "boolean"
+                },
+                "is_finished": {
+                    "type": "boolean"
+                },
+                "session_id": {
+                    "type": "string"
+                },
+                "started_date": {
+                    "type": "string"
+                },
+                "summary": {
+                    "$ref": "#/definitions/chat.SummaryDTO"
+                },
+                "user_id": {
+                    "type": "string"
+                },
+                "user_timezone": {
+                    "type": "string"
+                }
+            }
+        },
+        "chat.ChatWithSummaryDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "is_archived": {
+                    "type": "boolean"
+                },
+                "is_finished": {
+                    "type": "boolean"
+                },
+                "session_id": {
+                    "type": "string"
+                },
+                "started_date": {
+                    "type": "string"
+                },
+                "summary": {
+                    "$ref": "#/definitions/chat.SummaryDTO"
+                },
+                "user_id": {
+                    "type": "string"
+                },
+                "user_timezone": {
+                    "type": "string"
+                }
+            }
+        },
+        "chat.HistoryDTO": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "role": {
+                    "type": "string"
+                },
+                "when": {
+                    "type": "string"
+                }
+            }
+        },
+        "chat.SummaryDTO": {
+            "type": "object",
+            "properties": {
+                "emotions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/common.EmotionRate"
+                    }
+                },
+                "keywords": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "text": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "chat.UpsertSummaryHandlerResponse": {
+            "type": "object",
+            "properties": {
+                "created": {
+                    "type": "boolean"
+                },
+                "returning": {
+                    "$ref": "#/definitions/chat.SummaryDTO"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
         "common.Emotion": {
             "type": "string",
             "enum": [
@@ -358,6 +789,34 @@ const docTemplate = `{
                 "EmotionFear",
                 "EmotionDisgust",
                 "EmotionNeutral"
+            ]
+        },
+        "common.EmotionRate": {
+            "type": "object",
+            "properties": {
+                "emotion": {
+                    "$ref": "#/definitions/common.Emotion"
+                },
+                "rate": {
+                    "type": "number"
+                }
+            }
+        },
+        "common.Feature": {
+            "type": "string",
+            "enum": [
+                "escalate_crisis",
+                "suggest_test_phq9",
+                "suggest_test_gad7",
+                "suggest_test_pss",
+                "end_conversation"
+            ],
+            "x-enum-varnames": [
+                "FeatureEscalateCrisis",
+                "FeatureSuggestTestPHQ9",
+                "FeatureSuggestTestGAD7",
+                "FeatureSuggestTestPSS",
+                "FeatureEndConversation"
             ]
         },
         "http.Error": {
@@ -395,18 +854,7 @@ const docTemplate = `{
                 }
             }
         },
-        "schema.GetSupportedEmotionResponse": {
-            "type": "object",
-            "properties": {
-                "supported_emotions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/common.Emotion"
-                    }
-                }
-            }
-        },
-        "user.GetSelfHandlerAdditionPartial": {
+        "user.SimplifiedAdditionDTO": {
             "type": "object",
             "properties": {
                 "concerns": {
@@ -423,7 +871,7 @@ const docTemplate = `{
                 }
             }
         },
-        "user.GetSelfHandlerPrivacyPartial": {
+        "user.SimplifiedPrivacyDTO": {
             "type": "object",
             "properties": {
                 "birthday": {
@@ -434,11 +882,11 @@ const docTemplate = `{
                 }
             }
         },
-        "user.GetSelfHandlerResponse": {
+        "user.SimplifiedUserDTO": {
             "type": "object",
             "properties": {
                 "addition": {
-                    "$ref": "#/definitions/user.GetSelfHandlerAdditionPartial"
+                    "$ref": "#/definitions/user.SimplifiedAdditionDTO"
                 },
                 "email": {
                     "type": "string"
@@ -447,7 +895,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "privacy": {
-                    "$ref": "#/definitions/user.GetSelfHandlerPrivacyPartial"
+                    "$ref": "#/definitions/user.SimplifiedPrivacyDTO"
                 },
                 "username": {
                     "type": "string"

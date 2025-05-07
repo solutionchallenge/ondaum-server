@@ -3,6 +3,7 @@ package user
 import (
 	"time"
 
+	"github.com/solutionchallenge/ondaum-server/pkg/utils"
 	"github.com/uptrace/bun"
 )
 
@@ -14,7 +15,7 @@ const (
 	UserGenderOther  UserGender = "other"
 )
 
-type UserPrivacy struct {
+type Privacy struct {
 	bun.BaseModel `bun:"table:user_privacies,alias:up"`
 
 	UserID    int64      `json:"user_id" db:"user_id" bun:"user_id,pk"`
@@ -24,4 +25,16 @@ type UserPrivacy struct {
 	UpdatedAt time.Time  `json:"updated_at" db:"updated_at" bun:"updated_at,notnull,default:CURRENT_TIMESTAMP"`
 
 	User *User `bun:"rel:belongs-to,join:user_id=id"`
+}
+
+type SimplifiedPrivacyDTO struct {
+	Gender   string `json:"gender"`
+	Birthday string `json:"birthday"`
+}
+
+func (p *Privacy) ToSimplifiedPrivacyDTO() SimplifiedPrivacyDTO {
+	return SimplifiedPrivacyDTO{
+		Gender:   string(p.Gender),
+		Birthday: p.Birthday.Format(utils.TIME_FORMAT_DATE),
+	}
 }

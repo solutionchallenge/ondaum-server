@@ -7,7 +7,7 @@ import (
 	"github.com/uptrace/bun"
 )
 
-type UserOAuth struct {
+type OAuth struct {
 	bun.BaseModel `bun:"table:user_oauths,alias:uo"`
 
 	ID           int64          `json:"id" db:"id" bun:"id,pk,autoincrement"`

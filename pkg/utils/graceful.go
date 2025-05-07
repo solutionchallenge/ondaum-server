@@ -15,7 +15,7 @@ func RunGracefully(signals []os.Signal, runners ...Runner) {
 		go func() {
 			err := runner.RunningFunction()
 			if err != nil {
-				Log(FatalLevel).Err(err).Send("Error running runner")
+				Log(FatalLevel).Err(err).BT().Send("Error running runner")
 			}
 		}()
 	}
@@ -26,7 +26,7 @@ func RunGracefully(signals []os.Signal, runners ...Runner) {
 	for _, runner := range runners {
 		err := runner.ShutdownHandler()
 		if err != nil {
-			Log(FatalLevel).Err(err).Send("Error shutting down runner")
+			Log(FatalLevel).Err(err).BT().Send("Error shutting down runner")
 		}
 	}
 }

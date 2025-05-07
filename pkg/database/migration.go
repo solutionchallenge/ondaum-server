@@ -85,7 +85,7 @@ func GetMigrationHistories(ctx context.Context, db *sql.DB) ([]MigrationHistory,
 
 func Migrate(db *sql.DB, migrations ...Migration) error {
 	ctx := context.Background()
-	utils.Log(utils.InfoLevel).Ctx(ctx).Send("Migrating database...")
+	utils.Log(utils.InfoLevel).Ctx(ctx).BT().Send("Migrating database...")
 
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
@@ -103,9 +103,9 @@ func Migrate(db *sql.DB, migrations ...Migration) error {
 	}
 
 	if len(histories) == 0 {
-		utils.Log(utils.InfoLevel).Ctx(ctx).Send("No migration history found. Applying all migrations...")
+		utils.Log(utils.InfoLevel).Ctx(ctx).BT().Send("No migration history found. Applying all migrations...")
 		for _, migration := range migrations {
-			utils.Log(utils.InfoLevel).Ctx(ctx).Send("Migrating %v...", migration.Name)
+			utils.Log(utils.InfoLevel).Ctx(ctx).BT().Send("Migrating %v...", migration.Name)
 			if _, err := tx.ExecContext(ctx, migration.Query); err != nil {
 				return utils.WrapError(err, "failed to execute migration query for %s", migration.Name)
 			}
@@ -125,10 +125,10 @@ func Migrate(db *sql.DB, migrations ...Migration) error {
 
 		lastAppliedIndex := len(histories)
 		if lastAppliedIndex < len(migrations) {
-			utils.Log(utils.InfoLevel).Ctx(ctx).Send("Applying incremental migrations from %s...", migrations[lastAppliedIndex].Name)
+			utils.Log(utils.InfoLevel).Ctx(ctx).BT().Send("Applying incremental migrations from %s...", migrations[lastAppliedIndex].Name)
 			for i := lastAppliedIndex; i < len(migrations); i++ {
 				migration := migrations[i]
-				utils.Log(utils.InfoLevel).Ctx(ctx).Send("Migrating %v...", migration.Name)
+				utils.Log(utils.InfoLevel).Ctx(ctx).BT().Send("Migrating %v...", migration.Name)
 				if _, err := tx.ExecContext(ctx, migration.Query); err != nil {
 					return utils.WrapError(err, "failed to execute migration query for %s", migration.Name)
 				}
@@ -137,7 +137,7 @@ func Migrate(db *sql.DB, migrations ...Migration) error {
 				}
 			}
 		} else {
-			utils.Log(utils.InfoLevel).Ctx(ctx).Send("Database is up to date")
+			utils.Log(utils.InfoLevel).Ctx(ctx).BT().Send("Database is up to date")
 		}
 	}
 
