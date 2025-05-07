@@ -30,28 +30,14 @@ func NewJWTAuthMiddleware(generator *jwt.Generator) MiddlewareFunc {
 			return c.Next()
 		}
 
-		var claims *jwt.Claims
-		switch tokenType {
-		case jwt.AccessTokenType:
-			claims, err = generator.UnpackToken(tokenString)
-			if err != nil {
-				utils.Log(utils.InfoLevel).Ctx(c.UserContext()).Err(err).RID(rid).BT().Send("Failed to unpack access token")
-				return c.Next()
-			}
-		case jwt.RefreshTokenType:
-			tokenPair, err := generator.RefreshTokenPair(tokenString)
-			if err != nil {
-				utils.Log(utils.InfoLevel).Ctx(c.UserContext()).Err(err).RID(rid).BT().Send("Failed to refresh token pair")
-				return c.Next()
-			}
-			tokenString = tokenPair.AccessToken
-			claims, err = generator.UnpackToken(tokenString)
-			if err != nil {
-				utils.Log(utils.WarnLevel).Ctx(c.UserContext()).Err(err).RID(rid).BT().Send("Failed to unpack access token")
-				return c.Next()
-			}
-		default:
+		if tokenType != jwt.AccessTokenType {
 			utils.Log(utils.WarnLevel).Ctx(c.UserContext()).RID(rid).BT().Send("Invalid token type")
+			return c.Next()
+		}
+
+		claims, err := generator.UnpackToken(tokenString)
+		if err != nil {
+			utils.Log(utils.InfoLevel).Ctx(c.UserContext()).Err(err).RID(rid).BT().Send("Failed to unpack access token")
 			return c.Next()
 		}
 

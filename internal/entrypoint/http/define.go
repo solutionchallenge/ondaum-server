@@ -3,6 +3,7 @@ package http
 import (
 	"github.com/solutionchallenge/ondaum-server/internal/dependency"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/future"
+	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/auth"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/chat"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/debug"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/diagnosis"
@@ -23,6 +24,7 @@ var PredefinedRoutes = []fx.Option{
 	dependency.HttpRoute("GET", "/_debug/oauth", debug.NewOAuthCallbackHandler),
 	dependency.HttpRoute("GET", "/_debug/users", debug.NewListUserHandler),
 	dependency.HttpRoute("GET", "/_debug/chats", debug.NewListChatHandler),
+	dependency.HttpRoute("POST", "/auth/refresh", auth.NewRefreshAccessTokenHandler),
 	dependency.HttpRoute("GET", "/user/self", user.NewGetSelfHandler),
 	dependency.HttpRoute("PUT", "/user/privacy", user.NewUpsertUserPrivacyHandler),
 	dependency.HttpRoute("PUT", "/user/addition", user.NewUpsertUserAdditionHandler),
