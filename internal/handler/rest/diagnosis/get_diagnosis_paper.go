@@ -24,16 +24,17 @@ func NewGetDiagnosisPaperHandler(deps GetDiagnosisPaperHandlerDependencies) (*Ge
 // @Description Get diagnosis paper as JSON format
 // @Accept json
 // @Produce json
-// @Param diagnosis_id path string true "Diagnosis ID"
+// @Param paper_id path string true "Diagnosis Paper ID"
 // @Success 200 {object} common.DiagnosisPaper
 // @Failure 404 {object} http.Error
 // @Failure 500 {object} http.Error
-// @Router /diagnosis/:diagnosis_id [get]
+// @Router /diagnoses/papers/:paper_id [get]
+// @Security BearerAuth
 func (h *GetDiagnosisPaperHandler) Handle(c *fiber.Ctx) error {
-	identifier := c.Params("diagnosis_id")
+	identifier := c.Params("paper_id")
 	switch common.Diagnosis(identifier) {
 	case common.DiagnosisPHQ9:
-		diagnosisPaper, err := common.ReadDiagnosisPaperFrom("resource/diagnosis/phq-9-en.json")
+		diagnosisPaper, err := common.ReadDiagnosisPaperFrom(common.DiagnosisFilepaths[common.DiagnosisPHQ9])
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(
 				http.NewError(c.UserContext(), err, "Failed to read diagnosis paper"),
@@ -41,7 +42,7 @@ func (h *GetDiagnosisPaperHandler) Handle(c *fiber.Ctx) error {
 		}
 		return c.JSON(diagnosisPaper)
 	case common.DiagnosisGAD7:
-		diagnosisPaper, err := common.ReadDiagnosisPaperFrom("resource/diagnosis/gad-7-en.json")
+		diagnosisPaper, err := common.ReadDiagnosisPaperFrom(common.DiagnosisFilepaths[common.DiagnosisGAD7])
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(
 				http.NewError(c.UserContext(), err, "Failed to read diagnosis paper"),
@@ -49,7 +50,7 @@ func (h *GetDiagnosisPaperHandler) Handle(c *fiber.Ctx) error {
 		}
 		return c.JSON(diagnosisPaper)
 	case common.DiagnosisPSS:
-		diagnosisPaper, err := common.ReadDiagnosisPaperFrom("resource/diagnosis/pss-en.json")
+		diagnosisPaper, err := common.ReadDiagnosisPaperFrom(common.DiagnosisFilepaths[common.DiagnosisPSS])
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(
 				http.NewError(c.UserContext(), err, "Failed to read diagnosis paper"),

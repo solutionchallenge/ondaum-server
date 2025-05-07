@@ -17,6 +17,18 @@ const (
 	DiagnosisPSS  Diagnosis = "pss"
 )
 
+var DiagnosisDescriptions = map[Diagnosis]string{
+	DiagnosisPHQ9: "Patient Health Questionnaire-9",
+	DiagnosisGAD7: "Generalized Anxiety Disorder-7",
+	DiagnosisPSS:  "Perceived Stress Scale",
+}
+
+var DiagnosisFilepaths = map[Diagnosis]string{
+	DiagnosisPHQ9: "resource/diagnosis/phq-9-en.json",
+	DiagnosisGAD7: "resource/diagnosis/gad-7-en.json",
+	DiagnosisPSS:  "resource/diagnosis/pss-en.json",
+}
+
 var SupportedDiagnoses = DiagnosisList{
 	DiagnosisPHQ9,
 	DiagnosisGAD7,

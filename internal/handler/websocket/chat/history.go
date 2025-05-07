@@ -71,7 +71,7 @@ func (h *ChatHistoryManager) Get(ctx context.Context, conversationID string) []l
 		Relation("Summary").
 		Where("session_id = ?", conversationID).
 		Order("created_at ASC").
-		Scan(context.Background())
+		Scan(ctx)
 	if err != nil {
 		utils.Log(utils.WarnLevel).CID(conversationID).Err(err).BT().Send("Failed to get chat history")
 		return h.memoryCache

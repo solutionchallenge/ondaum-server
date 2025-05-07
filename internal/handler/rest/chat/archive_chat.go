@@ -1,7 +1,6 @@
 package chat
 
 import (
-	"context"
 	"errors"
 
 	"github.com/gofiber/fiber/v2"
@@ -41,7 +40,7 @@ func NewArchiveChatHandler(deps ArchiveChatHandlerDependencies) (*ArchiveChatHan
 // @Failure 401 {object} http.Error
 // @Failure 404 {object} http.Error
 // @Failure 500 {object} http.Error
-// @Router /chat/:session_id/archive [post]
+// @Router /chats/:session_id/archive [post]
 func (h *ArchiveChatHandler) Handle(c *fiber.Ctx) error {
 	userID, err := http.GetUserID(c)
 	if err != nil {
@@ -50,7 +49,7 @@ func (h *ArchiveChatHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 	user := &user.User{ID: userID}
-	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(context.Background()); err != nil {
+	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(c.UserContext()); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
 			http.NewError(c.UserContext(), err, "User not found"),
 		)
@@ -63,7 +62,7 @@ func (h *ArchiveChatHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 
-	tx, err := h.deps.DB.BeginTx(context.Background(), nil)
+	tx, err := h.deps.DB.BeginTx(c.UserContext(), nil)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
 			http.NewError(c.UserContext(), err, "Failed to begin transaction"),
@@ -76,7 +75,7 @@ func (h *ArchiveChatHandler) Handle(c *fiber.Ctx) error {
 		Model(chat).
 		Where("session_id = ?", sessionID).
 		Where("user_id = ?", userID).
-		Scan(context.Background()); err != nil {
+		Scan(c.UserContext()); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
 			http.NewError(c.UserContext(), err, "Chat not found"),
 		)
@@ -91,7 +90,7 @@ func (h *ArchiveChatHandler) Handle(c *fiber.Ctx) error {
 	if !wasFinished {
 		mutation = mutation.Set("finished_at = CURRENT_TIMESTAMP")
 	}
-	if _, err := mutation.Exec(context.Background()); err != nil {
+	if _, err := mutation.Exec(c.UserContext()); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
 			http.NewError(c.UserContext(), err, "Failed to archive chat"),
 		)

@@ -1,7 +1,6 @@
 package chat
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 
@@ -57,7 +56,7 @@ func (h *UpsertChatSummaryHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 	user := &user.User{ID: userID}
-	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(context.Background()); err != nil {
+	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(c.UserContext()); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
 			http.NewError(c.UserContext(), err, "User not found"),
 		)
@@ -77,7 +76,7 @@ func (h *UpsertChatSummaryHandler) Handle(c *fiber.Ctx) error {
 		Where("session_id = ?", sessionID).
 		Where("user_id = ?", userID).
 		Order("created_at ASC").
-		Scan(context.Background())
+		Scan(c.UserContext())
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
 			http.NewError(c.UserContext(), err, "Chat not found"),
@@ -146,7 +145,7 @@ func (h *UpsertChatSummaryHandler) Handle(c *fiber.Ctx) error {
 		Set("keywords = ?", summary.Keywords).
 		Set("emotions = ?", emotions.ToString()).
 		Set("updated_at = CURRENT_TIMESTAMP").
-		Exec(context.Background())
+		Exec(c.UserContext())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
 			http.NewError(c.UserContext(), err, "Failed to insert summary"),
@@ -162,5 +161,5 @@ func (h *UpsertChatSummaryHandler) Handle(c *fiber.Ctx) error {
 }
 
 func (h *UpsertChatSummaryHandler) Identify() string {
-	return "summary-chat"
+	return "upsert-chat-summary"
 }

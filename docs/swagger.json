@@ -9,6 +9,33 @@
     "host": "ondaum.revimal.me",
     "basePath": "/api/v1",
     "paths": {
+        "/_schema/supported-diagnoses": {
+            "get": {
+                "description": "List supported diagnoses",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "schema"
+                ],
+                "summary": "List supported diagnoses",
+                "operationId": "ListSupportedDiagnosis",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/common.Diagnosis"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/_schema/supported-emotions": {
             "get": {
                 "description": "List supported emotions",
@@ -63,33 +90,6 @@
                 }
             }
         },
-        "/_schema/supported-diagnoses": {
-            "get": {
-                "description": "List supported tests",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "schema"
-                ],
-                "summary": "List supported tests",
-                "operationId": "ListSupportedTest",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/common.Diagnosis"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/_ws/chat": {
             "get": {
                 "security": [
@@ -126,169 +126,6 @@
                     },
                     "426": {
                         "description": "Upgrade Required",
-                        "schema": {
-                            "$ref": "#/definitions/http.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/chat/:session_id": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get chat with histories and summary",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "chat"
-                ],
-                "summary": "Get chat",
-                "operationId": "GetChat",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Session ID",
-                        "name": "session_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/chat.ChatWithSummaryAndHistoriesDTO"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/http.Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/http.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/http.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/chat/:session_id/archive": {
-            "post": {
-                "description": "Archive a chat to prevent it from being accessed again and allow to summarize it.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "chat"
-                ],
-                "summary": "Archive a chat",
-                "operationId": "ArchiveChat",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Session ID",
-                        "name": "session_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/chat.ArchiveChatHandlerResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/http.Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/http.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/http.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/chat/:session_id/summary": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get summary of the chat",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "chat"
-                ],
-                "summary": "Get summary",
-                "operationId": "GetSummary",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Session ID",
-                        "name": "session_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/chat.SummaryDTO"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/http.Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/http.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/http.Error"
                         }
@@ -346,7 +183,168 @@
                 }
             }
         },
+        "/chats/:session_id": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get chat with histories and summary",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Get chat",
+                "operationId": "GetChat",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/chat.ChatWithSummaryAndHistoriesDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/chats/:session_id/archive": {
+            "post": {
+                "description": "Archive a chat to prevent it from being accessed again and allow to summarize it.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Archive a chat",
+                "operationId": "ArchiveChat",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/chat.ArchiveChatHandlerResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/chats/:session_id/summary": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get summary of the chat",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Get summary",
+                "operationId": "GetSummary",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/chat.SummaryDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -402,17 +400,66 @@
                 }
             }
         },
-        "/diagnosis/:diagnosis_id": {
+        "/diagnoses": {
             "get": {
-                "description": "Get diagnosis paper as JSON format",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "List diagnosis result",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Get diagnosis paper",
-                "operationId": "GetDiagnosisPaper",
+                "summary": "List diagnosis result",
+                "operationId": "ListDiagnosisResult",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/diagnosis.DiagnosisDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/diagnoses/:diagnosis_id": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get diagnosis result",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get diagnosis result",
+                "operationId": "GetDiagnosisResult",
                 "parameters": [
                     {
                         "type": "string",
@@ -426,7 +473,139 @@
                     "200": {
                         "description": "OK",
                         "schema": {
+                            "$ref": "#/definitions/diagnosis.DiagnosisDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/diagnoses/papers": {
+            "get": {
+                "description": "List diagnosis papers",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "List diagnosis papers",
+                "operationId": "ListDiagnosisPaper",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/diagnosis.ListDiagnosisPaperHandlerResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/diagnoses/papers/:paper_id": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get diagnosis paper as JSON format",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get diagnosis paper",
+                "operationId": "GetDiagnosisPaper",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Diagnosis Paper ID",
+                        "name": "paper_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
                             "$ref": "#/definitions/common.DiagnosisPaper"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/diagnoses/report": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Report diagnosis result",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Report diagnosis result",
+                "operationId": "ReportDiagnosisResult",
+                "parameters": [
+                    {
+                        "description": "Diagnosis result",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/diagnosis.DiagnosisDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/diagnosis.ReportDiagnosisResultHandlerResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
                         }
                     },
                     "404": {
@@ -833,55 +1012,6 @@
                 }
             }
         },
-        "common.Emotion": {
-            "type": "string",
-            "enum": [
-                "joy",
-                "sadness",
-                "anger",
-                "surprise",
-                "fear",
-                "disgust",
-                "neutral"
-            ],
-            "x-enum-varnames": [
-                "EmotionJoy",
-                "EmotionSadness",
-                "EmotionAnger",
-                "EmotionSurprise",
-                "EmotionFear",
-                "EmotionDisgust",
-                "EmotionNeutral"
-            ]
-        },
-        "common.EmotionRate": {
-            "type": "object",
-            "properties": {
-                "emotion": {
-                    "$ref": "#/definitions/common.Emotion"
-                },
-                "rate": {
-                    "type": "number"
-                }
-            }
-        },
-        "common.Feature": {
-            "type": "string",
-            "enum": [
-                "escalate_crisis",
-                "suggest_test_phq9",
-                "suggest_test_gad7",
-                "suggest_test_pss",
-                "end_conversation"
-            ],
-            "x-enum-varnames": [
-                "FeatureEscalateCrisis",
-                "FeatureSuggestTestPHQ9",
-                "FeatureSuggestTestGAD7",
-                "FeatureSuggestTestPSS",
-                "FeatureEndConversation"
-            ]
-        },
         "common.Diagnosis": {
             "type": "string",
             "enum": [
@@ -977,6 +1107,100 @@
                 },
                 "min": {
                     "type": "integer"
+                }
+            }
+        },
+        "common.Emotion": {
+            "type": "string",
+            "enum": [
+                "joy",
+                "sadness",
+                "anger",
+                "surprise",
+                "fear",
+                "disgust",
+                "neutral"
+            ],
+            "x-enum-varnames": [
+                "EmotionJoy",
+                "EmotionSadness",
+                "EmotionAnger",
+                "EmotionSurprise",
+                "EmotionFear",
+                "EmotionDisgust",
+                "EmotionNeutral"
+            ]
+        },
+        "common.EmotionRate": {
+            "type": "object",
+            "properties": {
+                "emotion": {
+                    "$ref": "#/definitions/common.Emotion"
+                },
+                "rate": {
+                    "type": "number"
+                }
+            }
+        },
+        "common.Feature": {
+            "type": "string",
+            "enum": [
+                "escalate_crisis",
+                "suggest_test_phq9",
+                "suggest_test_gad7",
+                "suggest_test_pss",
+                "end_conversation"
+            ],
+            "x-enum-varnames": [
+                "FeatureEscalateCrisis",
+                "FeatureSuggestTestPHQ9",
+                "FeatureSuggestTestGAD7",
+                "FeatureSuggestTestPSS",
+                "FeatureEndConversation"
+            ]
+        },
+        "diagnosis.DiagnosisDTO": {
+            "type": "object",
+            "properties": {
+                "diagnosis": {
+                    "$ref": "#/definitions/common.Diagnosis"
+                },
+                "result_critical": {
+                    "type": "boolean"
+                },
+                "result_description": {
+                    "type": "string"
+                },
+                "result_name": {
+                    "type": "string"
+                },
+                "result_score": {
+                    "type": "integer"
+                },
+                "total_score": {
+                    "type": "integer"
+                }
+            }
+        },
+        "diagnosis.ListDiagnosisPaperHandlerResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "$ref": "#/definitions/common.Diagnosis"
+                }
+            }
+        },
+        "diagnosis.ReportDiagnosisResultHandlerResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "success": {
+                    "type": "boolean"
                 }
             }
         },

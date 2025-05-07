@@ -1,7 +1,6 @@
 package chat
 
 import (
-	"context"
 	"errors"
 
 	"github.com/gofiber/fiber/v2"
@@ -35,7 +34,7 @@ func NewGetChatHandler(deps GetChatHandlerDependencies) (*GetChatHandler, error)
 // @Failure 401 {object} http.Error
 // @Failure 404 {object} http.Error
 // @Failure 500 {object} http.Error
-// @Router /chat/:session_id [get]
+// @Router /chats/:session_id [get]
 // @Security BearerAuth
 func (h *GetChatHandler) Handle(c *fiber.Ctx) error {
 	userID, err := http.GetUserID(c)
@@ -45,7 +44,7 @@ func (h *GetChatHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 	user := &user.User{ID: userID}
-	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(context.Background()); err != nil {
+	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(c.UserContext()); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
 			http.NewError(c.UserContext(), err, "User not found"),
 		)
@@ -68,7 +67,7 @@ func (h *GetChatHandler) Handle(c *fiber.Ctx) error {
 		Where("session_id = ?", sessionID).
 		Where("user_id = ?", userID).
 		Order("created_at ASC").
-		Scan(context.Background())
+		Scan(c.UserContext())
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
 			http.NewError(c.UserContext(), err, "Chat not found"),

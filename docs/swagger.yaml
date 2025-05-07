@@ -86,45 +86,6 @@ definitions:
       success:
         type: boolean
     type: object
-  common.Emotion:
-    enum:
-    - joy
-    - sadness
-    - anger
-    - surprise
-    - fear
-    - disgust
-    - neutral
-    type: string
-    x-enum-varnames:
-    - EmotionJoy
-    - EmotionSadness
-    - EmotionAnger
-    - EmotionSurprise
-    - EmotionFear
-    - EmotionDisgust
-    - EmotionNeutral
-  common.EmotionRate:
-    properties:
-      emotion:
-        $ref: '#/definitions/common.Emotion'
-      rate:
-        type: number
-    type: object
-  common.Feature:
-    enum:
-    - escalate_crisis
-    - suggest_test_phq9
-    - suggest_test_gad7
-    - suggest_test_pss
-    - end_conversation
-    type: string
-    x-enum-varnames:
-    - FeatureEscalateCrisis
-    - FeatureSuggestTestPHQ9
-    - FeatureSuggestTestGAD7
-    - FeatureSuggestTestPSS
-    - FeatureEndConversation
   common.Diagnosis:
     enum:
     - phq-9
@@ -189,6 +150,74 @@ definitions:
         type: integer
       min:
         type: integer
+    type: object
+  common.Emotion:
+    enum:
+    - joy
+    - sadness
+    - anger
+    - surprise
+    - fear
+    - disgust
+    - neutral
+    type: string
+    x-enum-varnames:
+    - EmotionJoy
+    - EmotionSadness
+    - EmotionAnger
+    - EmotionSurprise
+    - EmotionFear
+    - EmotionDisgust
+    - EmotionNeutral
+  common.EmotionRate:
+    properties:
+      emotion:
+        $ref: '#/definitions/common.Emotion'
+      rate:
+        type: number
+    type: object
+  common.Feature:
+    enum:
+    - escalate_crisis
+    - suggest_test_phq9
+    - suggest_test_gad7
+    - suggest_test_pss
+    - end_conversation
+    type: string
+    x-enum-varnames:
+    - FeatureEscalateCrisis
+    - FeatureSuggestTestPHQ9
+    - FeatureSuggestTestGAD7
+    - FeatureSuggestTestPSS
+    - FeatureEndConversation
+  diagnosis.DiagnosisDTO:
+    properties:
+      diagnosis:
+        $ref: '#/definitions/common.Diagnosis'
+      result_critical:
+        type: boolean
+      result_description:
+        type: string
+      result_name:
+        type: string
+      result_score:
+        type: integer
+      total_score:
+        type: integer
+    type: object
+  diagnosis.ListDiagnosisPaperHandlerResponse:
+    properties:
+      description:
+        type: string
+      id:
+        $ref: '#/definitions/common.Diagnosis'
+    type: object
+  diagnosis.ReportDiagnosisResultHandlerResponse:
+    properties:
+      id:
+        type: integer
+      success:
+        type: boolean
     type: object
   http.Error:
     properties:
@@ -304,6 +333,24 @@ info:
   title: Ondaum API
   version: "1.0"
 paths:
+  /_schema/supported-diagnoses:
+    get:
+      consumes:
+      - application/json
+      description: List supported diagnoses
+      operationId: ListSupportedDiagnosis
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/common.Diagnosis'
+            type: array
+      summary: List supported diagnoses
+      tags:
+      - schema
   /_schema/supported-emotions:
     get:
       consumes:
@@ -340,24 +387,6 @@ paths:
       summary: List supported features
       tags:
       - schema
-  /_schema/supported-diagnoses:
-    get:
-      consumes:
-      - application/json
-      description: List supported tests
-      operationId: ListSupportedTest
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/common.Diagnosis'
-            type: array
-      summary: List supported tests
-      tags:
-      - schema
   /_ws/chat:
     get:
       consumes:
@@ -387,7 +416,39 @@ paths:
       summary: Connect Chat Websocket
       tags:
       - chat
-  /chat/:session_id:
+  /chats:
+    get:
+      consumes:
+      - application/json
+      description: List chats with summaries
+      operationId: ListChat
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/chat.ChatWithSummaryDTO'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Error'
+      security:
+      - BearerAuth: []
+      summary: List chats
+      tags:
+      - chat
+  /chats/:session_id:
     get:
       consumes:
       - application/json
@@ -423,7 +484,7 @@ paths:
       summary: Get chat
       tags:
       - chat
-  /chat/:session_id/archive:
+  /chats/:session_id/archive:
     post:
       consumes:
       - application/json
@@ -458,7 +519,7 @@ paths:
       summary: Archive a chat
       tags:
       - chat
-  /chat/:session_id/summary:
+  /chats/:session_id/summary:
     get:
       consumes:
       - application/json
@@ -494,39 +555,6 @@ paths:
       summary: Get summary
       tags:
       - chat
-  /chats:
-    get:
-      consumes:
-      - application/json
-      description: List chats with summaries
-      operationId: ListChat
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/chat.ChatWithSummaryDTO'
-            type: array
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/http.Error'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/http.Error'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/http.Error'
-      security:
-      - BearerAuth: []
-      summary: List chats
-      tags:
-      - chat
-  /chats/:session_id/summary:
     post:
       consumes:
       - application/json
@@ -563,16 +591,94 @@ paths:
       summary: Create or update chat summary
       tags:
       - chat
-  /diagnosis/:diagnosis_id:
+  /diagnoses:
+    get:
+      consumes:
+      - application/json
+      description: List diagnosis result
+      operationId: ListDiagnosisResult
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/diagnosis.DiagnosisDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Error'
+      security:
+      - BearerAuth: []
+      summary: List diagnosis result
+  /diagnoses/:diagnosis_id:
+    get:
+      consumes:
+      - application/json
+      description: Get diagnosis result
+      operationId: GetDiagnosisResult
+      parameters:
+      - description: Diagnosis ID
+        in: path
+        name: diagnosis_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/diagnosis.DiagnosisDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Error'
+      security:
+      - BearerAuth: []
+      summary: Get diagnosis result
+  /diagnoses/papers:
+    get:
+      consumes:
+      - application/json
+      description: List diagnosis papers
+      operationId: ListDiagnosisPaper
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/diagnosis.ListDiagnosisPaperHandlerResponse'
+            type: array
+      summary: List diagnosis papers
+  /diagnoses/papers/:paper_id:
     get:
       consumes:
       - application/json
       description: Get diagnosis paper as JSON format
       operationId: GetDiagnosisPaper
       parameters:
-      - description: Diagnosis ID
+      - description: Diagnosis Paper ID
         in: path
-        name: diagnosis_id
+        name: paper_id
         required: true
         type: string
       produces:
@@ -590,7 +696,44 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/http.Error'
+      security:
+      - BearerAuth: []
       summary: Get diagnosis paper
+  /diagnoses/report:
+    post:
+      consumes:
+      - application/json
+      description: Report diagnosis result
+      operationId: ReportDiagnosisResult
+      parameters:
+      - description: Diagnosis result
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/diagnosis.DiagnosisDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/diagnosis.ReportDiagnosisResultHandlerResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Error'
+      security:
+      - BearerAuth: []
+      summary: Report diagnosis result
   /oauth/google/auth:
     post:
       consumes:
