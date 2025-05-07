@@ -62,11 +62,26 @@ func (h *ChatHistoryManager) Add(ctx context.Context, messages ...llm.Message) {
 }
 
 func (h *ChatHistoryManager) Get(ctx context.Context, conversationID string) []llm.Message {
-	histories := []llm.Message{}
-	err := h.db.NewSelect().Model(&domain.History{}).Where("session_id = ?", conversationID).Scan(ctx, &histories)
+	chat := &domain.Chat{}
+	err := h.db.NewSelect().
+		Model(chat).
+		Relation("Histories", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.Order("inserted_at ASC")
+		}).
+		Relation("Summary").
+		Where("session_id = ?", conversationID).
+		Order("created_at ASC").
+		Scan(context.Background())
 	if err != nil {
 		utils.Log(utils.WarnLevel).CID(conversationID).Err(err).BT().Send("Failed to get chat history")
 		return h.memoryCache
 	}
-	return histories
+	utils.Log(utils.DebugLevel).CID(conversationID).BT().Send("Found %d histories", len(chat.Histories))
+	return utils.Map(chat.Histories, func(history *domain.History) llm.Message {
+		return llm.Message{
+			ID:      history.MessageID,
+			Role:    llm.Role(history.Role),
+			Content: history.Content,
+		}
+	})
 }
