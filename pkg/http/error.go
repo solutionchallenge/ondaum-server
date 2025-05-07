@@ -24,7 +24,7 @@ func (e *Error) Error() string {
 
 func NewError(ctx context.Context, cause error, fmtstr string, args ...interface{}) *Error {
 	requestID := utils.GetRequestID(ctx)
-	utils.Log(utils.ErrorLevel).Ctx(ctx).Err(cause).RID(requestID).Send(fmtstr, args...)
+	utils.Log(utils.ErrorLevel).Ctx(ctx).Err(cause).RID(requestID).BT(1).Send(fmtstr, args...)
 	return &Error{
 		Cause:   cause,
 		Message: fmt.Sprintf(fmtstr, args...),

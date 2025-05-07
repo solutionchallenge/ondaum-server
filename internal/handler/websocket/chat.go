@@ -64,7 +64,7 @@ func (h *ChatHandler) Identify() string {
 // @Security     BearerAuth
 func (h *ChatHandler) HandleMessage(c *fiberws.Conn, request wspkg.MessageWrapper) (wspkg.ResponseWrapper, bool, error) {
 	if !request.Authorized || !h.checkAuthorization(request.UserID) {
-		utils.Log(utils.InfoLevel).CID(request.SessionID).RID(request.MessageID).Send("Unauthorized")
+		utils.Log(utils.InfoLevel).CID(request.SessionID).RID(request.MessageID).BT().Send("Unauthorized")
 		return wspkg.BuildRejectResponse(request), false, nil
 	}
 
@@ -77,12 +77,12 @@ func (h *ChatHandler) HandleMessage(c *fiberws.Conn, request wspkg.MessageWrappe
 			Where("session_id = ? AND user_id = ?", request.SessionID, request.UserID).
 			Scan(ctx)
 		if err != nil {
-			utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).Send("Failed to query chat")
+			utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).BT().Send("Failed to query chat")
 			return err
 		}
 
 		if !chat.ArchivedAt.IsZero() {
-			utils.Log(utils.InfoLevel).CID(request.SessionID).RID(request.MessageID).Send("Cannot reactivate archived chat")
+			utils.Log(utils.InfoLevel).CID(request.SessionID).RID(request.MessageID).BT().Send("Cannot reactivate archived chat")
 			response = wspkg.BuildRejectResponse(request)
 			return nil
 		}
@@ -94,27 +94,27 @@ func (h *ChatHandler) HandleMessage(c *fiberws.Conn, request wspkg.MessageWrappe
 				Where("id = ?", chat.ID).
 				Exec(ctx)
 			if err != nil {
-				utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).Send("Failed to reactivate chat")
+				utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).BT().Send("Failed to reactivate chat")
 				return err
 			}
 		}
 		return nil
 	})
 	if err != nil {
-		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).Send("Failed to run transaction")
+		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).BT().Send("Failed to run transaction")
 		return wspkg.ResponseWrapper{}, false, err
 	}
 
 	_, err = h.upsertChattingEndFutureJob(context.Background(), request.SessionID, request.UserID, ChatAutoFinishAfter)
 	if err != nil {
-		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).Send("Failed to upsert future job")
+		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).BT().Send("Failed to upsert future job")
 		return wspkg.ResponseWrapper{}, false, err
 	}
 
 	manager := newChatHistoryManager(h.deps.DB, request.SessionID)
 	conversation, err := h.deps.LLM.StartConversation(context.Background(), manager, "interactive_chat", request.SessionID)
 	if err != nil {
-		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).Send("Failed to start conversation")
+		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).BT().Send("Failed to start conversation")
 		return wspkg.ResponseWrapper{}, false, err
 	}
 	// TODO: apply user addition to the conversation
@@ -125,12 +125,12 @@ func (h *ChatHandler) HandleMessage(c *fiberws.Conn, request wspkg.MessageWrappe
 		Content:        request.Payload.(string),
 	})
 	if err != nil {
-		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).Send("Failed to request to conversation")
+		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).BT().Send("Failed to request to conversation")
 		return wspkg.ResponseWrapper{}, false, err
 	}
 	marshaled, _ := json.Marshal(llmResponse.Metadata)
-	utils.Log(utils.DebugLevel).CID(request.SessionID).RID(request.MessageID).Send("Message ID: %v", llmResponse.ID)
-	utils.Log(utils.DebugLevel).CID(request.SessionID).RID(request.MessageID).Send("Message Metadata: %v", string(marshaled))
+	utils.Log(utils.DebugLevel).CID(request.SessionID).RID(request.MessageID).BT().Send("Message ID: %v", llmResponse.ID)
+	utils.Log(utils.DebugLevel).CID(request.SessionID).RID(request.MessageID).BT().Send("Message Metadata: %v", string(marshaled))
 
 	response = wspkg.BuildResponseFrom(
 		request, llmResponse.ID,
@@ -142,7 +142,7 @@ func (h *ChatHandler) HandleMessage(c *fiberws.Conn, request wspkg.MessageWrappe
 
 func (h *ChatHandler) HandleConnect(c *fiberws.Conn, request wspkg.ConnectWrapper) (wspkg.ResponseWrapper, error) {
 	if !request.Authorized || !h.checkAuthorization(request.UserID) {
-		utils.Log(utils.InfoLevel).CID(request.SessionID).Send("Unauthorized")
+		utils.Log(utils.InfoLevel).CID(request.SessionID).BT().Send("Unauthorized")
 		return wspkg.BuildRejectResponse(request), nil
 	}
 
@@ -152,7 +152,7 @@ func (h *ChatHandler) HandleConnect(c *fiberws.Conn, request wspkg.ConnectWrappe
 		Where("user_id = ? AND session_id = ?", request.UserID, request.SessionID).
 		Scan(context.Background())
 	if err != nil && err != sql.ErrNoRows {
-		utils.Log(utils.ErrorLevel).CID(request.SessionID).Err(err).Send("Failed to query chat")
+		utils.Log(utils.ErrorLevel).CID(request.SessionID).Err(err).BT().Send("Failed to query chat")
 		return wspkg.ResponseWrapper{}, err
 	}
 
@@ -165,7 +165,7 @@ func (h *ChatHandler) HandleConnect(c *fiberws.Conn, request wspkg.ConnectWrappe
 		}
 		_, err = h.deps.DB.NewInsert().Model(chat).Exec(context.Background())
 		if err != nil {
-			utils.Log(utils.ErrorLevel).CID(request.SessionID).Err(err).Send("Failed to create chat")
+			utils.Log(utils.ErrorLevel).CID(request.SessionID).Err(err).BT().Send("Failed to create chat")
 			return wspkg.ResponseWrapper{}, err
 		}
 		return wspkg.BuildResponseFrom(
@@ -197,7 +197,7 @@ func (h *ChatHandler) HandleClose(_ *fiberws.Conn, _ wspkg.CloseWrapper) {}
 
 func (h *ChatHandler) HandlePing(c *fiberws.Conn, request wspkg.PingWrapper) (wspkg.ResponseWrapper, bool, error) {
 	if !request.Authorized || !h.checkAuthorization(request.UserID) {
-		utils.Log(utils.InfoLevel).CID(request.SessionID).Send("Unauthorized")
+		utils.Log(utils.InfoLevel).CID(request.SessionID).BT().Send("Unauthorized")
 		return wspkg.BuildRejectResponse(request), false, nil
 	}
 
@@ -207,7 +207,7 @@ func (h *ChatHandler) HandlePing(c *fiberws.Conn, request wspkg.PingWrapper) (ws
 		Where("user_id = ? AND session_id = ?", request.UserID, request.SessionID).
 		Scan(context.Background())
 	if err != nil {
-		utils.Log(utils.ErrorLevel).CID(request.SessionID).Err(err).Send("Failed to query chat")
+		utils.Log(utils.ErrorLevel).CID(request.SessionID).Err(err).BT().Send("Failed to query chat")
 		return wspkg.ResponseWrapper{}, false, err
 	}
 
@@ -288,7 +288,7 @@ func (h *chatHistoryManager) Add(ctx context.Context, messages ...llm.Message) {
 		chat := domain.Chat{}
 		err := tx.NewSelect().Model(&chat).Where("session_id = ?", h.conversationID).Scan(ctx)
 		if err != nil || chat.ID == 0 {
-			utils.Log(utils.WarnLevel).CID(h.conversationID).Err(err).Send("Failed to query chat")
+			utils.Log(utils.WarnLevel).CID(h.conversationID).Err(err).BT().Send("Failed to query chat")
 			return err
 		}
 
@@ -296,7 +296,7 @@ func (h *chatHistoryManager) Add(ctx context.Context, messages ...llm.Message) {
 		for _, message := range messages {
 			marshaled, err := json.Marshal(message.Metadata)
 			if err != nil {
-				utils.Log(utils.WarnLevel).CID(h.conversationID).Err(err).Send("Failed to marshal metadata")
+				utils.Log(utils.WarnLevel).CID(h.conversationID).Err(err).BT().Send("Failed to marshal metadata")
 				continue
 			}
 			histories = append(histories, domain.History{
@@ -311,7 +311,7 @@ func (h *chatHistoryManager) Add(ctx context.Context, messages ...llm.Message) {
 		if len(histories) > 0 {
 			_, err = tx.NewInsert().Model(&histories).Exec(ctx)
 			if err != nil {
-				utils.Log(utils.WarnLevel).CID(h.conversationID).Err(err).Send("Failed to bulk insert chat history")
+				utils.Log(utils.WarnLevel).CID(h.conversationID).Err(err).BT().Send("Failed to bulk insert chat history")
 				return err
 			}
 		}
@@ -323,7 +323,7 @@ func (h *chatHistoryManager) Get(ctx context.Context, conversationID string) []l
 	histories := []llm.Message{}
 	err := h.db.NewSelect().Model(&domain.History{}).Where("session_id = ?", conversationID).Scan(ctx, &histories)
 	if err != nil {
-		utils.Log(utils.WarnLevel).CID(conversationID).Err(err).Send("Failed to get chat history")
+		utils.Log(utils.WarnLevel).CID(conversationID).Err(err).BT().Send("Failed to get chat history")
 		return h.memoryCache
 	}
 	return histories

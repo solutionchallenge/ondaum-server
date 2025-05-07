@@ -24,23 +24,23 @@ func Install(router fiber.Router, path string, handler Handler) fiber.Router {
 	return router.Get(path, fiberws.New(func(c *fiberws.Conn) {
 		sessionID, err := GetWebsocketSessionID(c)
 		if err != nil {
-			utils.Log(utils.ErrorLevel).Err(err).CID(sessionID).Send("Failed to get session ID")
+			utils.Log(utils.ErrorLevel).Err(err).CID(sessionID).BT().Send("Failed to get session ID")
 			closeConnection(c, sessionID, "", "failed to get session ID", fiberws.CloseProtocolError)
 			return
 		}
 		responseWrapper, err := handleConnect(c, sessionID, handler)
 		if err != nil {
-			utils.Log(utils.ErrorLevel).Err(err).CID(sessionID).Send("Failed to connect")
+			utils.Log(utils.ErrorLevel).Err(err).CID(sessionID).BT().Send("Failed to connect")
 			closeConnection(c, sessionID, "", "failed to connect", fiberws.CloseProtocolError)
 			return
 		}
 		closed, err := processControlFlags(c, responseWrapper)
 		if err != nil {
-			utils.Log(utils.ErrorLevel).Err(err).CID(sessionID).Send("Failed to process control flags")
+			utils.Log(utils.ErrorLevel).Err(err).CID(sessionID).BT().Send("Failed to process control flags")
 			closeConnection(c, sessionID, "", "failed to process control flags", fiberws.CloseProtocolError)
 			return
 		} else if closed {
-			utils.Log(utils.InfoLevel).CID(sessionID).Send("Closing connection")
+			utils.Log(utils.InfoLevel).CID(sessionID).BT().Send("Closing connection")
 			closeConnection(c, sessionID, "", "server requested")
 			return
 		}
@@ -50,11 +50,11 @@ func Install(router fiber.Router, path string, handler Handler) fiber.Router {
 			if err != nil {
 				switch {
 				case fiberws.IsCloseError(err, fiberws.CloseNormalClosure, fiberws.CloseGoingAway, fiberws.CloseAbnormalClosure):
-					utils.Log(utils.InfoLevel).Err(err).CID(sessionID).RID(messageID).Send("Connection closed by client")
+					utils.Log(utils.InfoLevel).Err(err).CID(sessionID).RID(messageID).BT().Send("Connection closed by client")
 					handleClose(c, sessionID, fiberws.CloseNormalClosure, handler)
 					return
 				default:
-					utils.Log(utils.ErrorLevel).Err(err).CID(sessionID).RID(messageID).Send("Failed to read message")
+					utils.Log(utils.ErrorLevel).Err(err).CID(sessionID).RID(messageID).BT().Send("Failed to read message")
 					handleClose(c, sessionID, fiberws.CloseInternalServerErr, handler)
 					return
 				}
@@ -64,20 +64,20 @@ func Install(router fiber.Router, path string, handler Handler) fiber.Router {
 				responseWrapper, isCritical, err := handleMessage(c, sessionID, messageID, rawMessage, handler)
 				if err != nil {
 					if isCritical {
-						utils.Log(utils.ErrorLevel).Err(err).CID(sessionID).RID(messageID).Send("Occurred critical error")
+						utils.Log(utils.ErrorLevel).Err(err).CID(sessionID).RID(messageID).BT().Send("Occurred critical error")
 						closeConnection(c, sessionID, messageID, "server occurred critical error", fiberws.CloseInternalServerErr)
 						handleClose(c, sessionID, fiberws.CloseInternalServerErr, handler)
 						return
 					}
-					utils.Log(utils.ErrorLevel).Err(err).CID(sessionID).RID(messageID).Send("Failed to handle payload message")
+					utils.Log(utils.ErrorLevel).Err(err).CID(sessionID).RID(messageID).BT().Send("Failed to handle payload message")
 					continue
 				}
 				closed, err := processControlFlags(c, responseWrapper)
 				if err != nil {
-					utils.Log(utils.ErrorLevel).Err(err).CID(sessionID).RID(messageID).Send("Failed to process control flags")
+					utils.Log(utils.ErrorLevel).Err(err).CID(sessionID).RID(messageID).BT().Send("Failed to process control flags")
 					continue
 				} else if closed {
-					utils.Log(utils.InfoLevel).CID(sessionID).RID(messageID).Send("Closing connection")
+					utils.Log(utils.InfoLevel).CID(sessionID).RID(messageID).BT().Send("Closing connection")
 					closeConnection(c, sessionID, messageID, "server requested")
 					return
 				}
@@ -85,32 +85,32 @@ func Install(router fiber.Router, path string, handler Handler) fiber.Router {
 				responseWrapper, isCritical, err := handlePing(c, sessionID, messageID, handler)
 				if err != nil {
 					if isCritical {
-						utils.Log(utils.ErrorLevel).Err(err).CID(sessionID).RID(messageID).Send("Occurred critical error in ping")
+						utils.Log(utils.ErrorLevel).Err(err).CID(sessionID).RID(messageID).BT().Send("Occurred critical error in ping")
 						closeConnection(c, sessionID, messageID, "server occurred critical error", fiberws.CloseInternalServerErr)
 						handleClose(c, sessionID, fiberws.CloseInternalServerErr, handler)
 						return
 					}
-					utils.Log(utils.ErrorLevel).Err(err).CID(sessionID).RID(messageID).Send("Failed to handle ping")
+					utils.Log(utils.ErrorLevel).Err(err).CID(sessionID).RID(messageID).BT().Send("Failed to handle ping")
 					continue
 				}
 				closed, err := processControlFlags(c, responseWrapper)
 				if err != nil {
-					utils.Log(utils.ErrorLevel).Err(err).CID(sessionID).RID(messageID).Send("Failed to process control flags")
+					utils.Log(utils.ErrorLevel).Err(err).CID(sessionID).RID(messageID).BT().Send("Failed to process control flags")
 					continue
 				} else if closed {
-					utils.Log(utils.InfoLevel).CID(sessionID).RID(messageID).Send("Closing connection")
+					utils.Log(utils.InfoLevel).CID(sessionID).RID(messageID).BT().Send("Closing connection")
 					closeConnection(c, sessionID, messageID, "server requested")
 					return
 				}
 			case fiberws.PongMessage:
 				continue
 			case fiberws.CloseMessage:
-				utils.Log(utils.InfoLevel).CID(sessionID).RID(messageID).Send("Connection closed")
+				utils.Log(utils.InfoLevel).CID(sessionID).RID(messageID).BT().Send("Connection closed")
 				handleClose(c, sessionID, fiberws.CloseNormalClosure, handler)
 				// already closed by client so no need to handle
 				return
 			default:
-				utils.Log(utils.WarnLevel).CID(sessionID).RID(messageID).Send("Unknown message type")
+				utils.Log(utils.WarnLevel).CID(sessionID).RID(messageID).BT().Send("Unknown message type")
 			}
 		}
 	})).Name(handler.Identify())
@@ -222,7 +222,7 @@ func closeConnection(c *fiberws.Conn, sessionID string, messageID string, reason
 	payload := fmt.Sprintf("connection closed by server: %s", reason)
 	message := fiberws.FormatCloseMessage(code, payload)
 	if err := c.WriteControl(fiberws.CloseMessage, message, time.Now().UTC().Add(time.Second)); err != nil {
-		utils.Log(utils.ErrorLevel).Err(err).CID(sessionID).RID(messageID).Send("Failed to send close message")
+		utils.Log(utils.ErrorLevel).Err(err).CID(sessionID).RID(messageID).BT().Send("Failed to send close message")
 	}
 	c.Close()
 }

@@ -26,7 +26,7 @@ func Run(config AppConfig) {
 		encoded := base64.StdEncoding.EncodeToString(buf)
 		if err == nil {
 			value := fmt.Sprintf("Starting HTTP server with config: %s", string(encoded))
-			utils.Log(utils.InfoLevel).Send("%s", value)
+			utils.Log(utils.InfoLevel).BT().Send("%s", value)
 		}
 	}
 	app := fx.New(
@@ -51,7 +51,7 @@ func Run(config AppConfig) {
 				if err := db.PingContext(ctx); err == nil {
 					database.Migrate(db, migration.Collection...)
 				} else {
-					utils.Log(utils.ErrorLevel).Ctx(ctx).Err(err).Send("Failed to migrate database")
+					utils.Log(utils.ErrorLevel).Ctx(ctx).Err(err).BT().Send("Failed to migrate database")
 				}
 			}
 		}),
