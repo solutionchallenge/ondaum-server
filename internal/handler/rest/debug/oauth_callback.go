@@ -73,7 +73,9 @@ func (h *OAuthCallbackHandler) Handle(c *fiber.Ctx) error {
 	}
 	_, err = dbTx.NewInsert().
 		Model(userData).
-		On("DUPLICATE KEY UPDATE username = VALUES(username)").
+		On("DUPLICATE KEY UPDATE").
+		Set("username = VALUES(username)").
+		Set("updated_at = CURRENT_TIMESTAMP").
 		Exec(c.Context())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
@@ -94,11 +96,13 @@ func (h *OAuthCallbackHandler) Handle(c *fiber.Ctx) error {
 	userOAuth := &user.OAuth{
 		UserID:       userData.ID,
 		Provider:     google.Provider,
-		ProviderCode: userInfo.ID,
+		ProviderCode: code,
 	}
 	_, err = dbTx.NewInsert().
 		Model(userOAuth).
-		On("DUPLICATE KEY UPDATE provider_code = VALUES(provider_code)").
+		On("DUPLICATE KEY UPDATE").
+		Set("provider_code = ?", code).
+		Set("updated_at = CURRENT_TIMESTAMP").
 		Exec(c.Context())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(

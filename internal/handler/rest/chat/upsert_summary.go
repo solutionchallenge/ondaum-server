@@ -132,6 +132,7 @@ func (h *UpsertSummaryHandler) Handle(c *fiber.Ctx) error {
 		Set("text = ?", summary.Text).
 		Set("keywords = ?", summary.Keywords).
 		Set("emotions = ?", emotions).
+		Set("updated_at = CURRENT_TIMESTAMP").
 		Exec(context.Background())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
