@@ -88,7 +88,7 @@ func (h *UpsertSummaryHandler) Handle(c *fiber.Ctx) error {
 		}
 	})
 
-	resolved, err := h.deps.LLM.ResolvePrompt(c.UserContext(), "interactive_chat", "summary_chat", histories...)
+	resolved, err := h.deps.LLM.RunActionPrompt(c.UserContext(), "interactive_chat", "summary_chat", histories...)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
 			http.NewError(c.UserContext(), err, "Failed to resolve prompt"),

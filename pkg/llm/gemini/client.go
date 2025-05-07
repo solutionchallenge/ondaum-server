@@ -56,7 +56,7 @@ func (client *Client) StartConversation(ctx context.Context, historyManager llm.
 	return conversation, nil
 }
 
-func (client *Client) ResolvePrompt(ctx context.Context, instructionIdentifier string, promptIdentifier string, histories ...llm.Message) (llm.Message, error) {
+func (client *Client) RunActionPrompt(ctx context.Context, instructionIdentifier string, promptIdentifier string, histories ...llm.Message) (llm.Message, error) {
 	config, err := BuildGenerativeConfig(client, instructionIdentifier)
 	if err != nil {
 		return llm.Message{}, err
@@ -64,7 +64,7 @@ func (client *Client) ResolvePrompt(ctx context.Context, instructionIdentifier s
 
 	var prepared *llm.PreparedPrompt = nil
 	for _, iterator := range client.Config.Gemini.PreparedPrompts {
-		if iterator.Identifier == promptIdentifier && iterator.PromptType == llm.PromptTypeSystemInstruction {
+		if iterator.Identifier == promptIdentifier && iterator.PromptType == llm.PromptTypeActionPrompt {
 			prepared = &iterator
 			break
 		}
