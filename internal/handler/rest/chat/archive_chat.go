@@ -40,7 +40,7 @@ func NewArchiveChatHandler(deps ArchiveChatHandlerDependencies) (*ArchiveChatHan
 // @Failure 401 {object} http.Error
 // @Failure 404 {object} http.Error
 // @Failure 500 {object} http.Error
-// @Router /chats/:session_id/archive [post]
+// @Router /chats/{session_id}/archive [post]
 func (h *ArchiveChatHandler) Handle(c *fiber.Ctx) error {
 	userID, err := http.GetUserID(c)
 	if err != nil {

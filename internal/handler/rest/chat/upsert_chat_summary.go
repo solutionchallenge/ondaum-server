@@ -46,7 +46,7 @@ func NewUpsertChatSummaryHandler(deps UpsertChatSummaryHandlerDependencies) (*Up
 // @Failure 401 {object} http.Error
 // @Failure 404 {object} http.Error
 // @Failure 500 {object} http.Error
-// @Router /chats/:session_id/summary [post]
+// @Router /chats/{session_id}/summary [post]
 // @Security BearerAuth
 func (h *UpsertChatSummaryHandler) Handle(c *fiber.Ctx) error {
 	userID, err := http.GetUserID(c)

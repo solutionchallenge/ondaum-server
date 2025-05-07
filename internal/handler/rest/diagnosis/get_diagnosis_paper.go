@@ -28,7 +28,7 @@ func NewGetDiagnosisPaperHandler(deps GetDiagnosisPaperHandlerDependencies) (*Ge
 // @Success 200 {object} common.DiagnosisPaper
 // @Failure 404 {object} http.Error
 // @Failure 500 {object} http.Error
-// @Router /diagnoses/papers/:paper_id [get]
+// @Router /diagnosis-papers/{paper_id [get]
 // @Security BearerAuth
 func (h *GetDiagnosisPaperHandler) Handle(c *fiber.Ctx) error {
 	identifier := c.Params("paper_id")

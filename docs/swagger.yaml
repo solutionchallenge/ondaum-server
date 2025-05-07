@@ -448,7 +448,7 @@ paths:
       summary: List chats
       tags:
       - chat
-  /chats/:session_id:
+  /chats/{session_id}:
     get:
       consumes:
       - application/json
@@ -484,7 +484,7 @@ paths:
       summary: Get chat
       tags:
       - chat
-  /chats/:session_id/archive:
+  /chats/{session_id}/archive:
     post:
       consumes:
       - application/json
@@ -519,7 +519,7 @@ paths:
       summary: Archive a chat
       tags:
       - chat
-  /chats/:session_id/summary:
+  /chats/{session_id}/summary:
     get:
       consumes:
       - application/json
@@ -619,40 +619,6 @@ paths:
       security:
       - BearerAuth: []
       summary: List diagnosis result
-  /diagnoses/:diagnosis_id:
-    get:
-      consumes:
-      - application/json
-      description: Get diagnosis result
-      operationId: GetDiagnosisResult
-      parameters:
-      - description: Diagnosis ID
-        in: path
-        name: diagnosis_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/diagnosis.DiagnosisDTO'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/http.Error'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/http.Error'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/http.Error'
-      security:
-      - BearerAuth: []
-      summary: Get diagnosis result
   /diagnoses/papers:
     get:
       consumes:
@@ -669,36 +635,6 @@ paths:
               $ref: '#/definitions/diagnosis.ListDiagnosisPaperHandlerResponse'
             type: array
       summary: List diagnosis papers
-  /diagnoses/papers/:paper_id:
-    get:
-      consumes:
-      - application/json
-      description: Get diagnosis paper as JSON format
-      operationId: GetDiagnosisPaper
-      parameters:
-      - description: Diagnosis Paper ID
-        in: path
-        name: paper_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/common.DiagnosisPaper'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/http.Error'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/http.Error'
-      security:
-      - BearerAuth: []
-      summary: Get diagnosis paper
   /diagnoses/report:
     post:
       consumes:
@@ -734,6 +670,70 @@ paths:
       security:
       - BearerAuth: []
       summary: Report diagnosis result
+  /diagnosis-papers/{diagnosis_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get diagnosis result
+      operationId: GetDiagnosisResult
+      parameters:
+      - description: Diagnosis ID
+        in: path
+        name: diagnosis_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/diagnosis.DiagnosisDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Error'
+      security:
+      - BearerAuth: []
+      summary: Get diagnosis result
+  /diagnosis-papers/{paper_id:
+    get:
+      consumes:
+      - application/json
+      description: Get diagnosis paper as JSON format
+      operationId: GetDiagnosisPaper
+      parameters:
+      - description: Diagnosis Paper ID
+        in: path
+        name: paper_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.DiagnosisPaper'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Error'
+      security:
+      - BearerAuth: []
+      summary: Get diagnosis paper
   /oauth/google/auth:
     post:
       consumes:

@@ -189,7 +189,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/chats/:session_id": {
+        "/chats/{session_id}": {
             "get": {
                 "security": [
                     {
@@ -245,7 +245,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/chats/:session_id/archive": {
+        "/chats/{session_id}/archive": {
             "post": {
                 "description": "Archive a chat to prevent it from being accessed again and allow to summarize it.",
                 "consumes": [
@@ -296,7 +296,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/chats/:session_id/summary": {
+        "/chats/{session_id}/summary": {
             "get": {
                 "security": [
                     {
@@ -450,7 +450,86 @@ const docTemplate = `{
                 }
             }
         },
-        "/diagnoses/:diagnosis_id": {
+        "/diagnoses/papers": {
+            "get": {
+                "description": "List diagnosis papers",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "List diagnosis papers",
+                "operationId": "ListDiagnosisPaper",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/diagnosis.ListDiagnosisPaperHandlerResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/diagnoses/report": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Report diagnosis result",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Report diagnosis result",
+                "operationId": "ReportDiagnosisResult",
+                "parameters": [
+                    {
+                        "description": "Diagnosis result",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/diagnosis.DiagnosisDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/diagnosis.ReportDiagnosisResultHandlerResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/diagnosis-papers/{diagnosis_id}": {
             "get": {
                 "security": [
                     {
@@ -503,31 +582,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/diagnoses/papers": {
-            "get": {
-                "description": "List diagnosis papers",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "List diagnosis papers",
-                "operationId": "ListDiagnosisPaper",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/diagnosis.ListDiagnosisPaperHandlerResponse"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/diagnoses/papers/:paper_id": {
+        "/diagnosis-papers/{paper_id": {
             "get": {
                 "security": [
                     {
@@ -557,61 +612,6 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/common.DiagnosisPaper"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/http.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/http.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/diagnoses/report": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Report diagnosis result",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Report diagnosis result",
-                "operationId": "ReportDiagnosisResult",
-                "parameters": [
-                    {
-                        "description": "Diagnosis result",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/diagnosis.DiagnosisDTO"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/diagnosis.ReportDiagnosisResultHandlerResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/http.Error"
                         }
                     },
                     "404": {

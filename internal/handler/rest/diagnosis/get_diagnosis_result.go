@@ -35,7 +35,7 @@ func NewGetDiagnosisResultHandler(deps GetDiagnosisResultHandlerDependencies) (*
 // @Failure 401 {object} http.Error
 // @Failure 404 {object} http.Error
 // @Failure 500 {object} http.Error
-// @Router /diagnoses/:diagnosis_id [get]
+// @Router /diagnosis-papers/{diagnosis_id} [get]
 // @Security BearerAuth
 func (h *GetDiagnosisResultHandler) Handle(c *fiber.Ctx) error {
 	userID, err := http.GetUserID(c)
