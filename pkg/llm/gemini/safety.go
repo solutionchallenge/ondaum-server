@@ -77,11 +77,8 @@ func checkContentBlocked(feedbacks []map[string]any) error {
 }
 
 func buildContentFeedbacks(response *genai.GenerateContentResponse) []map[string]any {
-	feedback := []map[string]any{}
+	feedback := make([]map[string]any, len(response.Candidates))
 	for idx, candidate := range response.Candidates {
-		if feedback[idx] == nil {
-			feedback[idx] = map[string]any{}
-		}
 		if len(candidate.SafetyRatings) > 0 {
 			for _, result := range candidate.SafetyRatings {
 				feedback[idx] = map[string]any{

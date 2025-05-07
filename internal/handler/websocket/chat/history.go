@@ -1,0 +1,72 @@
+package chat
+
+import (
+	"context"
+	"encoding/json"
+
+	domain "github.com/solutionchallenge/ondaum-server/internal/domain/chat"
+	"github.com/solutionchallenge/ondaum-server/pkg/llm"
+	"github.com/solutionchallenge/ondaum-server/pkg/utils"
+	"github.com/uptrace/bun"
+)
+
+type ChatHistoryManager struct {
+	db             *bun.DB
+	memoryCache    []llm.Message
+	conversationID string
+}
+
+func NewChatHistoryManager(db *bun.DB, conversationID string) *ChatHistoryManager {
+	return &ChatHistoryManager{
+		db:             db,
+		memoryCache:    []llm.Message{},
+		conversationID: conversationID,
+	}
+}
+
+func (h *ChatHistoryManager) Add(ctx context.Context, messages ...llm.Message) {
+	h.memoryCache = append(h.memoryCache, messages...)
+	h.db.RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
+		chat := domain.Chat{}
+		err := tx.NewSelect().Model(&chat).Where("session_id = ?", h.conversationID).Scan(ctx)
+		if err != nil || chat.ID == 0 {
+			utils.Log(utils.WarnLevel).CID(h.conversationID).Err(err).BT().Send("Failed to query chat")
+			return err
+		}
+
+		histories := make([]domain.History, 0, len(messages))
+		for _, message := range messages {
+			marshaled, err := json.Marshal(message.Metadata)
+			if err != nil {
+				utils.Log(utils.WarnLevel).CID(h.conversationID).Err(err).BT().Send("Failed to marshal metadata")
+				continue
+			}
+			histories = append(histories, domain.History{
+				ChatID:    chat.ID,
+				MessageID: message.ID,
+				Role:      string(message.Role),
+				Content:   message.Content,
+				Metadata:  marshaled,
+			})
+		}
+
+		if len(histories) > 0 {
+			_, err = tx.NewInsert().Model(&histories).Exec(ctx)
+			if err != nil {
+				utils.Log(utils.WarnLevel).CID(h.conversationID).Err(err).BT().Send("Failed to bulk insert chat history")
+				return err
+			}
+		}
+		return nil
+	})
+}
+
+func (h *ChatHistoryManager) Get(ctx context.Context, conversationID string) []llm.Message {
+	histories := []llm.Message{}
+	err := h.db.NewSelect().Model(&domain.History{}).Where("session_id = ?", conversationID).Scan(ctx, &histories)
+	if err != nil {
+		utils.Log(utils.WarnLevel).CID(conversationID).Err(err).BT().Send("Failed to get chat history")
+		return h.memoryCache
+	}
+	return histories
+}

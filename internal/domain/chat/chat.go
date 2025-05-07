@@ -55,7 +55,7 @@ func (c *Chat) ToChatWithSimplifiedSummaryDTO() ChatWithSimplifiedSummaryDTO {
 		StartedDate:  c.StartedDate.Format(utils.TIME_FORMAT_DATE),
 		UserTimezone: c.UserTimezone,
 		IsFinished:   !c.FinishedAt.IsZero(),
-		IsArchived:   c.ArchivedAt.IsZero(),
+		IsArchived:   !c.ArchivedAt.IsZero(),
 		Summary:      summary,
 	}
 }
