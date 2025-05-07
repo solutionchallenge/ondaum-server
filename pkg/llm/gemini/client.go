@@ -73,9 +73,9 @@ func (client *Client) RunActionPrompt(ctx context.Context, instructionIdentifier
 		return llm.Message{}, fmt.Errorf("prepared prompt identifier '%s' not found", promptIdentifier)
 	}
 
-	prompt, err := readPromptFile(prepared.PromptFile)
+	prompt, err := utils.ReadFileFrom(prepared.PromptFile)
 	if err != nil {
-		return llm.Message{}, fmt.Errorf("readPromptFile failed for %s: %w", prepared.PromptFile, err)
+		return llm.Message{}, fmt.Errorf("ReadFileFrom failed for %s: %w", prepared.PromptFile, err)
 	}
 
 	finalContents := []*genai.Content{}
@@ -88,9 +88,9 @@ func (client *Client) RunActionPrompt(ctx context.Context, instructionIdentifier
 
 	currentUserTurnParts := []*genai.Part{genai.NewPartFromText(prompt)}
 	if prepared.AttachmentFile != "" {
-		reader, err := openAttachmentFile(prepared.AttachmentFile)
+		reader, err := utils.OpenFileFrom(prepared.AttachmentFile)
 		if err != nil {
-			return llm.Message{}, fmt.Errorf("openAttachmentFile failed for %s: %w", prepared.AttachmentFile, err)
+			return llm.Message{}, fmt.Errorf("OpenFileFrom failed for %s: %w", prepared.AttachmentFile, err)
 		}
 		defer reader.Close()
 

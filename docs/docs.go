@@ -69,6 +69,33 @@ const docTemplate = `{
                 }
             }
         },
+        "/_schema/supported-inspections": {
+            "get": {
+                "description": "List supported tests",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "schema"
+                ],
+                "summary": "List supported tests",
+                "operationId": "ListSupportedTest",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/common.Inspection"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/_ws/chat": {
             "get": {
                 "security": [
@@ -332,7 +359,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Create or update summary and return the created/updated summary",
+                "description": "Create or update chat summary and return the created/updated chat summary",
                 "consumes": [
                     "application/json"
                 ],
@@ -342,8 +369,8 @@ const docTemplate = `{
                 "tags": [
                     "chat"
                 ],
-                "summary": "Create or update summary",
-                "operationId": "UpsertSummary",
+                "summary": "Create or update chat summary",
+                "operationId": "UpsertChatSummary",
                 "parameters": [
                     {
                         "type": "string",
@@ -357,13 +384,55 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/chat.UpsertSummaryHandlerResponse"
+                            "$ref": "#/definitions/chat.UpsertChatSummaryHandlerResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/inspection/:inspection_id": {
+            "get": {
+                "description": "Get inspection paper as JSON format",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get inspection paper",
+                "operationId": "GetInspectionPaper",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Inspection ID",
+                        "name": "inspection_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.InspectionPaper"
                         }
                     },
                     "404": {
@@ -499,7 +568,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/user.UpsertAdditionHandlerRequest"
+                            "$ref": "#/definitions/user.UpsertUserAdditionHandlerRequest"
                         }
                     }
                 ],
@@ -507,7 +576,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/user.UpsertAdditionHandlerResponse"
+                            "$ref": "#/definitions/user.UpsertUserAdditionHandlerResponse"
                         }
                     },
                     "400": {
@@ -557,7 +626,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/user.UpsertPrivacyHandlerRequest"
+                            "$ref": "#/definitions/user.UpsertUserPrivacyHandlerRequest"
                         }
                     }
                 ],
@@ -565,7 +634,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/user.UpsertPrivacyHandlerResponse"
+                            "$ref": "#/definitions/user.UpsertUserPrivacyHandlerResponse"
                         }
                     },
                     "400": {
@@ -756,7 +825,7 @@ const docTemplate = `{
                 }
             }
         },
-        "chat.UpsertSummaryHandlerResponse": {
+        "chat.UpsertChatSummaryHandlerResponse": {
             "type": "object",
             "properties": {
                 "created": {
@@ -818,6 +887,104 @@ const docTemplate = `{
                 "FeatureSuggestTestPSS",
                 "FeatureEndConversation"
             ]
+        },
+        "common.Inspection": {
+            "type": "string",
+            "enum": [
+                "phq-9",
+                "gad-7",
+                "pss"
+            ],
+            "x-enum-varnames": [
+                "InspectionPHQ9",
+                "InspectionGAD7",
+                "InspectionPSS"
+            ]
+        },
+        "common.InspectionAnswer": {
+            "type": "object",
+            "properties": {
+                "score": {
+                    "type": "integer"
+                },
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "common.InspectionPaper": {
+            "type": "object",
+            "properties": {
+                "guides": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "questions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/common.InspectionQuestion"
+                    }
+                },
+                "results": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/common.InspectionResult"
+                    }
+                },
+                "scoring": {
+                    "$ref": "#/definitions/common.InspectionScoring"
+                }
+            }
+        },
+        "common.InspectionQuestion": {
+            "type": "object",
+            "properties": {
+                "answers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/common.InspectionAnswer"
+                    }
+                },
+                "index": {
+                    "type": "integer"
+                },
+                "question": {
+                    "type": "string"
+                }
+            }
+        },
+        "common.InspectionResult": {
+            "type": "object",
+            "properties": {
+                "critical": {
+                    "type": "boolean"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "max": {
+                    "type": "integer"
+                },
+                "min": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "common.InspectionScoring": {
+            "type": "object",
+            "properties": {
+                "max": {
+                    "type": "integer"
+                },
+                "min": {
+                    "type": "integer"
+                }
+            }
         },
         "http.Error": {
             "type": "object",
@@ -902,7 +1069,7 @@ const docTemplate = `{
                 }
             }
         },
-        "user.UpsertAdditionHandlerRequest": {
+        "user.UpsertUserAdditionHandlerRequest": {
             "type": "object",
             "properties": {
                 "concerns": {
@@ -919,7 +1086,7 @@ const docTemplate = `{
                 }
             }
         },
-        "user.UpsertAdditionHandlerResponse": {
+        "user.UpsertUserAdditionHandlerResponse": {
             "type": "object",
             "properties": {
                 "created": {
@@ -930,7 +1097,7 @@ const docTemplate = `{
                 }
             }
         },
-        "user.UpsertPrivacyHandlerRequest": {
+        "user.UpsertUserPrivacyHandlerRequest": {
             "type": "object",
             "properties": {
                 "birthday": {
@@ -941,7 +1108,7 @@ const docTemplate = `{
                 }
             }
         },
-        "user.UpsertPrivacyHandlerResponse": {
+        "user.UpsertUserPrivacyHandlerResponse": {
             "type": "object",
             "properties": {
                 "created": {

@@ -1,11 +1,11 @@
-package gemini
+package utils
 
 import (
 	"os"
 	"path"
 )
 
-func readPromptFile(filepath string, rootpath ...string) (string, error) {
+func ReadFileFrom(filepath string, rootpath ...string) (string, error) {
 	var err error
 	basepath := "./"
 	if len(rootpath) > 0 && rootpath[0] != "" {
@@ -24,7 +24,7 @@ func readPromptFile(filepath string, rootpath ...string) (string, error) {
 	return string(data), nil
 }
 
-func openAttachmentFile(filepath string, rootpath ...string) (*os.File, error) {
+func OpenFileFrom(filepath string, rootpath ...string) (*os.File, error) {
 	var err error
 	basepath := "./"
 	if len(rootpath) > 0 && rootpath[0] != "" {

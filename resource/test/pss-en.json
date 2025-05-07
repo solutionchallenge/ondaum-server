@@ -1,0 +1,293 @@
+{
+    "name": "PSS",
+    "guides": "Please indicate how often you have felt or thought a certain way during the past month.",
+    "questions": [
+        {
+            "index": 1,
+            "question": "In the last month, how often have you been upset because something that happened unexpectedly?",
+            "answers": [
+                {
+                    "score": 0,
+                    "text": "Never"
+                },
+                {
+                    "score": 1,
+                    "text": "Almost never"
+                },
+                {
+                    "score": 2,
+                    "text": "Sometimes"
+                },
+                {
+                    "score": 3,
+                    "text": "Fairly often"
+                },
+                {
+                    "score": 4,
+                    "text": "Very often"
+                }
+            ]
+        },
+        {
+            "index": 2,
+            "question": "In the last month, how often have you felt that you were unable to control the important things in your life?",
+            "answers": [
+                {
+                    "score": 0,
+                    "text": "Never"
+                },
+                {
+                    "score": 1,
+                    "text": "Almost never"
+                },
+                {
+                    "score": 2,
+                    "text": "Sometimes"
+                },
+                {
+                    "score": 3,
+                    "text": "Fairly often"
+                },
+                {
+                    "score": 4,
+                    "text": "Very often"
+                }
+            ]
+        },
+        {
+            "index": 3,
+            "question": "In the last month, how often have you felt nervous and \"stressed\"?",
+            "answers": [
+                {
+                    "score": 0,
+                    "text": "Never"
+                },
+                {
+                    "score": 1,
+                    "text": "Almost never"
+                },
+                {
+                    "score": 2,
+                    "text": "Sometimes"
+                },
+                {
+                    "score": 3,
+                    "text": "Fairly often"
+                },
+                {
+                    "score": 4,
+                    "text": "Very often"
+                }
+            ]
+        },
+        {
+            "index": 4,
+            "question": "In the last month, how often have you felt confident about your ability to handle your personal problems?",
+            "answers": [
+                {
+                    "score": 4,
+                    "text": "Never"
+                },
+                {
+                    "score": 3,
+                    "text": "Almost never"
+                },
+                {
+                    "score": 2,
+                    "text": "Sometimes"
+                },
+                {
+                    "score": 1,
+                    "text": "Fairly often"
+                },
+                {
+                    "score": 0,
+                    "text": "Very often"
+                }
+            ]
+        },
+        {
+            "index": 5,
+            "question": "In the last month, how often have you felt that things were going your way?",
+            "answers": [
+                {
+                    "score": 4,
+                    "text": "Never"
+                },
+                {
+                    "score": 3,
+                    "text": "Almost never"
+                },
+                {
+                    "score": 2,
+                    "text": "Sometimes"
+                },
+                {
+                    "score": 1,
+                    "text": "Fairly often"
+                },
+                {
+                    "score": 0,
+                    "text": "Very often"
+                }
+            ]
+        },
+        {
+            "index": 6,
+            "question": "In the last month, how often have you found that you could not cope with all the things that you had to do?",
+            "answers": [
+                {
+                    "score": 0,
+                    "text": "Never"
+                },
+                {
+                    "score": 1,
+                    "text": "Almost never"
+                },
+                {
+                    "score": 2,
+                    "text": "Sometimes"
+                },
+                {
+                    "score": 3,
+                    "text": "Fairly often"
+                },
+                {
+                    "score": 4,
+                    "text": "Very often"
+                }
+            ]
+        },
+        {
+            "index": 7,
+            "question": "In the last month, how often have you been able to control irritations in your life?",
+            "answers": [
+                {
+                    "score": 4,
+                    "text": "Never"
+                },
+                {
+                    "score": 3,
+                    "text": "Almost never"
+                },
+                {
+                    "score": 2,
+                    "text": "Sometimes"
+                },
+                {
+                    "score": 1,
+                    "text": "Fairly often"
+                },
+                {
+                    "score": 0,
+                    "text": "Very often"
+                }
+            ]
+        },
+        {
+            "index": 8,
+            "question": "In the last month, how often have you felt that you were on top of things?",
+            "answers": [
+                {
+                    "score": 4,
+                    "text": "Never"
+                },
+                {
+                    "score": 3,
+                    "text": "Almost never"
+                },
+                {
+                    "score": 2,
+                    "text": "Sometimes"
+                },
+                {
+                    "score": 1,
+                    "text": "Fairly often"
+                },
+                {
+                    "score": 0,
+                    "text": "Very often"
+                }
+            ]
+        },
+        {
+            "index": 9,
+            "question": "In the last month, how often have you been angered because of things that were outside of your control?",
+            "answers": [
+                {
+                    "score": 0,
+                    "text": "Never"
+                },
+                {
+                    "score": 1,
+                    "text": "Almost never"
+                },
+                {
+                    "score": 2,
+                    "text": "Sometimes"
+                },
+                {
+                    "score": 3,
+                    "text": "Fairly often"
+                },
+                {
+                    "score": 4,
+                    "text": "Very often"
+                }
+            ]
+        },
+        {
+            "index": 10,
+            "question": "In the last month, how often have you felt difficulties were piling up so high that you could not overcome them?",
+            "answers": [
+                {
+                    "score": 0,
+                    "text": "Never"
+                },
+                {
+                    "score": 1,
+                    "text": "Almost never"
+                },
+                {
+                    "score": 2,
+                    "text": "Sometimes"
+                },
+                {
+                    "score": 3,
+                    "text": "Fairly often"
+                },
+                {
+                    "score": 4,
+                    "text": "Very often"
+                }
+            ]
+        }
+    ],
+    "results": [
+        {
+            "min": 0,
+            "max": 13,
+            "name": "Low Stress",
+            "description": "You're doing well. Keep checking in with yourself regularly.",
+            "critical": false
+        },
+        {
+            "min": 14,
+            "max": 26,
+            "name": "Moderate Stress",
+            "description": "You're showing signs of low mood. Consider self-care strategies.",
+            "critical": false
+        },
+        {
+            "min": 27,
+            "max": 40,
+            "name": "High Stress",
+            "description": "We recommend speaking with a mental health professional as soon as possible. You're not alone.",
+            "critical": true
+        }
+    ],
+    "scoring": {
+        "min": 0,
+        "max": 40
+    }
+}

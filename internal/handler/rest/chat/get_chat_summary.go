@@ -12,17 +12,17 @@ import (
 	"go.uber.org/fx"
 )
 
-type GetSummaryHandlerDependencies struct {
+type GetChatSummaryHandlerDependencies struct {
 	fx.In
 	DB *bun.DB
 }
 
-type GetSummaryHandler struct {
-	deps GetSummaryHandlerDependencies
+type GetChatSummaryHandler struct {
+	deps GetChatSummaryHandlerDependencies
 }
 
-func NewGetSummaryHandler(deps GetSummaryHandlerDependencies) (*GetSummaryHandler, error) {
-	return &GetSummaryHandler{deps: deps}, nil
+func NewGetChatSummaryHandler(deps GetChatSummaryHandlerDependencies) (*GetChatSummaryHandler, error) {
+	return &GetChatSummaryHandler{deps: deps}, nil
 }
 
 // @ID GetSummary
@@ -38,7 +38,7 @@ func NewGetSummaryHandler(deps GetSummaryHandlerDependencies) (*GetSummaryHandle
 // @Failure 500 {object} http.Error
 // @Router /chat/:session_id/summary [get]
 // @Security BearerAuth
-func (h *GetSummaryHandler) Handle(c *fiber.Ctx) error {
+func (h *GetChatSummaryHandler) Handle(c *fiber.Ctx) error {
 	userID, err := http.GetUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(
@@ -77,6 +77,6 @@ func (h *GetSummaryHandler) Handle(c *fiber.Ctx) error {
 	return c.JSON(response)
 }
 
-func (h *GetSummaryHandler) Identify() string {
-	return "get-summary"
+func (h *GetChatSummaryHandler) Identify() string {
+	return "get-chat-summary"
 }

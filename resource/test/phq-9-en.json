@@ -1,0 +1,245 @@
+{
+    "name": "PHQ-9",
+    "guides": "Over the last 2 weeks, how often have you been bothered by any of the following problems?",
+    "questions": [
+        {
+            "index": 1,
+            "question": "Little interest or pleasure in doing things",
+            "answers": [
+                {
+                    "score": 0,
+                    "text": "Not at all"
+                },
+                {
+                    "score": 1,
+                    "text": "Several days"
+                },
+                {
+                    "score": 2,
+                    "text": "More than half the days"
+                },
+                {
+                    "score": 3,
+                    "text": "Nearly every day"
+                }
+            ]
+        },
+        {
+            "index": 2,
+            "question": "Feeling down, depressed, or hopeless",
+            "answers": [
+                {
+                    "score": 0,
+                    "text": "Not at all"
+                },
+                {
+                    "score": 1,
+                    "text": "Several days"
+                },
+                {
+                    "score": 2,
+                    "text": "More than half the days"
+                },
+                {
+                    "score": 3,
+                    "text": "Nearly every day"
+                }
+            ]
+        },
+        {
+            "index": 3,
+            "question": "Trouble falling or staying asleep, or sleeping too much",
+            "answers": [
+                {
+                    "score": 0,
+                    "text": "Not at all"
+                },
+                {
+                    "score": 1,
+                    "text": "Several days"
+                },
+                {
+                    "score": 2,
+                    "text": "More than half the days"
+                },
+                {
+                    "score": 3,
+                    "text": "Nearly every day"
+                }
+            ]
+        },
+        {
+            "index": 4,
+            "question": "Feeling tired or having little energy",
+            "answers": [
+                {
+                    "score": 0,
+                    "text": "Not at all"
+                },
+                {
+                    "score": 1,
+                    "text": "Several days"
+                },
+                {
+                    "score": 2,
+                    "text": "More than half the days"
+                },
+                {
+                    "score": 3,
+                    "text": "Nearly every day"
+                }
+            ]
+        },
+        {
+            "index": 5,
+            "question": "Poor appetite or overeating",
+            "answers": [
+                {
+                    "score": 0,
+                    "text": "Not at all"
+                },
+                {
+                    "score": 1,
+                    "text": "Several days"
+                },
+                {
+                    "score": 2,
+                    "text": "More than half the days"
+                },
+                {
+                    "score": 3,
+                    "text": "Nearly every day"
+                }
+            ]
+        },
+        {
+            "index": 6,
+            "question": "Feeling bad about yourself — or that you are a failure or have let yourself or your family down",
+            "answers": [
+                {
+                    "score": 0,
+                    "text": "Not at all"
+                },
+                {
+                    "score": 1,
+                    "text": "Several days"
+                },
+                {
+                    "score": 2,
+                    "text": "More than half the days"
+                },
+                {
+                    "score": 3,
+                    "text": "Nearly every day"
+                }
+            ]
+        },
+        {
+            "index": 7,
+            "question": "Trouble concentrating on things, such as reading the newspaper or watching television",
+            "answers": [
+                {
+                    "score": 0,
+                    "text": "Not at all"
+                },
+                {
+                    "score": 1,
+                    "text": "Several days"
+                },
+                {
+                    "score": 2,
+                    "text": "More than half the days"
+                },
+                {
+                    "score": 3,
+                    "text": "Nearly every day"
+                }
+            ]
+        },
+        {
+            "index": 8,
+            "question": "Moving or speaking so slowly that other people could have noticed. Or the opposite — being so fidgety or restless that you have been moving a lot more than usual",
+            "answers": [
+                {
+                    "score": 0,
+                    "text": "Not at all"
+                },
+                {
+                    "score": 1,
+                    "text": "Several days"
+                },
+                {
+                    "score": 2,
+                    "text": "More than half the days"
+                },
+                {
+                    "score": 3,
+                    "text": "Nearly every day"
+                }
+            ]
+        },
+        {
+            "index": 9,
+            "question": "Thoughts that you would be better off dead or of hurting yourself in some way",
+            "answers": [
+                {
+                    "score": 0,
+                    "text": "Not at all"
+                },
+                {
+                    "score": 1,
+                    "text": "Several days"
+                },
+                {
+                    "score": 2,
+                    "text": "More than half the days"
+                },
+                {
+                    "score": 3,
+                    "text": "Nearly every day"
+                }
+            ]
+        }
+    ],
+    "results": [
+        {
+            "min": 0,
+            "max": 4,
+            "name": "Minimal or none",
+            "description": "You're doing well. Keep checking in with yourself regularly.",
+            "critical": false
+        },
+        {
+            "min": 5,
+            "max": 9,
+            "name": "Mild depression",
+            "description": "You're showing signs of low mood. Consider self-care strategies.",
+            "critical": false
+        },
+        {
+            "min": 10,
+            "max": 14,
+            "name": "Moderate depression",
+            "description": "You may benefit from talking to someone. We're here to support you.",
+            "critical": false
+        },
+        {
+            "min": 15,
+            "max": 19,
+            "name": "Moderately severe depression",
+            "description": "These feelings are important. Let's explore ways to manage them together.",
+            "critical": true
+        },
+        {
+            "min": 20,
+            "max": 27,
+            "name": "Severe depression",
+            "description": "We recommend speaking with a mental health professional as soon as possible. You're not alone.",
+            "critical": true
+        }
+    ],
+    "scoring": {
+        "min": 0,
+        "max": 27
+    }
+}

@@ -5,6 +5,7 @@ import (
 	"github.com/solutionchallenge/ondaum-server/internal/handler/future"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/chat"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/debug"
+	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/inspection"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/oauth"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/schema"
 	"github.com/solutionchallenge/ondaum-server/internal/handler/rest/sys"
@@ -23,17 +24,19 @@ var PredefinedRoutes = []fx.Option{
 	dependency.HttpRoute("GET", "/_debug/users", debug.NewListUserHandler),
 	dependency.HttpRoute("GET", "/_debug/chats", debug.NewListChatHandler),
 	dependency.HttpRoute("GET", "/user/self", user.NewGetSelfHandler),
-	dependency.HttpRoute("PUT", "/user/privacy", user.NewUpsertPrivacyHandler),
-	dependency.HttpRoute("PUT", "/user/addition", user.NewUpsertAdditionHandler),
+	dependency.HttpRoute("PUT", "/user/privacy", user.NewUpsertUserPrivacyHandler),
+	dependency.HttpRoute("PUT", "/user/addition", user.NewUpsertUserAdditionHandler),
 	dependency.HttpRoute("GET", "/oauth/google/start", oauth.NewStartGoogleHandler),
 	dependency.HttpRoute("POST", "/oauth/google/auth", oauth.NewAuthGoogleHandler),
 	dependency.HttpRoute("GET", "/chats", chat.NewListChatHandler),
 	dependency.HttpRoute("GET", "/chat/:session_id", chat.NewGetChatHandler),
-	dependency.HttpRoute("GET", "/chat/:session_id/summary", chat.NewGetSummaryHandler),
-	dependency.HttpRoute("PUT", "/chat/:session_id/summary", chat.NewUpsertSummaryHandler),
+	dependency.HttpRoute("GET", "/chat/:session_id/summary", chat.NewGetChatSummaryHandler),
+	dependency.HttpRoute("PUT", "/chat/:session_id/summary", chat.NewUpsertChatSummaryHandler),
 	dependency.HttpRoute("POST", "/chat/:session_id/archive", chat.NewArchiveChatHandler),
+	dependency.HttpRoute("GET", "/inspection/:inspection_id", inspection.NewGetInspectionPaperHandler),
 	dependency.HttpRoute("GET", "/_schema/supported-emotions", schema.NewListSupportedEmotionHandler),
 	dependency.HttpRoute("GET", "/_schema/supported-features", schema.NewListSupportedFeatureHandler),
+	dependency.HttpRoute("GET", "/_schema/supported-inspections", schema.NewListSupportedInspectionHandler),
 }
 
 var WebsocketRoutes = []fx.Option{

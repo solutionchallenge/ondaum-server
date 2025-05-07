@@ -77,7 +77,7 @@ definitions:
       title:
         type: string
     type: object
-  chat.UpsertSummaryHandlerResponse:
+  chat.UpsertChatSummaryHandlerResponse:
     properties:
       created:
         type: boolean
@@ -125,6 +125,71 @@ definitions:
     - FeatureSuggestTestGAD7
     - FeatureSuggestTestPSS
     - FeatureEndConversation
+  common.Inspection:
+    enum:
+    - phq-9
+    - gad-7
+    - pss
+    type: string
+    x-enum-varnames:
+    - InspectionPHQ9
+    - InspectionGAD7
+    - InspectionPSS
+  common.InspectionAnswer:
+    properties:
+      score:
+        type: integer
+      text:
+        type: string
+    type: object
+  common.InspectionPaper:
+    properties:
+      guides:
+        type: string
+      name:
+        type: string
+      questions:
+        items:
+          $ref: '#/definitions/common.InspectionQuestion'
+        type: array
+      results:
+        items:
+          $ref: '#/definitions/common.InspectionResult'
+        type: array
+      scoring:
+        $ref: '#/definitions/common.InspectionScoring'
+    type: object
+  common.InspectionQuestion:
+    properties:
+      answers:
+        items:
+          $ref: '#/definitions/common.InspectionAnswer'
+        type: array
+      index:
+        type: integer
+      question:
+        type: string
+    type: object
+  common.InspectionResult:
+    properties:
+      critical:
+        type: boolean
+      description:
+        type: string
+      max:
+        type: integer
+      min:
+        type: integer
+      name:
+        type: string
+    type: object
+  common.InspectionScoring:
+    properties:
+      max:
+        type: integer
+      min:
+        type: integer
+    type: object
   http.Error:
     properties:
       message:
@@ -178,7 +243,7 @@ definitions:
       username:
         type: string
     type: object
-  user.UpsertAdditionHandlerRequest:
+  user.UpsertUserAdditionHandlerRequest:
     properties:
       concerns:
         items:
@@ -189,21 +254,21 @@ definitions:
           $ref: '#/definitions/common.Emotion'
         type: array
     type: object
-  user.UpsertAdditionHandlerResponse:
+  user.UpsertUserAdditionHandlerResponse:
     properties:
       created:
         type: boolean
       success:
         type: boolean
     type: object
-  user.UpsertPrivacyHandlerRequest:
+  user.UpsertUserPrivacyHandlerRequest:
     properties:
       birthday:
         type: string
       gender:
         type: string
     type: object
-  user.UpsertPrivacyHandlerResponse:
+  user.UpsertUserPrivacyHandlerResponse:
     properties:
       created:
         type: boolean
@@ -273,6 +338,24 @@ paths:
               $ref: '#/definitions/common.Feature'
             type: array
       summary: List supported features
+      tags:
+      - schema
+  /_schema/supported-inspections:
+    get:
+      consumes:
+      - application/json
+      description: List supported tests
+      operationId: ListSupportedTest
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/common.Inspection'
+            type: array
+      summary: List supported tests
       tags:
       - schema
   /_ws/chat:
@@ -447,8 +530,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create or update summary and return the created/updated summary
-      operationId: UpsertSummary
+      description: Create or update chat summary and return the created/updated chat
+        summary
+      operationId: UpsertChatSummary
       parameters:
       - description: Session ID
         in: path
@@ -461,7 +545,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/chat.UpsertSummaryHandlerResponse'
+            $ref: '#/definitions/chat.UpsertChatSummaryHandlerResponse'
         "401":
           description: Unauthorized
           schema:
@@ -476,9 +560,37 @@ paths:
             $ref: '#/definitions/http.Error'
       security:
       - BearerAuth: []
-      summary: Create or update summary
+      summary: Create or update chat summary
       tags:
       - chat
+  /inspection/:inspection_id:
+    get:
+      consumes:
+      - application/json
+      description: Get inspection paper as JSON format
+      operationId: GetInspectionPaper
+      parameters:
+      - description: Inspection ID
+        in: path
+        name: inspection_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.InspectionPaper'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Error'
+      summary: Get inspection paper
   /oauth/google/auth:
     post:
       consumes:
@@ -559,14 +671,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/user.UpsertAdditionHandlerRequest'
+          $ref: '#/definitions/user.UpsertUserAdditionHandlerRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/user.UpsertAdditionHandlerResponse'
+            $ref: '#/definitions/user.UpsertUserAdditionHandlerResponse'
         "400":
           description: Bad Request
           schema:
@@ -597,14 +709,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/user.UpsertPrivacyHandlerRequest'
+          $ref: '#/definitions/user.UpsertUserPrivacyHandlerRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/user.UpsertPrivacyHandlerResponse'
+            $ref: '#/definitions/user.UpsertUserPrivacyHandlerResponse'
         "400":
           description: Bad Request
           schema:
