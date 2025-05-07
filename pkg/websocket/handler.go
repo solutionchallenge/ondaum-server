@@ -14,7 +14,7 @@ import (
 
 type Handler interface {
 	Identify() string
-	HandleConnect(c *fiberws.Conn, payload ConnectWrapper) (ResponseWrapper, error)
+	HandleConnect(c *fiberws.Conn, payload ConnectWrapper) (ResponseWrapper, string, error)
 	HandleMessage(c *fiberws.Conn, payload MessageWrapper) (ResponseWrapper, bool, error)
 	HandlePing(c *fiberws.Conn, payload PingWrapper) (ResponseWrapper, bool, error)
 	HandleClose(c *fiberws.Conn, payload CloseWrapper)
@@ -22,13 +22,7 @@ type Handler interface {
 
 func Install(router fiber.Router, path string, handler Handler) fiber.Router {
 	return router.Get(path, fiberws.New(func(c *fiberws.Conn) {
-		sessionID, err := GetWebsocketSessionID(c)
-		if err != nil {
-			utils.Log(utils.ErrorLevel).Err(err).CID(sessionID).BT().Send("Failed to get session ID")
-			closeConnection(c, sessionID, "", "failed to get session ID", fiberws.CloseProtocolError)
-			return
-		}
-		responseWrapper, err := handleConnect(c, sessionID, handler)
+		responseWrapper, sessionID, err := handleConnect(c, handler)
 		if err != nil {
 			utils.Log(utils.ErrorLevel).Err(err).CID(sessionID).BT().Send("Failed to connect")
 			closeConnection(c, sessionID, "", "failed to connect", fiberws.CloseProtocolError)
@@ -117,10 +111,14 @@ func Install(router fiber.Router, path string, handler Handler) fiber.Router {
 }
 
 func handleConnect(
-	c *fiberws.Conn, sessionID string, handler Handler,
-) (ResponseWrapper, error) {
+	c *fiberws.Conn, handler Handler,
+) (ResponseWrapper, string, error) {
+	sessionID, err := GetWebsocketSessionID(c)
+	if err != nil {
+		return ResponseWrapper{}, "", err
+	}
 	connectWrapper := ConnectWrapper{
-		SessionID: sessionID,
+		ConnectID: sessionID,
 	}
 	userID, err := GetWebsocketUserID(c)
 	if err == nil {

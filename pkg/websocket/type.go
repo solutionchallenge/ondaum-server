@@ -19,42 +19,42 @@ const (
 )
 
 type ConnectWrapper struct {
-	SessionID string `json:"session_id"`
+	ConnectID string
 
-	Authorized   bool           `json:"-"`
-	UserID       int64          `json:"-"`
-	UserMetadata map[string]any `json:"-"`
+	Authorized   bool
+	UserID       int64
+	UserMetadata map[string]any
 }
 
 type MessageWrapper struct {
-	Action  Action `json:"action"`
-	Payload any    `json:"payload"`
+	Action  Action
+	Payload any
 
-	SessionID string `json:"-"`
-	MessageID string `json:"-"`
+	SessionID string
+	MessageID string
 
-	Authorized   bool           `json:"-"`
-	UserID       int64          `json:"-"`
-	UserMetadata map[string]any `json:"-"`
+	Authorized   bool
+	UserID       int64
+	UserMetadata map[string]any
 }
 
 type PingWrapper struct {
-	SessionID string `json:"session_id"`
-	MessageID string `json:"message_id"`
+	SessionID string
+	MessageID string
 
-	Authorized   bool           `json:"-"`
-	UserID       int64          `json:"-"`
-	UserMetadata map[string]any `json:"-"`
+	Authorized   bool
+	UserID       int64
+	UserMetadata map[string]any
 }
 
 type CloseWrapper struct {
-	CloseCode int `json:"close_code"`
+	CloseCode int
 
-	SessionID string `json:"session_id"`
+	SessionID string
 
-	Authorized   bool           `json:"-"`
-	UserID       int64          `json:"-"`
-	UserMetadata map[string]any `json:"-"`
+	Authorized   bool
+	UserID       int64
+	UserMetadata map[string]any
 }
 
 type ResponseWrapper struct {
@@ -80,7 +80,7 @@ func BuildResponseFrom[WRAP MessageWrapper | ConnectWrapper | PingWrapper | Clos
 		response.SessionID = request.SessionID
 		response.MessageID = id
 	case ConnectWrapper:
-		response.SessionID = request.SessionID
+		response.SessionID = request.ConnectID
 		response.MessageID = id
 	case PingWrapper:
 		response.SessionID = request.SessionID

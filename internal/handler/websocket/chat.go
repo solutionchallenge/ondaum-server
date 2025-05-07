@@ -42,7 +42,7 @@ func (h *ChatHandler) HandleMessage(c *fiberws.Conn, request wspkg.MessageWrappe
 	return impl.HandleMessage(h.deps.DB, h.deps.Clock, h.deps.LLM, h.deps.Future, request)
 }
 
-func (h *ChatHandler) HandleConnect(c *fiberws.Conn, request wspkg.ConnectWrapper) (wspkg.ResponseWrapper, error) {
+func (h *ChatHandler) HandleConnect(c *fiberws.Conn, request wspkg.ConnectWrapper) (wspkg.ResponseWrapper, string, error) {
 	return impl.HandleConnect(h.deps.DB, h.deps.Clock, request)
 }
 
