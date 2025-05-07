@@ -11,7 +11,7 @@ import (
 
 type RefreshAccessTokenHandlerDependencies struct {
 	fx.In
-	generator *jwt.Generator
+	JWT *jwt.Generator
 }
 
 type RefreshAccessTokenHandlerRequest struct {
@@ -49,7 +49,7 @@ func (h *RefreshAccessTokenHandler) Handle(c *fiber.Ctx) error {
 		})
 	}
 
-	tokenType, err := h.deps.generator.GetTokenType(request.RefreshToken)
+	tokenType, err := h.deps.JWT.GetTokenType(request.RefreshToken)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(
 			http.NewError(c.UserContext(), err, "Invalid refresh token"),
@@ -62,7 +62,7 @@ func (h *RefreshAccessTokenHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 
-	tokenPair, err := h.deps.generator.RefreshTokenPair(request.RefreshToken)
+	tokenPair, err := h.deps.JWT.RefreshTokenPair(request.RefreshToken)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(
 			http.NewError(c.UserContext(), err, "Failed to refresh token pair"),
