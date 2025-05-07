@@ -5,26 +5,27 @@ import (
 	"errors"
 
 	"github.com/gofiber/fiber/v2"
-	domain "github.com/solutionchallenge/ondaum-server/internal/domain/chat"
+	"github.com/solutionchallenge/ondaum-server/internal/domain/chat"
 	"github.com/solutionchallenge/ondaum-server/internal/domain/user"
 	"github.com/solutionchallenge/ondaum-server/pkg/http"
 	"github.com/uptrace/bun"
 	"go.uber.org/fx"
 )
 
-type GetChatHandlerDependencies struct {
+type GetSummaryHandlerDependencies struct {
 	fx.In
 	DB *bun.DB
 }
-type GetChatHandler struct {
-	deps GetChatHandlerDependencies
+
+type GetSummaryHandler struct {
+	deps GetSummaryHandlerDependencies
 }
 
-func NewGetChatHandler(deps GetChatHandlerDependencies) (*GetChatHandler, error) {
-	return &GetChatHandler{deps: deps}, nil
+func NewGetSummaryHandler(deps GetSummaryHandlerDependencies) (*GetSummaryHandler, error) {
+	return &GetSummaryHandler{deps: deps}, nil
 }
 
-func (h *GetChatHandler) Handle(c *fiber.Ctx) error {
+func (h *GetSummaryHandler) Handle(c *fiber.Ctx) error {
 	userID, err := http.GetUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(
@@ -37,33 +38,32 @@ func (h *GetChatHandler) Handle(c *fiber.Ctx) error {
 			http.NewError(c.UserContext(), err, "User not found"),
 		)
 	}
-
 	sessionID := c.Params("session_id")
 	if sessionID == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(
 			http.NewError(c.UserContext(), errors.New("session_id is required"), "Bad Request"),
 		)
 	}
-
-	chat := &domain.Chat{}
-	err = h.deps.DB.NewSelect().
+	chat := &chat.Chat{}
+	if err := h.deps.DB.NewSelect().
 		Model(chat).
-		Relation("Histories").
 		Relation("Summary").
 		Where("session_id = ?", sessionID).
 		Where("user_id = ?", userID).
-		Order("created_at ASC").
-		Scan(context.Background())
-	if err != nil {
+		Scan(context.Background()); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
-			http.NewError(c.UserContext(), err, "Chat not found"),
+			http.NewError(c.UserContext(), err, "Failed to get summary"),
 		)
 	}
-
-	response := chat.ToChatWithSimplifiedSummaryAndHistoriesDTO()
+	if chat.Summary == nil {
+		return c.Status(fiber.StatusNotFound).JSON(
+			http.NewError(c.UserContext(), errors.New("summary not found"), "Failed to get summary"),
+		)
+	}
+	response := chat.Summary.ToSimplifiedSummaryDTO()
 	return c.JSON(response)
 }
 
-func (h *GetChatHandler) Identify() string {
-	return "get-chat"
+func (h *GetSummaryHandler) Identify() string {
+	return "get-summary"
 }
