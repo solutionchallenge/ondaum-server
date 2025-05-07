@@ -7,7 +7,7 @@ definitions:
       success:
         type: boolean
     type: object
-  chat.ChatWithSimplifiedSummaryAndHistoriesDTO:
+  chat.ChatWithSummaryAndHistoriesDTO:
     properties:
       histories:
         items:
@@ -24,13 +24,13 @@ definitions:
       started_date:
         type: string
       summary:
-        $ref: '#/definitions/chat.SimplifiedSummaryDTO'
+        $ref: '#/definitions/chat.SummaryDTO'
       user_id:
         type: string
       user_timezone:
         type: string
     type: object
-  chat.ChatWithSimplifiedSummaryDTO:
+  chat.ChatWithSummaryDTO:
     properties:
       id:
         type: string
@@ -43,7 +43,7 @@ definitions:
       started_date:
         type: string
       summary:
-        $ref: '#/definitions/chat.SimplifiedSummaryDTO'
+        $ref: '#/definitions/chat.SummaryDTO'
       user_id:
         type: string
       user_timezone:
@@ -62,12 +62,29 @@ definitions:
       when:
         type: string
     type: object
-  chat.SimplifiedSummaryDTO:
+  chat.SummaryDTO:
     properties:
+      emotions:
+        items:
+          $ref: '#/definitions/common.EmotionRate'
+        type: array
+      keywords:
+        items:
+          type: string
+        type: array
       text:
         type: string
       title:
         type: string
+    type: object
+  chat.UpsertSummaryHandlerResponse:
+    properties:
+      created:
+        type: boolean
+      returning:
+        $ref: '#/definitions/chat.SummaryDTO'
+      success:
+        type: boolean
     type: object
   common.Emotion:
     enum:
@@ -87,6 +104,13 @@ definitions:
     - EmotionFear
     - EmotionDisgust
     - EmotionNeutral
+  common.EmotionRate:
+    properties:
+      emotion:
+        $ref: '#/definitions/common.Emotion'
+      rate:
+        type: number
+    type: object
   common.Feature:
     enum:
     - escalate_crisis
@@ -298,7 +322,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/chat.ChatWithSimplifiedSummaryAndHistoriesDTO'
+            $ref: '#/definitions/chat.ChatWithSummaryAndHistoriesDTO'
         "401":
           description: Unauthorized
           schema:
@@ -369,7 +393,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/chat.SimplifiedSummaryDTO'
+            $ref: '#/definitions/chat.SummaryDTO'
         "401":
           description: Unauthorized
           schema:
@@ -400,7 +424,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/chat.ChatWithSimplifiedSummaryDTO'
+              $ref: '#/definitions/chat.ChatWithSummaryDTO'
             type: array
         "401":
           description: Unauthorized
@@ -417,6 +441,42 @@ paths:
       security:
       - BearerAuth: []
       summary: List chats
+      tags:
+      - chat
+  /chats/:session_id/summary:
+    post:
+      consumes:
+      - application/json
+      description: Create or update summary and return the created/updated summary
+      operationId: UpsertSummary
+      parameters:
+      - description: Session ID
+        in: path
+        name: session_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/chat.UpsertSummaryHandlerResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Error'
+      security:
+      - BearerAuth: []
+      summary: Create or update summary
       tags:
       - chat
   /oauth/google/auth:

@@ -138,7 +138,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/chat.ChatWithSimplifiedSummaryAndHistoriesDTO"
+                            "$ref": "#/definitions/chat.ChatWithSummaryAndHistoriesDTO"
                         }
                     },
                     "401": {
@@ -245,7 +245,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/chat.SimplifiedSummaryDTO"
+                            "$ref": "#/definitions/chat.SummaryDTO"
                         }
                     },
                     "401": {
@@ -294,8 +294,64 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/chat.ChatWithSimplifiedSummaryDTO"
+                                "$ref": "#/definitions/chat.ChatWithSummaryDTO"
                             }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/chats/:session_id/summary": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create or update summary and return the created/updated summary",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Create or update summary",
+                "operationId": "UpsertSummary",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/chat.UpsertSummaryHandlerResponse"
                         }
                     },
                     "401": {
@@ -587,7 +643,7 @@
                 }
             }
         },
-        "chat.ChatWithSimplifiedSummaryAndHistoriesDTO": {
+        "chat.ChatWithSummaryAndHistoriesDTO": {
             "type": "object",
             "properties": {
                 "histories": {
@@ -612,7 +668,7 @@
                     "type": "string"
                 },
                 "summary": {
-                    "$ref": "#/definitions/chat.SimplifiedSummaryDTO"
+                    "$ref": "#/definitions/chat.SummaryDTO"
                 },
                 "user_id": {
                     "type": "string"
@@ -622,7 +678,7 @@
                 }
             }
         },
-        "chat.ChatWithSimplifiedSummaryDTO": {
+        "chat.ChatWithSummaryDTO": {
             "type": "object",
             "properties": {
                 "id": {
@@ -641,7 +697,7 @@
                     "type": "string"
                 },
                 "summary": {
-                    "$ref": "#/definitions/chat.SimplifiedSummaryDTO"
+                    "$ref": "#/definitions/chat.SummaryDTO"
                 },
                 "user_id": {
                     "type": "string"
@@ -671,14 +727,40 @@
                 }
             }
         },
-        "chat.SimplifiedSummaryDTO": {
+        "chat.SummaryDTO": {
             "type": "object",
             "properties": {
+                "emotions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/common.EmotionRate"
+                    }
+                },
+                "keywords": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "text": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "chat.UpsertSummaryHandlerResponse": {
+            "type": "object",
+            "properties": {
+                "created": {
+                    "type": "boolean"
+                },
+                "returning": {
+                    "$ref": "#/definitions/chat.SummaryDTO"
+                },
+                "success": {
+                    "type": "boolean"
                 }
             }
         },
@@ -702,6 +784,17 @@
                 "EmotionDisgust",
                 "EmotionNeutral"
             ]
+        },
+        "common.EmotionRate": {
+            "type": "object",
+            "properties": {
+                "emotion": {
+                    "$ref": "#/definitions/common.Emotion"
+                },
+                "rate": {
+                    "type": "number"
+                }
+            }
         },
         "common.Feature": {
             "type": "string",

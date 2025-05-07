@@ -31,7 +31,7 @@ func NewGetChatHandler(deps GetChatHandlerDependencies) (*GetChatHandler, error)
 // @Accept json
 // @Produce json
 // @Param session_id path string true "Session ID"
-// @Success 200 {object} domain.ChatWithSimplifiedSummaryAndHistoriesDTO
+// @Success 200 {object} domain.ChatWithSummaryAndHistoriesDTO
 // @Failure 401 {object} http.Error
 // @Failure 404 {object} http.Error
 // @Failure 500 {object} http.Error

@@ -31,7 +31,7 @@ func NewListChatHandler(deps ListChatHandlerDependencies) (*ListChatHandler, err
 // @Tags chat
 // @Accept json
 // @Produce json
-// @Success 200 {object} []chat.ChatWithSimplifiedSummaryDTO
+// @Success 200 {object} []chat.ChatWithSummaryDTO
 // @Failure 401 {object} http.Error
 // @Failure 404 {object} http.Error
 // @Failure 500 {object} http.Error

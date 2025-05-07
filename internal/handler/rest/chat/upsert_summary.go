@@ -36,6 +36,19 @@ func NewUpsertSummaryHandler(deps UpsertSummaryHandlerDependencies) (*UpsertSumm
 	return &UpsertSummaryHandler{deps: deps}, nil
 }
 
+// @ID UpsertSummary
+// @Summary Create or update summary
+// @Description Create or update summary and return the created/updated summary
+// @Tags chat
+// @Accept json
+// @Produce json
+// @Param session_id path string true "Session ID"
+// @Success 200 {object} UpsertSummaryHandlerResponse
+// @Failure 401 {object} http.Error
+// @Failure 404 {object} http.Error
+// @Failure 500 {object} http.Error
+// @Router /chats/:session_id/summary [post]
+// @Security BearerAuth
 func (h *UpsertSummaryHandler) Handle(c *fiber.Ctx) error {
 	userID, err := http.GetUserID(c)
 	if err != nil {

@@ -32,7 +32,7 @@ func NewGetSummaryHandler(deps GetSummaryHandlerDependencies) (*GetSummaryHandle
 // @Accept json
 // @Produce json
 // @Param session_id path string true "Session ID"
-// @Success 200 {object} chat.SimplifiedSummaryDTO
+// @Success 200 {object} chat.SummaryDTO
 // @Failure 401 {object} http.Error
 // @Failure 404 {object} http.Error
 // @Failure 500 {object} http.Error
