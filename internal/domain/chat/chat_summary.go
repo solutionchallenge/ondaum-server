@@ -22,30 +22,18 @@ type Summary struct {
 	Chat *Chat `json:"chat,omitempty" bun:"rel:belongs-to,join:chat_id=id"`
 }
 
-type DetailedSummaryDTO struct {
+type SummaryDTO struct {
 	Title    string                 `json:"title"`
 	Text     string                 `json:"text"`
 	Keywords []string               `json:"keywords"`
 	Emotions common.EmotionRateList `json:"emotions"`
 }
 
-type SimplifiedSummaryDTO struct {
-	Title string `json:"title"`
-	Text  string `json:"text"`
-}
-
-func (s *Summary) ToDetailedSummaryDTO() DetailedSummaryDTO {
-	return DetailedSummaryDTO{
+func (s *Summary) ToSummaryDTO() SummaryDTO {
+	return SummaryDTO{
 		Title:    s.Title,
 		Text:     s.Text,
 		Keywords: s.Keywords,
 		Emotions: s.Emotions,
-	}
-}
-
-func (s *Summary) ToSimplifiedSummaryDTO() SimplifiedSummaryDTO {
-	return SimplifiedSummaryDTO{
-		Title: s.Title,
-		Text:  s.Text,
 	}
 }

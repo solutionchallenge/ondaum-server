@@ -62,8 +62,8 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 
-	dtos := utils.Map(chats, func(c *chat.Chat) chat.ChatWithSimplifiedSummaryDTO {
-		return c.ToChatWithSimplifiedSummaryDTO()
+	dtos := utils.Map(chats, func(c *chat.Chat) chat.ChatWithSummaryDTO {
+		return c.ToChatWithSummaryDTO()
 	})
 	return c.JSON(dtos)
 }

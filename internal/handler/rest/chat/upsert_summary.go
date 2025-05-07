@@ -23,9 +23,9 @@ type UpsertSummaryHandlerDependencies struct {
 }
 
 type UpsertSummaryHandlerResponse struct {
-	Success   bool                        `json:"success"`
-	Created   bool                        `json:"created"`
-	Returning domain.SimplifiedSummaryDTO `json:"returning"`
+	Success   bool              `json:"success"`
+	Created   bool              `json:"created"`
+	Returning domain.SummaryDTO `json:"returning"`
 }
 
 type UpsertSummaryHandler struct {
@@ -143,7 +143,7 @@ func (h *UpsertSummaryHandler) Handle(c *fiber.Ctx) error {
 	response := &UpsertSummaryHandlerResponse{
 		Success:   true,
 		Created:   rowsAffected == 1,
-		Returning: model.ToSimplifiedSummaryDTO(),
+		Returning: model.ToSummaryDTO(),
 	}
 	return c.JSON(response)
 }

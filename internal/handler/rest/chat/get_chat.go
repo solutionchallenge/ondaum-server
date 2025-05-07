@@ -75,7 +75,7 @@ func (h *GetChatHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 
-	response := chat.ToChatWithSimplifiedSummaryAndHistoriesDTO()
+	response := chat.ToChatWithSummaryAndHistoriesDTO()
 	return c.JSON(response)
 }
 

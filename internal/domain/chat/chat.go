@@ -26,29 +26,29 @@ type Chat struct {
 	Histories []*History `json:"histories,omitempty" bun:"rel:has-many,join:id=chat_id"`
 }
 
-type ChatWithSimplifiedSummaryDTO struct {
-	ID           string                `json:"id"`
-	UserID       string                `json:"user_id"`
-	SessionID    string                `json:"session_id"`
-	StartedDate  string                `json:"started_date"`
-	UserTimezone string                `json:"user_timezone"`
-	IsFinished   bool                  `json:"is_finished"`
-	IsArchived   bool                  `json:"is_archived"`
-	Summary      *SimplifiedSummaryDTO `json:"summary,omitempty"`
+type ChatWithSummaryDTO struct {
+	ID           string      `json:"id"`
+	UserID       string      `json:"user_id"`
+	SessionID    string      `json:"session_id"`
+	StartedDate  string      `json:"started_date"`
+	UserTimezone string      `json:"user_timezone"`
+	IsFinished   bool        `json:"is_finished"`
+	IsArchived   bool        `json:"is_archived"`
+	Summary      *SummaryDTO `json:"summary,omitempty"`
 }
 
-type ChatWithSimplifiedSummaryAndHistoriesDTO struct {
-	ChatWithSimplifiedSummaryDTO
+type ChatWithSummaryAndHistoriesDTO struct {
+	ChatWithSummaryDTO
 	Histories []HistoryDTO `json:"histories"`
 }
 
-func (c *Chat) ToChatWithSimplifiedSummaryDTO() ChatWithSimplifiedSummaryDTO {
-	summary := (*SimplifiedSummaryDTO)(nil)
+func (c *Chat) ToChatWithSummaryDTO() ChatWithSummaryDTO {
+	summary := (*SummaryDTO)(nil)
 	if c.Summary != nil {
-		dto := c.Summary.ToSimplifiedSummaryDTO()
+		dto := c.Summary.ToSummaryDTO()
 		summary = &dto
 	}
-	return ChatWithSimplifiedSummaryDTO{
+	return ChatWithSummaryDTO{
 		ID:           strconv.FormatInt(c.ID, 10),
 		UserID:       strconv.FormatInt(c.UserID, 10),
 		SessionID:    c.SessionID,
@@ -60,15 +60,15 @@ func (c *Chat) ToChatWithSimplifiedSummaryDTO() ChatWithSimplifiedSummaryDTO {
 	}
 }
 
-func (c *Chat) ToChatWithSimplifiedSummaryAndHistoriesDTO() ChatWithSimplifiedSummaryAndHistoriesDTO {
+func (c *Chat) ToChatWithSummaryAndHistoriesDTO() ChatWithSummaryAndHistoriesDTO {
 	histories := make([]HistoryDTO, len(c.Histories))
 	if len(c.Histories) > 0 {
 		histories = utils.Map(c.Histories, func(h *History) HistoryDTO {
 			return h.ToHistoryDTO()
 		})
 	}
-	return ChatWithSimplifiedSummaryAndHistoriesDTO{
-		ChatWithSimplifiedSummaryDTO: c.ToChatWithSimplifiedSummaryDTO(),
-		Histories:                    histories,
+	return ChatWithSummaryAndHistoriesDTO{
+		ChatWithSummaryDTO: c.ToChatWithSummaryDTO(),
+		Histories:          histories,
 	}
 }

@@ -73,7 +73,7 @@ func (h *GetSummaryHandler) Handle(c *fiber.Ctx) error {
 			http.NewError(c.UserContext(), errors.New("summary not found"), "Failed to get summary"),
 		)
 	}
-	response := chat.Summary.ToSimplifiedSummaryDTO()
+	response := chat.Summary.ToSummaryDTO()
 	return c.JSON(response)
 }
 
