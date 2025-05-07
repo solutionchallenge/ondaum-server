@@ -139,6 +139,56 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/refresh": {
+            "post": {
+                "description": "Refresh access token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Refresh access token",
+                "operationId": "RefreshAccessToken",
+                "parameters": [
+                    {
+                        "description": "Refresh token",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.RefreshAccessTokenHandlerRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/auth.RefreshAccessTokenHandlerResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/chats": {
             "get": {
                 "security": [
@@ -884,6 +934,22 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "auth.RefreshAccessTokenHandlerRequest": {
+            "type": "object",
+            "properties": {
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.RefreshAccessTokenHandlerResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                }
+            }
+        },
         "chat.ArchiveChatHandlerResponse": {
             "type": "object",
             "properties": {
@@ -1168,6 +1234,9 @@ const docTemplate = `{
             "properties": {
                 "diagnosis": {
                     "$ref": "#/definitions/common.Diagnosis"
+                },
+                "id": {
+                    "type": "integer"
                 },
                 "result_critical": {
                     "type": "boolean"

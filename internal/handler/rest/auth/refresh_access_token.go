@@ -35,7 +35,7 @@ func NewRefreshAccessTokenHandler(deps RefreshAccessTokenHandlerDependencies) (*
 // @Description Refresh access token
 // @Accept json
 // @Produce json
-// @Param request body RefreshAccessTokenHandlerRequest true
+// @Param request body RefreshAccessTokenHandlerRequest true "Refresh token"
 // @Success 200 {object} RefreshAccessTokenHandlerResponse
 // @Failure 401 {object} http.Error
 // @Failure 404 {object} http.Error

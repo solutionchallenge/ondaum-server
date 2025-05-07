@@ -1,5 +1,15 @@
 basePath: /api/v1
 definitions:
+  auth.RefreshAccessTokenHandlerRequest:
+    properties:
+      refresh_token:
+        type: string
+    type: object
+  auth.RefreshAccessTokenHandlerResponse:
+    properties:
+      access_token:
+        type: string
+    type: object
   chat.ArchiveChatHandlerResponse:
     properties:
       finished:
@@ -194,6 +204,8 @@ definitions:
     properties:
       diagnosis:
         $ref: '#/definitions/common.Diagnosis'
+      id:
+        type: integer
       result_critical:
         type: boolean
       result_description:
@@ -416,6 +428,39 @@ paths:
       summary: Connect Chat Websocket
       tags:
       - chat
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refresh access token
+      operationId: RefreshAccessToken
+      parameters:
+      - description: Refresh token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.RefreshAccessTokenHandlerRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.RefreshAccessTokenHandlerResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Error'
+      summary: Refresh access token
   /chats:
     get:
       consumes:
