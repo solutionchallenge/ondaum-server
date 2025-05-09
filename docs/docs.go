@@ -237,6 +237,12 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "type": "string",
+                        "description": "Filter by message ID",
+                        "name": "message_id",
+                        "in": "query"
+                    },
+                    {
                         "type": "boolean",
                         "description": "Filter only archived chats",
                         "name": "only_archived",

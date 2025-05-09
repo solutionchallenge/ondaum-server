@@ -502,6 +502,10 @@ paths:
         in: query
         name: dominant_emotion
         type: string
+      - description: Filter by message ID
+        in: query
+        name: message_id
+        type: string
       - description: Filter only archived chats
         in: query
         name: only_archived

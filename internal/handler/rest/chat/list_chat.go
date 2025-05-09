@@ -39,6 +39,7 @@ func NewListChatHandler(deps ListChatHandlerDependencies) (*ListChatHandler, err
 // @Param datetime_gte query string false "Filter by chat started datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)"
 // @Param datetime_lte query string false "Filter by chat ended datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)"
 // @Param dominant_emotion query string false "Filter by dominant emotion"
+// @Param message_id query string false "Filter by message ID"
 // @Param only_archived query bool false "Filter only archived chats"
 // @Success 200 {object} ListChatResponse
 // @Failure 401 {object} http.Error
@@ -67,6 +68,7 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 	datetimeLte := c.Query("datetime_lte")
 	dominantEmotion := c.Query("dominant_emotion")
 	onlyArchivedStr := c.Query("only_archived")
+	messageID := c.Query("message_id")
 
 	var startTime, endTime time.Time
 	if datetimeGte != "" {
@@ -110,6 +112,13 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 	}
 	if !endTime.IsZero() {
 		query = query.Where("(finished_at IS NULL OR finished_at <= ?)", endTime)
+	}
+
+	if messageID != "" {
+		query = query.
+			Join("JOIN chat_histories ch").
+			JoinOn("ch.chat_id = c.id").
+			Where("ch.message_id = ?", messageID)
 	}
 
 	var chats []domain.Chat
