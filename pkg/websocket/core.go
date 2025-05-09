@@ -17,30 +17,42 @@ func EnableWebsocketCore(app fiber.Router, path string, generator *jwt.Generator
 		if c.Get("Upgrade") != "websocket" {
 			return c.SendStatus(fiber.StatusUpgradeRequired)
 		}
+
 		sid := c.Query("session_id")
 		if sid == "" {
 			sid = uuid.New().String()
 		}
 		c.Locals("X-Websocket-Session-ID", sid)
-		tryWebsocketAuthorization(c, generator, sid)
+
+		token := c.Query("access_token")
+		if token == "" {
+			tryWebsocketAuthorization(c, generator, sid)
+		} else {
+			tryWebsocketAuthorization(c, generator, sid, token)
+		}
+
 		return c.Next()
 	})
 	return nil
 }
 
-func tryWebsocketAuthorization(c *fiber.Ctx, generator *jwt.Generator, sessionID string) {
-	authHeader := c.Get("Authorization")
-	if authHeader == "" {
-		utils.Log(utils.DebugLevel).Ctx(c.UserContext()).RID(sessionID).BT().Send("No authorization header")
-		return
+func tryWebsocketAuthorization(c *fiber.Ctx, generator *jwt.Generator, sessionID string, accessToken ...string) {
+	tokenString := ""
+	if len(accessToken) > 0 && accessToken[0] != "" {
+		tokenString = accessToken[0]
+	} else {
+		authHeader := c.Get("Authorization")
+		if authHeader == "" {
+			utils.Log(utils.DebugLevel).Ctx(c.UserContext()).RID(sessionID).BT().Send("No authorization header")
+			return
+		}
+		if len(authHeader) < 7 || authHeader[:7] != "Bearer " {
+			utils.Log(utils.WarnLevel).Ctx(c.UserContext()).RID(sessionID).BT().Send("Missing Bearer prefix in Authorization header")
+			return
+		}
+		tokenString = authHeader[7:]
 	}
 
-	if len(authHeader) < 7 || authHeader[:7] != "Bearer " {
-		utils.Log(utils.WarnLevel).Ctx(c.UserContext()).RID(sessionID).BT().Send("Missing Bearer prefix in Authorization header")
-		return
-	}
-
-	tokenString := authHeader[7:]
 	tokenType, err := generator.GetTokenType(tokenString)
 	if err != nil {
 		utils.Log(utils.WarnLevel).Ctx(c.UserContext()).Err(err).RID(sessionID).BT().Send("Failed to get token type")

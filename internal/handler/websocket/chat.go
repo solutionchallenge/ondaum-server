@@ -34,6 +34,7 @@ func NewChatHandler(deps ChatHandlerDependencies) (*ChatHandler, error) {
 // @Accept       json
 // @Produce      json
 // @Param        session_id query string false "Websocket Session ID (optional; if not provided, the server will use the most recent non-archived conversation or create a new one if none exists)"
+// @Param        access_token query string false "Access Token (optional; if not provided, the server will try to get the access token from the request header)"
 // @Success      200 {object} wspkg.ResponseWrapper
 // @Failure      426 {object} http.Error
 // @Router       /_ws/chat [get]

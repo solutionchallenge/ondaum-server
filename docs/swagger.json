@@ -115,6 +115,12 @@
                         "description": "Websocket Session ID (optional; if not provided, the server will use the most recent non-archived conversation or create a new one if none exists)",
                         "name": "session_id",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Access Token (optional; if not provided, the server will try to get the access token from the request header)",
+                        "name": "access_token",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -141,6 +147,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "auth"
                 ],
                 "summary": "Refresh access token",
                 "operationId": "RefreshAccessToken",
@@ -464,6 +473,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "diagnosis"
+                ],
                 "summary": "List diagnosis result",
                 "operationId": "ListDiagnosisResult",
                 "responses": {
@@ -505,6 +517,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "diagnosis"
                 ],
                 "summary": "Report diagnosis result",
                 "operationId": "ReportDiagnosisResult",
@@ -556,6 +571,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "diagnosis"
+                ],
                 "summary": "List diagnosis papers",
                 "operationId": "ListDiagnosisPaper",
                 "responses": {
@@ -584,6 +602,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "diagnosis"
                 ],
                 "summary": "Get diagnosis result",
                 "operationId": "GetDiagnosisResult",
@@ -624,7 +645,7 @@
                 }
             }
         },
-        "/diagnosis-papers/{paper_id": {
+        "/diagnosis-papers/{paper_id}": {
             "get": {
                 "security": [
                     {
@@ -637,6 +658,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "diagnosis"
                 ],
                 "summary": "Get diagnosis paper",
                 "operationId": "GetDiagnosisPaper",

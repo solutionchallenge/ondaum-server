@@ -412,6 +412,11 @@ paths:
         in: query
         name: session_id
         type: string
+      - description: Access Token (optional; if not provided, the server will try
+          to get the access token from the request header)
+        in: query
+        name: access_token
+        type: string
       produces:
       - application/json
       responses:
@@ -461,6 +466,8 @@ paths:
           schema:
             $ref: '#/definitions/http.Error'
       summary: Refresh access token
+      tags:
+      - auth
   /chats:
     get:
       consumes:
@@ -664,6 +671,8 @@ paths:
       security:
       - BearerAuth: []
       summary: List diagnosis result
+      tags:
+      - diagnosis
     post:
       consumes:
       - application/json
@@ -698,6 +707,8 @@ paths:
       security:
       - BearerAuth: []
       summary: Report diagnosis result
+      tags:
+      - diagnosis
   /diagnoses/papers:
     get:
       consumes:
@@ -714,6 +725,8 @@ paths:
               $ref: '#/definitions/diagnosis.ListDiagnosisPaperHandlerResponse'
             type: array
       summary: List diagnosis papers
+      tags:
+      - diagnosis
   /diagnosis-papers/{diagnosis_id}:
     get:
       consumes:
@@ -748,7 +761,9 @@ paths:
       security:
       - BearerAuth: []
       summary: Get diagnosis result
-  /diagnosis-papers/{paper_id:
+      tags:
+      - diagnosis
+  /diagnosis-papers/{paper_id}:
     get:
       consumes:
       - application/json
@@ -778,6 +793,8 @@ paths:
       security:
       - BearerAuth: []
       summary: Get diagnosis paper
+      tags:
+      - diagnosis
   /oauth/google/auth:
     post:
       consumes:

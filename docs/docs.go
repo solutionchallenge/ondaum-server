@@ -121,6 +121,12 @@ const docTemplate = `{
                         "description": "Websocket Session ID (optional; if not provided, the server will use the most recent non-archived conversation or create a new one if none exists)",
                         "name": "session_id",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Access Token (optional; if not provided, the server will try to get the access token from the request header)",
+                        "name": "access_token",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -147,6 +153,9 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "auth"
                 ],
                 "summary": "Refresh access token",
                 "operationId": "RefreshAccessToken",
@@ -470,6 +479,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "diagnosis"
+                ],
                 "summary": "List diagnosis result",
                 "operationId": "ListDiagnosisResult",
                 "responses": {
@@ -511,6 +523,9 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "diagnosis"
                 ],
                 "summary": "Report diagnosis result",
                 "operationId": "ReportDiagnosisResult",
@@ -562,6 +577,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "diagnosis"
+                ],
                 "summary": "List diagnosis papers",
                 "operationId": "ListDiagnosisPaper",
                 "responses": {
@@ -590,6 +608,9 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "diagnosis"
                 ],
                 "summary": "Get diagnosis result",
                 "operationId": "GetDiagnosisResult",
@@ -630,7 +651,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/diagnosis-papers/{paper_id": {
+        "/diagnosis-papers/{paper_id}": {
             "get": {
                 "security": [
                     {
@@ -643,6 +664,9 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "diagnosis"
                 ],
                 "summary": "Get diagnosis paper",
                 "operationId": "GetDiagnosisPaper",
