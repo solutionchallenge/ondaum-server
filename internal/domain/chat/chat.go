@@ -34,6 +34,7 @@ type ChatWithSummaryDTO struct {
 	SessionID    string      `json:"session_id"`
 	StartedDate  string      `json:"started_date"`
 	UserTimezone string      `json:"user_timezone"`
+	ChatDuration string      `json:"chat_duration"`
 	IsFinished   bool        `json:"is_finished"`
 	IsArchived   bool        `json:"is_archived"`
 	Summary      *SummaryDTO `json:"summary,omitempty"`
@@ -56,6 +57,7 @@ func (c *Chat) ToChatWithSummaryDTO() ChatWithSummaryDTO {
 		SessionID:    c.SessionID,
 		StartedDate:  c.StartedDate.Format(utils.TIME_FORMAT_DATE),
 		UserTimezone: c.UserTimezone,
+		ChatDuration: c.ChatDuration.ToString(common.DurationFormatTime),
 		IsFinished:   !c.FinishedAt.IsZero(),
 		IsArchived:   !c.ArchivedAt.IsZero(),
 		Summary:      summary,

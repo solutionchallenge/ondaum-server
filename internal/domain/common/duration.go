@@ -7,6 +7,13 @@ import (
 	"time"
 )
 
+type DurationFormat string
+
+const (
+	DurationFormatSeconds = DurationFormat("3600sec")
+	DurationFormatTime    = DurationFormat("02:04:05")
+)
+
 type Duration time.Duration
 
 func (d *Duration) Scan(value interface{}) error {
@@ -36,6 +43,22 @@ func (d Duration) Value() (driver.Value, error) {
 
 func (d Duration) ToDuration() time.Duration {
 	return time.Duration(d)
+}
+
+func (d Duration) ToString(format DurationFormat) string {
+	seconds := int64(d.ToDuration().Seconds())
+
+	switch format {
+	case DurationFormatSeconds:
+		return fmt.Sprintf("%dsec", seconds)
+	case DurationFormatTime:
+		hours := seconds / 3600
+		minutes := (seconds % 3600) / 60
+		secs := seconds % 60
+		return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, secs)
+	default:
+		return fmt.Sprintf("%dsec", seconds)
+	}
 }
 
 func NewDuration(d time.Duration) Duration {
@@ -78,6 +101,13 @@ func (nd NullableDuration) Value() (driver.Value, error) {
 
 func (nd NullableDuration) ToDuration() time.Duration {
 	return nd.Duration.ToDuration()
+}
+
+func (nd NullableDuration) ToString(format DurationFormat) string {
+	if !nd.Valid {
+		return ""
+	}
+	return nd.Duration.ToString(format)
 }
 
 func NewNullableDuration(d time.Duration) NullableDuration {
