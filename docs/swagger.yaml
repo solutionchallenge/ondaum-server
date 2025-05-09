@@ -19,6 +19,8 @@ definitions:
     type: object
   chat.ChatWithSummaryAndHistoriesDTO:
     properties:
+      chat_duration:
+        type: string
       histories:
         items:
           $ref: '#/definitions/chat.HistoryDTO'
@@ -42,6 +44,8 @@ definitions:
     type: object
   chat.ChatWithSummaryDTO:
     properties:
+      chat_duration:
+        type: string
       id:
         type: string
       is_archived:
@@ -72,6 +76,13 @@ definitions:
       when:
         type: string
     type: object
+  chat.ListChatResponse:
+    properties:
+      chats:
+        items:
+          $ref: '#/definitions/chat.ChatWithSummaryDTO'
+        type: array
+    type: object
   chat.SummaryDTO:
     properties:
       emotions:
@@ -79,6 +90,10 @@ definitions:
           $ref: '#/definitions/common.EmotionRate'
         type: array
       keywords:
+        items:
+          type: string
+        type: array
+      recommendations:
         items:
           type: string
         type: array
@@ -472,23 +487,38 @@ paths:
     get:
       consumes:
       - application/json
-      description: List chats with summaries
+      description: List chats with optional filters for datetime range and emotion
       operationId: ListChat
+      parameters:
+      - description: Filter by chat started datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)
+        in: query
+        name: datetime_gte
+        type: string
+      - description: Filter by chat ended datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)
+        in: query
+        name: datetime_lte
+        type: string
+      - description: Filter by dominant emotion
+        in: query
+        name: dominant_emotion
+        type: string
+      - description: Filter only archived chats
+        in: query
+        name: only_archived
+        type: boolean
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/chat.ChatWithSummaryDTO'
-            type: array
-        "401":
-          description: Unauthorized
+            $ref: '#/definitions/chat.ListChatResponse'
+        "400":
+          description: Bad Request
           schema:
             $ref: '#/definitions/http.Error'
-        "404":
-          description: Not Found
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/http.Error'
         "500":

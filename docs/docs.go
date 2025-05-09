@@ -205,7 +205,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "List chats with summaries",
+                "description": "List chats with optional filters for datetime range and emotion",
                 "consumes": [
                     "application/json"
                 ],
@@ -217,24 +217,47 @@ const docTemplate = `{
                 ],
                 "summary": "List chats",
                 "operationId": "ListChat",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by chat started datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)",
+                        "name": "datetime_gte",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by chat ended datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)",
+                        "name": "datetime_lte",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by dominant emotion",
+                        "name": "dominant_emotion",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Filter only archived chats",
+                        "name": "only_archived",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/chat.ChatWithSummaryDTO"
-                            }
+                            "$ref": "#/definitions/chat.ListChatResponse"
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/http.Error"
                         }
                     },
-                    "404": {
-                        "description": "Not Found",
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/http.Error"
                         }
@@ -988,6 +1011,9 @@ const docTemplate = `{
         "chat.ChatWithSummaryAndHistoriesDTO": {
             "type": "object",
             "properties": {
+                "chat_duration": {
+                    "type": "string"
+                },
                 "histories": {
                     "type": "array",
                     "items": {
@@ -1023,6 +1049,9 @@ const docTemplate = `{
         "chat.ChatWithSummaryDTO": {
             "type": "object",
             "properties": {
+                "chat_duration": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -1069,6 +1098,17 @@ const docTemplate = `{
                 }
             }
         },
+        "chat.ListChatResponse": {
+            "type": "object",
+            "properties": {
+                "chats": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/chat.ChatWithSummaryDTO"
+                    }
+                }
+            }
+        },
         "chat.SummaryDTO": {
             "type": "object",
             "properties": {
@@ -1079,6 +1119,12 @@ const docTemplate = `{
                     }
                 },
                 "keywords": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "recommendations": {
                     "type": "array",
                     "items": {
                         "type": "string"
