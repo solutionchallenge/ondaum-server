@@ -37,6 +37,7 @@ func NewListUserHandler(deps ListUserHandlerDependencies) (*ListUserHandler, err
 
 // Must not be documented. (Debugging purpose only!)
 func (h *ListUserHandler) Handle(c *fiber.Ctx) error {
+	ctx := c.UserContext()
 	if os.Getenv("FLAG_DEBUGGING_FEATURES_ENABLED") != "true" {
 		return c.SendStatus(fiber.StatusNotFound)
 	}
@@ -45,11 +46,11 @@ func (h *ListUserHandler) Handle(c *fiber.Ctx) error {
 	err := h.deps.DB.NewSelect().
 		Model(&users).
 		Order("id ASC").
-		Scan(c.UserContext())
+		Scan(ctx)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(c.UserContext(), err, "Failed to list users"),
+			http.NewError(ctx, err, "Failed to list users"),
 		)
 	}
 

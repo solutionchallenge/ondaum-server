@@ -37,6 +37,7 @@ func NewAuthUserHandler(deps AuthUserHandlerDependencies) (*AuthUserHandler, err
 
 // Must not be documented. (Debugging purpose only!)
 func (h *AuthUserHandler) Handle(c *fiber.Ctx) error {
+	ctx := c.UserContext()
 	if os.Getenv("FLAG_DEBUGGING_FEATURES_ENABLED") != "true" {
 		return c.SendStatus(fiber.StatusNotFound)
 	}
@@ -44,7 +45,7 @@ func (h *AuthUserHandler) Handle(c *fiber.Ctx) error {
 	request := &AuthUserHandlerRequest{}
 	if err := c.BodyParser(request); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(
-			http.NewError(c.UserContext(), err, "Invalid request"),
+			http.NewError(ctx, err, "Invalid request"),
 		)
 	}
 
@@ -52,18 +53,18 @@ func (h *AuthUserHandler) Handle(c *fiber.Ctx) error {
 	err := h.deps.DB.NewSelect().
 		Model(user).
 		Where("id = ?", request.ID).
-		Scan(c.UserContext())
+		Scan(ctx)
 
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
-			http.NewError(c.UserContext(), err, "User not found"),
+			http.NewError(ctx, err, "User not found"),
 		)
 	}
 
 	tokenPair, err := h.deps.JWT.GenerateTokenPair(strconv.FormatInt(user.ID, 10))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(c.UserContext(), err, "Failed to generate token pair"),
+			http.NewError(ctx, err, "Failed to generate token pair"),
 		)
 	}
 

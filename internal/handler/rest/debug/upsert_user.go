@@ -36,6 +36,7 @@ func NewUpsertUserHandler(deps UpsertUserHandlerDependencies) (*UpsertUserHandle
 
 // Must not be documented. (Debugging purpose only!)
 func (h *UpsertUserHandler) Handle(c *fiber.Ctx) error {
+	ctx := c.UserContext()
 	if os.Getenv("FLAG_DEBUGGING_FEATURES_ENABLED") != "true" {
 		return c.SendStatus(fiber.StatusNotFound)
 	}
@@ -43,7 +44,7 @@ func (h *UpsertUserHandler) Handle(c *fiber.Ctx) error {
 	request := &UpsertUserHandlerRequest{}
 	if err := c.BodyParser(request); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(
-			http.NewError(c.UserContext(), err, "Invalid request"),
+			http.NewError(ctx, err, "Invalid request"),
 		)
 	}
 
@@ -57,11 +58,11 @@ func (h *UpsertUserHandler) Handle(c *fiber.Ctx) error {
 		On("DUPLICATE KEY UPDATE").
 		Set("username = ?", request.Username).
 		Set("updated_at = CURRENT_TIMESTAMP").
-		Exec(c.UserContext())
+		Exec(ctx)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(c.UserContext(), err, "Failed to upsert user"),
+			http.NewError(ctx, err, "Failed to upsert user"),
 		)
 	}
 

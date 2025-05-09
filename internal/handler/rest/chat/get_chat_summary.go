@@ -38,22 +38,23 @@ func NewGetChatSummaryHandler(deps GetChatSummaryHandlerDependencies) (*GetChatS
 // @Router /chats/{session_id}/summary [get]
 // @Security BearerAuth
 func (h *GetChatSummaryHandler) Handle(c *fiber.Ctx) error {
+	ctx := c.UserContext()
 	userID, err := http.GetUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(
-			http.NewError(c.UserContext(), err, "Unauthorized"),
+			http.NewError(ctx, err, "Unauthorized"),
 		)
 	}
 	user := &user.User{ID: userID}
-	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(c.UserContext()); err != nil {
+	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(ctx); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
-			http.NewError(c.UserContext(), err, "User not found"),
+			http.NewError(ctx, err, "User not found"),
 		)
 	}
 	sessionID := c.Params("session_id")
 	if sessionID == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(
-			http.NewError(c.UserContext(), errors.New("session_id is required"), "Bad Request"),
+			http.NewError(ctx, errors.New("session_id is required"), "Bad Request"),
 		)
 	}
 	chat := &chat.Chat{}
@@ -62,14 +63,14 @@ func (h *GetChatSummaryHandler) Handle(c *fiber.Ctx) error {
 		Relation("Summary").
 		Where("session_id = ?", sessionID).
 		Where("user_id = ?", userID).
-		Scan(c.UserContext()); err != nil {
+		Scan(ctx); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
-			http.NewError(c.UserContext(), err, "Failed to get summary"),
+			http.NewError(ctx, err, "Failed to get summary"),
 		)
 	}
 	if chat.Summary == nil {
 		return c.Status(fiber.StatusNotFound).JSON(
-			http.NewError(c.UserContext(), errors.New("summary not found"), "Failed to get summary"),
+			http.NewError(ctx, errors.New("summary not found"), "Failed to get summary"),
 		)
 	}
 	response := chat.Summary.ToSummaryDTO()

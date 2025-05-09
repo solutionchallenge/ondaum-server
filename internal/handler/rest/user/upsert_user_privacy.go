@@ -48,17 +48,18 @@ func NewUpsertUserPrivacyHandler(deps UpsertUserPrivacyHandlerDependencies) (*Up
 // @Router       /user/privacy [put]
 // @Security     BearerAuth
 func (h *UpsertUserPrivacyHandler) Handle(c *fiber.Ctx) error {
+	ctx := c.UserContext()
 	userID, err := http.GetUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(
-			http.NewError(c.UserContext(), err, "Unauthorized"),
+			http.NewError(ctx, err, "Unauthorized"),
 		)
 	}
 
 	request := &UpsertUserPrivacyHandlerRequest{}
 	if err := c.BodyParser(request); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(
-			http.NewError(c.UserContext(), err, "Invalid request"),
+			http.NewError(ctx, err, "Invalid request"),
 		)
 	}
 
@@ -66,7 +67,7 @@ func (h *UpsertUserPrivacyHandler) Handle(c *fiber.Ctx) error {
 	birthday, err := time.Parse(utils.TIME_FORMAT_DATE, request.Birthday)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(
-			http.NewError(c.UserContext(), err, "Invalid birthday format. Use YYYY-MM-DD"),
+			http.NewError(ctx, err, "Invalid birthday format. Use YYYY-MM-DD"),
 		)
 	}
 
@@ -74,7 +75,7 @@ func (h *UpsertUserPrivacyHandler) Handle(c *fiber.Ctx) error {
 	gender := user.UserGender(request.Gender)
 	if gender != user.UserGenderMale && gender != user.UserGenderFemale && gender != user.UserGenderOther {
 		return c.Status(fiber.StatusBadRequest).JSON(
-			http.NewError(c.UserContext(), nil, "Invalid gender. Must be one of: male, female, other"),
+			http.NewError(ctx, nil, "Invalid gender. Must be one of: male, female, other"),
 		)
 	}
 
@@ -90,11 +91,11 @@ func (h *UpsertUserPrivacyHandler) Handle(c *fiber.Ctx) error {
 		Set("gender = ?", gender).
 		Set("birthday = ?", birthday).
 		Set("updated_at = CURRENT_TIMESTAMP").
-		Exec(c.UserContext())
+		Exec(ctx)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(c.UserContext(), err, "Failed to upsert user privacy"),
+			http.NewError(ctx, err, "Failed to upsert user privacy"),
 		)
 	}
 

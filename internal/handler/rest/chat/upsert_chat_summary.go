@@ -49,23 +49,24 @@ func NewUpsertChatSummaryHandler(deps UpsertChatSummaryHandlerDependencies) (*Up
 // @Router /chats/{session_id}/summary [post]
 // @Security BearerAuth
 func (h *UpsertChatSummaryHandler) Handle(c *fiber.Ctx) error {
+	ctx := c.UserContext()
 	userID, err := http.GetUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(
-			http.NewError(c.UserContext(), err, "Unauthorized"),
+			http.NewError(ctx, err, "Unauthorized"),
 		)
 	}
 	user := &user.User{ID: userID}
-	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(c.UserContext()); err != nil {
+	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(ctx); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
-			http.NewError(c.UserContext(), err, "User not found"),
+			http.NewError(ctx, err, "User not found"),
 		)
 	}
 
 	sessionID := c.Params("session_id")
 	if sessionID == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(
-			http.NewError(c.UserContext(), errors.New("session_id is required"), "Bad Request"),
+			http.NewError(ctx, errors.New("session_id is required"), "Bad Request"),
 		)
 	}
 
@@ -76,20 +77,20 @@ func (h *UpsertChatSummaryHandler) Handle(c *fiber.Ctx) error {
 		Where("session_id = ?", sessionID).
 		Where("user_id = ?", userID).
 		Order("created_at ASC").
-		Scan(c.UserContext())
+		Scan(ctx)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
-			http.NewError(c.UserContext(), err, "Chat not found"),
+			http.NewError(ctx, err, "Chat not found"),
 		)
 	}
 	if chat.ArchivedAt.IsZero() {
 		return c.Status(fiber.StatusNotFound).JSON(
-			http.NewError(c.UserContext(), errors.New("chat is not archived"), "Chat is not archived"),
+			http.NewError(ctx, errors.New("chat is not archived"), "Chat is not archived"),
 		)
 	}
 	if len(chat.Histories) == 0 {
 		return c.Status(fiber.StatusNotFound).JSON(
-			http.NewError(c.UserContext(), errors.New("chat history not found"), "Chat history not found"),
+			http.NewError(ctx, errors.New("chat history not found"), "Chat history not found"),
 		)
 	}
 
@@ -100,10 +101,10 @@ func (h *UpsertChatSummaryHandler) Handle(c *fiber.Ctx) error {
 		}
 	})
 
-	resolved, err := h.deps.LLM.RunActionPrompt(c.UserContext(), "interactive_chat", "summary_chat", histories...)
+	resolved, err := h.deps.LLM.RunActionPrompt(ctx, "interactive_chat", "summary_chat", histories...)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(c.UserContext(), err, "Failed to resolve prompt"),
+			http.NewError(ctx, err, "Failed to resolve prompt"),
 		)
 	}
 
@@ -118,7 +119,7 @@ func (h *UpsertChatSummaryHandler) Handle(c *fiber.Ctx) error {
 	}{}
 	if err := json.Unmarshal([]byte(resolved.Content), &summary); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(c.UserContext(), err, "Failed to unmarshal response"),
+			http.NewError(ctx, err, "Failed to unmarshal response"),
 		)
 	}
 	var emotions common.EmotionRateList = utils.Map(summary.Emotions, func(e struct {
@@ -145,10 +146,10 @@ func (h *UpsertChatSummaryHandler) Handle(c *fiber.Ctx) error {
 		Set("keywords = ?", summary.Keywords).
 		Set("emotions = ?", emotions.ToString()).
 		Set("updated_at = CURRENT_TIMESTAMP").
-		Exec(c.UserContext())
+		Exec(ctx)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(c.UserContext(), err, "Failed to insert summary"),
+			http.NewError(ctx, err, "Failed to insert summary"),
 		)
 	}
 	rowsAffected, _ := result.RowsAffected()

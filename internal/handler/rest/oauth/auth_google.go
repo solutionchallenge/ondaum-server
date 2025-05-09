@@ -55,17 +55,18 @@ func NewAuthGoogleHandler(deps AuthGoogleHandlerDependencies) (*AuthGoogleHandle
 // @Failure      500 {object} http.Error
 // @Router       /oauth/google/auth [post]
 func (h *AuthGoogleHandler) Handle(c *fiber.Ctx) error {
+	ctx := c.UserContext()
 	redirectURI := c.Query("redirect")
 
 	request := &AuthGoogleHandlerRequest{}
 	if err := c.BodyParser(request); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(
-			http.NewError(c.UserContext(), err, "Invalid request"),
+			http.NewError(ctx, err, "Invalid request"),
 		)
 	}
 	if request.Code == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(
-			http.NewError(c.UserContext(), nil, "Code is required"),
+			http.NewError(ctx, nil, "Code is required"),
 		)
 	}
 
@@ -78,14 +79,14 @@ func (h *AuthGoogleHandler) Handle(c *fiber.Ctx) error {
 	}
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(c.UserContext(), err, "Failed to get user info"),
+			http.NewError(ctx, err, "Failed to get user info"),
 		)
 	}
 
-	dbTx, err := h.deps.DB.BeginTx(c.Context(), nil)
+	dbTx, err := h.deps.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(c.UserContext(), err, "Failed to begin transaction"),
+			http.NewError(ctx, err, "Failed to begin transaction"),
 		)
 	}
 	defer dbTx.Rollback()
@@ -99,20 +100,20 @@ func (h *AuthGoogleHandler) Handle(c *fiber.Ctx) error {
 		On("DUPLICATE KEY UPDATE").
 		Set("username = VALUES(username)").
 		Set("updated_at = CURRENT_TIMESTAMP").
-		Exec(c.Context())
+		Exec(ctx)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(c.UserContext(), err, "Failed to upsert user"),
+			http.NewError(ctx, err, "Failed to upsert user"),
 		)
 	}
 
 	err = dbTx.NewSelect().
 		Model(userData).
 		Where("email = ?", userInfo.Email).
-		Scan(c.Context())
+		Scan(ctx)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(c.UserContext(), err, "Failed to get user"),
+			http.NewError(ctx, err, "Failed to get user"),
 		)
 	}
 
@@ -126,23 +127,23 @@ func (h *AuthGoogleHandler) Handle(c *fiber.Ctx) error {
 		On("DUPLICATE KEY UPDATE").
 		Set("provider_code = ?", request.Code).
 		Set("updated_at = CURRENT_TIMESTAMP").
-		Exec(c.Context())
+		Exec(ctx)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(c.UserContext(), err, "Failed to create user oauth"),
+			http.NewError(ctx, err, "Failed to create user oauth"),
 		)
 	}
 
 	if err := dbTx.Commit(); err != nil {
 		return c.Status(fiber.StatusConflict).JSON(
-			http.NewError(c.UserContext(), err, "Failed to commit transaction"),
+			http.NewError(ctx, err, "Failed to commit transaction"),
 		)
 	}
 
 	tokenPair, err := h.deps.JWT.GenerateTokenPair(strconv.FormatInt(userData.ID, 10))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(c.UserContext(), err, "Failed to generate token pair"),
+			http.NewError(ctx, err, "Failed to generate token pair"),
 		)
 	}
 

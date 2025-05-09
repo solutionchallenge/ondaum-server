@@ -32,13 +32,14 @@ func NewGetDiagnosisPaperHandler(deps GetDiagnosisPaperHandlerDependencies) (*Ge
 // @Router /diagnosis-papers/{paper_id} [get]
 // @Security BearerAuth
 func (h *GetDiagnosisPaperHandler) Handle(c *fiber.Ctx) error {
+	ctx := c.UserContext()
 	identifier := c.Params("paper_id")
 	switch common.Diagnosis(identifier) {
 	case common.DiagnosisPHQ9:
 		diagnosisPaper, err := common.ReadDiagnosisPaperFrom(common.DiagnosisFilepaths[common.DiagnosisPHQ9])
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(
-				http.NewError(c.UserContext(), err, "Failed to read diagnosis paper"),
+				http.NewError(ctx, err, "Failed to read diagnosis paper"),
 			)
 		}
 		return c.JSON(diagnosisPaper)
@@ -46,7 +47,7 @@ func (h *GetDiagnosisPaperHandler) Handle(c *fiber.Ctx) error {
 		diagnosisPaper, err := common.ReadDiagnosisPaperFrom(common.DiagnosisFilepaths[common.DiagnosisGAD7])
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(
-				http.NewError(c.UserContext(), err, "Failed to read diagnosis paper"),
+				http.NewError(ctx, err, "Failed to read diagnosis paper"),
 			)
 		}
 		return c.JSON(diagnosisPaper)
@@ -54,13 +55,13 @@ func (h *GetDiagnosisPaperHandler) Handle(c *fiber.Ctx) error {
 		diagnosisPaper, err := common.ReadDiagnosisPaperFrom(common.DiagnosisFilepaths[common.DiagnosisPSS])
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(
-				http.NewError(c.UserContext(), err, "Failed to read diagnosis paper"),
+				http.NewError(ctx, err, "Failed to read diagnosis paper"),
 			)
 		}
 		return c.JSON(diagnosisPaper)
 	default:
 		return c.Status(fiber.StatusNotFound).JSON(
-			http.NewError(c.UserContext(), nil, "Diagnosis not found"),
+			http.NewError(ctx, nil, "Diagnosis not found"),
 		)
 	}
 }

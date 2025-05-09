@@ -46,23 +46,24 @@ func NewUpsertUserAdditionHandler(deps UpsertUserAdditionHandlerDependencies) (*
 // @Router       /user/addition [put]
 // @Security     BearerAuth
 func (h *UpsertUserAdditionHandler) Handle(c *fiber.Ctx) error {
+	ctx := c.UserContext()
 	userID, err := http.GetUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(
-			http.NewError(c.UserContext(), err, "Unauthorized"),
+			http.NewError(ctx, err, "Unauthorized"),
 		)
 	}
 
 	request := &UpsertUserAdditionHandlerRequest{}
 	if err := c.BodyParser(request); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(
-			http.NewError(c.UserContext(), err, "Invalid request"),
+			http.NewError(ctx, err, "Invalid request"),
 		)
 	}
 
 	if !request.Emotions.Validate() {
 		return c.Status(fiber.StatusBadRequest).JSON(
-			http.NewError(c.UserContext(), nil, "Invalid emotions contained in request"),
+			http.NewError(ctx, nil, "Invalid emotions contained in request"),
 		)
 	}
 
@@ -78,11 +79,11 @@ func (h *UpsertUserAdditionHandler) Handle(c *fiber.Ctx) error {
 		Set("concerns = ?", request.Concerns).
 		Set("emotions = ?", request.Emotions.ToString()).
 		Set("updated_at = CURRENT_TIMESTAMP").
-		Exec(c.UserContext())
+		Exec(ctx)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(c.UserContext(), err, "Failed to upsert user addition"),
+			http.NewError(ctx, err, "Failed to upsert user addition"),
 		)
 	}
 

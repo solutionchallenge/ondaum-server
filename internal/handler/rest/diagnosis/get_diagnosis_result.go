@@ -39,30 +39,31 @@ func NewGetDiagnosisResultHandler(deps GetDiagnosisResultHandlerDependencies) (*
 // @Router /diagnosis-papers/{diagnosis_id} [get]
 // @Security BearerAuth
 func (h *GetDiagnosisResultHandler) Handle(c *fiber.Ctx) error {
+	ctx := c.UserContext()
 	userID, err := http.GetUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(
-			http.NewError(c.UserContext(), err, "Unauthorized"),
+			http.NewError(ctx, err, "Unauthorized"),
 		)
 	}
 	user := &user.User{ID: userID}
-	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(c.UserContext()); err != nil {
+	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(ctx); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
-			http.NewError(c.UserContext(), err, "User not found"),
+			http.NewError(ctx, err, "User not found"),
 		)
 	}
 
 	diagnosisID := c.Params("diagnosis_id")
 	if diagnosisID == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(
-			http.NewError(c.UserContext(), errors.New("diagnosis_id is required"), "Bad Request"),
+			http.NewError(ctx, errors.New("diagnosis_id is required"), "Bad Request"),
 		)
 	}
 
 	convertedID, err := strconv.ParseInt(diagnosisID, 10, 64)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(
-			http.NewError(c.UserContext(), err, "Invalid diagnosis_id"),
+			http.NewError(ctx, err, "Invalid diagnosis_id"),
 		)
 	}
 
@@ -71,9 +72,9 @@ func (h *GetDiagnosisResultHandler) Handle(c *fiber.Ctx) error {
 		Model(diagnosis).
 		Where("id = ?", convertedID).
 		Where("user_id = ?", userID).
-		Scan(c.UserContext()); err != nil {
+		Scan(ctx); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
-			http.NewError(c.UserContext(), err, "Diagnosis not found"),
+			http.NewError(ctx, err, "Diagnosis not found"),
 		)
 	}
 

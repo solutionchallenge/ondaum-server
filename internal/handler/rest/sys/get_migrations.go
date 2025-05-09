@@ -30,10 +30,11 @@ func NewGetMigrationsHandler(deps GetMigrationsHandlerDependencies) (*GetMigrati
 }
 
 func (h *GetMigrationsHandler) Handle(c *fiber.Ctx) error {
-	migrations, err := database.GetMigrationHistories(c.UserContext(), h.deps.DB.DB)
+	ctx := c.UserContext()
+	migrations, err := database.GetMigrationHistories(ctx, h.deps.DB.DB)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(c.UserContext(), err, "Failed to get migrations"),
+			http.NewError(ctx, err, "Failed to get migrations"),
 		)
 	}
 

@@ -29,6 +29,7 @@ func NewListChatHandler(deps ListChatHandlerDependencies) (*ListChatHandler, err
 
 // Must not be documented. (Debugging purpose only!)
 func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
+	ctx := c.UserContext()
 	if os.Getenv("FLAG_DEBUGGING_FEATURES_ENABLED") != "true" {
 		return c.SendStatus(fiber.StatusNotFound)
 	}
@@ -47,10 +48,10 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 	if sid != "" {
 		query = query.Where("session_id = ?", sid)
 	}
-	err := query.Scan(c.UserContext(), &chats)
+	err := query.Scan(ctx, &chats)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
-			http.NewError(c.UserContext(), err, "Chat not found"),
+			http.NewError(ctx, err, "Chat not found"),
 		)
 	}
 	return c.JSON(ListHistoryHandlerResponse{Chats: chats})

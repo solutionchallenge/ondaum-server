@@ -24,7 +24,7 @@ func (h *GetHealthHandler) Handle(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 	if err := h.deps.DB.PingContext(ctx); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(c.UserContext(), err, "Failed to ping database"),
+			http.NewError(ctx, err, "Failed to ping database"),
 		)
 	}
 	return c.JSON(fiber.Map{

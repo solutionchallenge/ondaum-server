@@ -43,10 +43,11 @@ func NewGetSelfHandler(deps GetSelfHandlerDependencies) (*GetSelfHandler, error)
 // @Router       /user/self [get]
 // @Security     BearerAuth
 func (h *GetSelfHandler) Handle(c *fiber.Ctx) error {
+	ctx := c.UserContext()
 	id, err := http.GetUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(
-			http.NewError(c.UserContext(), err, "Unauthorized"),
+			http.NewError(ctx, err, "Unauthorized"),
 		)
 	}
 	user := user.User{}
@@ -55,15 +56,15 @@ func (h *GetSelfHandler) Handle(c *fiber.Ctx) error {
 		Relation("Addition").
 		Relation("Privacy").
 		Where("id = ?", id).
-		Scan(c.UserContext())
+		Scan(ctx)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return c.Status(fiber.StatusNotFound).JSON(
-				http.NewError(c.UserContext(), err, "User not found for id: %v", id),
+				http.NewError(ctx, err, "User not found for id: %v", id),
 			)
 		}
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(c.UserContext(), err, "Failed to get user for id: %v", id),
+			http.NewError(ctx, err, "Failed to get user for id: %v", id),
 		)
 	}
 

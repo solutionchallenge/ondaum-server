@@ -36,16 +36,17 @@ func NewListDiagnosisResultHandler(deps ListDiagnosisResultHandlerDependencies) 
 // @Router /diagnoses [get]
 // @Security BearerAuth
 func (h *ListDiagnosisResultHandler) Handle(c *fiber.Ctx) error {
+	ctx := c.UserContext()
 	userID, err := http.GetUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(
-			http.NewError(c.UserContext(), err, "Unauthorized"),
+			http.NewError(ctx, err, "Unauthorized"),
 		)
 	}
 	user := &user.User{ID: userID}
-	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(c.UserContext()); err != nil {
+	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(ctx); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
-			http.NewError(c.UserContext(), err, "User not found"),
+			http.NewError(ctx, err, "User not found"),
 		)
 	}
 
@@ -54,9 +55,9 @@ func (h *ListDiagnosisResultHandler) Handle(c *fiber.Ctx) error {
 		Model(&diagnoses).
 		Where("user_id = ?", userID).
 		Order("created_at DESC").
-		Scan(c.UserContext()); err != nil {
+		Scan(ctx); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
-			http.NewError(c.UserContext(), err, "Diagnosis not found"),
+			http.NewError(ctx, err, "Diagnosis not found"),
 		)
 	}
 

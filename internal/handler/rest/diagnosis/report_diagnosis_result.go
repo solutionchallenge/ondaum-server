@@ -41,23 +41,24 @@ func NewReportDiagnosisResultHandler(deps ReportDiagnosisResultHandlerDependenci
 // @Router /diagnoses [post]
 // @Security BearerAuth
 func (h *ReportDiagnosisResultHandler) Handle(c *fiber.Ctx) error {
+	ctx := c.UserContext()
 	userID, err := http.GetUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(
-			http.NewError(c.UserContext(), err, "Unauthorized"),
+			http.NewError(ctx, err, "Unauthorized"),
 		)
 	}
 	user := &user.User{ID: userID}
-	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(c.UserContext()); err != nil {
+	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(ctx); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
-			http.NewError(c.UserContext(), err, "User not found"),
+			http.NewError(ctx, err, "User not found"),
 		)
 	}
 
 	var request diagnosis.DiagnosisDTO
 	if err := c.BodyParser(&request); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(
-			http.NewError(c.UserContext(), err, "Invalid request"),
+			http.NewError(ctx, err, "Invalid request"),
 		)
 	}
 
@@ -70,17 +71,17 @@ func (h *ReportDiagnosisResultHandler) Handle(c *fiber.Ctx) error {
 		ResultDescription: request.ResultDescription,
 		ResultCritical:    request.ResultCritical,
 	}
-	result, err := h.deps.DB.NewInsert().Model(diagnosis).Exec(c.UserContext())
+	result, err := h.deps.DB.NewInsert().Model(diagnosis).Exec(ctx)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(c.UserContext(), err, "Failed to report diagnosis result"),
+			http.NewError(ctx, err, "Failed to report diagnosis result"),
 		)
 	}
 
 	inserted, err := result.LastInsertId()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(c.UserContext(), err, "Failed to report diagnosis result"),
+			http.NewError(ctx, err, "Failed to report diagnosis result"),
 		)
 	}
 	response := ReportDiagnosisResultHandlerResponse{

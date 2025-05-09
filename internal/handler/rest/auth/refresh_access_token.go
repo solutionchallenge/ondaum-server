@@ -43,6 +43,7 @@ func NewRefreshAccessTokenHandler(deps RefreshAccessTokenHandlerDependencies) (*
 // @Failure 500 {object} http.Error
 // @Router /auth/refresh [post]
 func (h *RefreshAccessTokenHandler) Handle(c *fiber.Ctx) error {
+	ctx := c.UserContext()
 	var request RefreshAccessTokenHandlerRequest
 	if err := c.BodyParser(&request); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -53,20 +54,20 @@ func (h *RefreshAccessTokenHandler) Handle(c *fiber.Ctx) error {
 	tokenType, err := h.deps.JWT.GetTokenType(request.RefreshToken)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(
-			http.NewError(c.UserContext(), err, "Invalid refresh token"),
+			http.NewError(ctx, err, "Invalid refresh token"),
 		)
 	}
 
 	if tokenType != jwt.RefreshTokenType {
 		return c.Status(fiber.StatusUnauthorized).JSON(
-			http.NewError(c.UserContext(), errors.New("invalid token type"), "Invalid token type"),
+			http.NewError(ctx, errors.New("invalid token type"), "Invalid token type"),
 		)
 	}
 
 	tokenPair, err := h.deps.JWT.RefreshTokenPair(request.RefreshToken)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(
-			http.NewError(c.UserContext(), err, "Failed to refresh token pair"),
+			http.NewError(ctx, err, "Failed to refresh token pair"),
 		)
 	}
 
