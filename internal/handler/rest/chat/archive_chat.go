@@ -3,8 +3,10 @@ package chat
 import (
 	"errors"
 
+	"github.com/benbjohnson/clock"
 	"github.com/gofiber/fiber/v2"
 	domain "github.com/solutionchallenge/ondaum-server/internal/domain/chat"
+	"github.com/solutionchallenge/ondaum-server/internal/domain/common"
 	"github.com/solutionchallenge/ondaum-server/internal/domain/user"
 	"github.com/solutionchallenge/ondaum-server/pkg/http"
 	"github.com/uptrace/bun"
@@ -13,7 +15,8 @@ import (
 
 type ArchiveChatHandlerDependencies struct {
 	fx.In
-	DB *bun.DB
+	DB    *bun.DB
+	Clock clock.Clock
 }
 
 type ArchiveChatHandler struct {
@@ -42,30 +45,33 @@ func NewArchiveChatHandler(deps ArchiveChatHandlerDependencies) (*ArchiveChatHan
 // @Failure 500 {object} http.Error
 // @Router /chats/{session_id}/archive [post]
 func (h *ArchiveChatHandler) Handle(c *fiber.Ctx) error {
+	ctx := c.UserContext()
+
 	userID, err := http.GetUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(
-			http.NewError(c.UserContext(), err, "Unauthorized"),
+			http.NewError(ctx, err, "Unauthorized"),
 		)
 	}
+
 	user := &user.User{ID: userID}
-	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(c.UserContext()); err != nil {
+	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(ctx); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
-			http.NewError(c.UserContext(), err, "User not found"),
+			http.NewError(ctx, err, "User not found"),
 		)
 	}
 
 	sessionID := c.Params("session_id")
 	if sessionID == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(
-			http.NewError(c.UserContext(), errors.New("session_id is required"), "Bad Request"),
+			http.NewError(ctx, errors.New("session_id is required"), "Bad Request"),
 		)
 	}
 
-	tx, err := h.deps.DB.BeginTx(c.UserContext(), nil)
+	tx, err := h.deps.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(c.UserContext(), err, "Failed to begin transaction"),
+			http.NewError(ctx, err, "Failed to begin transaction"),
 		)
 	}
 	defer tx.Rollback()
@@ -75,38 +81,47 @@ func (h *ArchiveChatHandler) Handle(c *fiber.Ctx) error {
 		Model(chat).
 		Where("session_id = ?", sessionID).
 		Where("user_id = ?", userID).
-		Scan(c.UserContext()); err != nil {
+		Scan(ctx); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
-			http.NewError(c.UserContext(), err, "Chat not found"),
+			http.NewError(ctx, err, "Chat not found"),
 		)
 	}
+
+	now := h.deps.Clock.Now()
+	endedAt := now
+	if !chat.FinishedAt.IsZero() && !chat.FinishedAt.Time.Before(chat.CreatedAt) {
+		endedAt = chat.FinishedAt.Time
+	}
+	chatDuration := common.NewNullableDuration(endedAt.Sub(chat.CreatedAt))
 
 	wasFinished := chat.FinishedAt.IsZero()
 	mutation := tx.NewUpdate().
 		Model(chat).
 		Set("archived_at = CURRENT_TIMESTAMP").
+		Set("chat_duration = ?", chatDuration).
 		Where("session_id = ?", sessionID).
 		Where("user_id = ?", userID)
-	if !wasFinished {
+
+	if wasFinished {
 		mutation = mutation.Set("finished_at = CURRENT_TIMESTAMP")
 	}
-	if _, err := mutation.Exec(c.UserContext()); err != nil {
+
+	if _, err := mutation.Exec(ctx); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(c.UserContext(), err, "Failed to archive chat"),
+			http.NewError(ctx, err, "Failed to archive chat"),
 		)
 	}
 
 	if err := tx.Commit(); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(c.UserContext(), err, "Failed to commit transaction"),
+			http.NewError(ctx, err, "Failed to commit transaction"),
 		)
 	}
 
-	response := ArchiveChatHandlerResponse{
+	return c.JSON(ArchiveChatHandlerResponse{
 		Success:  true,
 		Finished: wasFinished,
-	}
-	return c.JSON(response)
+	})
 }
 
 func (h *ArchiveChatHandler) Identify() string {

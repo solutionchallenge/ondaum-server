@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/solutionchallenge/ondaum-server/internal/domain/common"
 	"github.com/solutionchallenge/ondaum-server/internal/domain/user"
 	"github.com/solutionchallenge/ondaum-server/pkg/utils"
 	"github.com/uptrace/bun"
@@ -11,15 +12,16 @@ import (
 
 type Chat struct {
 	bun.BaseModel `bun:"table:chats,alias:c"`
-	ID            int64        `json:"id" db:"id" bun:"id,pk,autoincrement"`
-	UserID        int64        `json:"user_id" db:"user_id" bun:"user_id,notnull"`
-	SessionID     string       `json:"session_id" db:"session_id" bun:"session_id,notnull"`
-	StartedDate   time.Time    `json:"started_date" db:"started_date" bun:"started_date,notnull"`
-	UserTimezone  string       `json:"user_timezone" db:"user_timezone" bun:"user_timezone,notnull"`
-	CreatedAt     time.Time    `json:"created_at" db:"created_at" bun:"created_at,notnull,default:CURRENT_TIMESTAMP"`
-	UpdatedAt     time.Time    `json:"updated_at" db:"updated_at" bun:"updated_at,notnull,default:CURRENT_TIMESTAMP"`
-	FinishedAt    bun.NullTime `json:"finished_at" db:"finished_at" bun:"finished_at"`
-	ArchivedAt    bun.NullTime `json:"archived_at" db:"archived_at" bun:"archived_at"`
+	ID            int64                   `json:"id" db:"id" bun:"id,pk,autoincrement"`
+	UserID        int64                   `json:"user_id" db:"user_id" bun:"user_id,notnull"`
+	SessionID     string                  `json:"session_id" db:"session_id" bun:"session_id,notnull"`
+	StartedDate   time.Time               `json:"started_date" db:"started_date" bun:"started_date,notnull"`
+	UserTimezone  string                  `json:"user_timezone" db:"user_timezone" bun:"user_timezone,notnull"`
+	CreatedAt     time.Time               `json:"created_at" db:"created_at" bun:"created_at,notnull,default:CURRENT_TIMESTAMP"`
+	UpdatedAt     time.Time               `json:"updated_at" db:"updated_at" bun:"updated_at,notnull,default:CURRENT_TIMESTAMP"`
+	FinishedAt    bun.NullTime            `json:"finished_at" db:"finished_at" bun:"finished_at"`
+	ArchivedAt    bun.NullTime            `json:"archived_at" db:"archived_at" bun:"archived_at"`
+	ChatDuration  common.NullableDuration `json:"chat_duration" db:"chat_duration" bun:"chat_duration"`
 
 	User      *user.User `json:"user,omitempty" bun:"rel:belongs-to,join:user_id=id"`
 	Summary   *Summary   `json:"summary,omitempty" bun:"rel:has-one,join:id=chat_id"`
