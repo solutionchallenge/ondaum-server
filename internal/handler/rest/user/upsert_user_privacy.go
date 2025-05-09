@@ -63,7 +63,6 @@ func (h *UpsertUserPrivacyHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 
-	// Parse birthday string to time.Time
 	birthday, err := time.Parse(utils.TIME_FORMAT_DATE, request.Birthday)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(

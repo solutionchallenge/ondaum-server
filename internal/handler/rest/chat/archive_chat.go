@@ -87,7 +87,7 @@ func (h *ArchiveChatHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 
-	now := h.deps.Clock.Now()
+	now := h.deps.Clock.Now().UTC()
 	endedAt := now
 	if !chat.FinishedAt.IsZero() && !chat.FinishedAt.Time.Before(chat.CreatedAt) {
 		endedAt = chat.FinishedAt.Time

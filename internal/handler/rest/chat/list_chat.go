@@ -70,9 +70,9 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 	onlyArchivedStr := c.Query("only_archived")
 	messageID := c.Query("message_id")
 
-	var startTime, endTime time.Time
+	var localStartTime, localEndTime time.Time
 	if datetimeGte != "" {
-		startTime, err = time.Parse(time.RFC3339, datetimeGte)
+		localStartTime, err = time.Parse(time.RFC3339, datetimeGte)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(
 				http.NewError(ctx, err, "Invalid datetime_gte format. Use YYYY-MM-DDTHH:mm:ssZ"),
@@ -80,7 +80,7 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 		}
 	}
 	if datetimeLte != "" {
-		endTime, err = time.Parse(time.RFC3339, datetimeLte)
+		localEndTime, err = time.Parse(time.RFC3339, datetimeLte)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(
 				http.NewError(ctx, err, "Invalid datetime_lte format. Use YYYY-MM-DDTHH:mm:ssZ"),
@@ -107,11 +107,11 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 		query = query.Where("archived_at IS NOT NULL")
 	}
 
-	if !startTime.IsZero() {
-		query = query.Where("created_at >= ?", startTime)
+	if !localStartTime.IsZero() {
+		query = query.Where("created_at >= ?", localStartTime.UTC())
 	}
-	if !endTime.IsZero() {
-		query = query.Where("(finished_at IS NULL OR finished_at <= ?)", endTime)
+	if !localEndTime.IsZero() {
+		query = query.Where("(finished_at IS NULL OR finished_at <= ?)", localEndTime.UTC())
 	}
 
 	if messageID != "" {
