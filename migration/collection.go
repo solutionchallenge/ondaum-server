@@ -15,4 +15,5 @@ var Collection = []database.Migration{
 	sql.MigrationUser007CreateChatHistoryTable,
 	sql.MigrationUser008CreateChatSummaryTable,
 	sql.MigrationUser009CreateDiagnosisTable,
+	sql.MigrationUser010AlterChatSummaryTable,
 }
