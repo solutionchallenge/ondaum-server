@@ -33,7 +33,7 @@ func HandleConnect(db *bun.DB, clk clock.Clock, request wspkg.ConnectWrapper) (w
 			UserID:       request.UserID,
 			SessionID:    request.ConnectID,
 			StartedDate:  clk.Now().Truncate(24 * time.Hour),
-			UserTimezone: clk.Now().Location().String(),
+			UserTimezone: utils.FormatTimezoneOffset(clk.Now()),
 		}
 		_, err = db.NewInsert().Model(chat).Exec(context.Background())
 		if err != nil {
