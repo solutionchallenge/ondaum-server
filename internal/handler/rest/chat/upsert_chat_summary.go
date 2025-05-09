@@ -116,6 +116,7 @@ func (h *UpsertChatSummaryHandler) Handle(c *fiber.Ctx) error {
 			Emotion common.Emotion `json:"emotion"`
 			Rate    float64        `json:"rate"`
 		} `json:"emotions"`
+		Recommendations []string `json:"recommendations"`
 	}{}
 	if err := json.Unmarshal([]byte(resolved.Content), &summary); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
@@ -132,11 +133,12 @@ func (h *UpsertChatSummaryHandler) Handle(c *fiber.Ctx) error {
 		}
 	})
 	model := &domain.Summary{
-		ChatID:   chat.ID,
-		Title:    summary.Title,
-		Text:     summary.Text,
-		Keywords: summary.Keywords,
-		Emotions: emotions,
+		ChatID:          chat.ID,
+		Title:           summary.Title,
+		Text:            summary.Text,
+		Keywords:        summary.Keywords,
+		Emotions:        emotions,
+		Recommendations: summary.Recommendations,
 	}
 	result, err := h.deps.DB.NewInsert().
 		Model(model).
@@ -145,6 +147,7 @@ func (h *UpsertChatSummaryHandler) Handle(c *fiber.Ctx) error {
 		Set("text = ?", summary.Text).
 		Set("keywords = ?", summary.Keywords).
 		Set("emotions = ?", emotions.ToString()).
+		Set("recommendations = ?", summary.Recommendations).
 		Set("updated_at = CURRENT_TIMESTAMP").
 		Exec(ctx)
 	if err != nil {
