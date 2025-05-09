@@ -3,7 +3,7 @@ package sql
 import "github.com/solutionchallenge/ondaum-server/pkg/database"
 
 const sqlUser010AlterChatSummaryTable = `
-ALTER TABLE IF EXISTS chat_summaries
+ALTER TABLE chat_summaries
 ADD COLUMN recommendations JSON AFTER emotions`
 
 var MigrationUser010AlterChatSummaryTable = database.Migration{

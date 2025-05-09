@@ -3,7 +3,7 @@ package sql
 import "github.com/solutionchallenge/ondaum-server/pkg/database"
 
 const sqlUser011AlterChatTable = `
-ALTER TABLE IF EXISTS chats
+ALTER TABLE chats
 ADD COLUMN chat_duration BIGINT AFTER archived_at`
 
 var MigrationUser011AlterChatTable = database.Migration{
