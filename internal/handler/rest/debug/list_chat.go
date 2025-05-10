@@ -58,5 +58,5 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 }
 
 func (h *ListChatHandler) Identify() string {
-	return "list_chat"
+	return "list-chat"
 }
