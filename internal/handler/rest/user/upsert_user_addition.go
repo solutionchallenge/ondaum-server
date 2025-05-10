@@ -5,6 +5,7 @@ import (
 	"github.com/solutionchallenge/ondaum-server/internal/domain/common"
 	"github.com/solutionchallenge/ondaum-server/internal/domain/user"
 	"github.com/solutionchallenge/ondaum-server/pkg/http"
+	"github.com/solutionchallenge/ondaum-server/pkg/utils"
 	"github.com/uptrace/bun"
 	"go.uber.org/fx"
 )
@@ -69,8 +70,8 @@ func (h *UpsertUserAdditionHandler) Handle(c *fiber.Ctx) error {
 
 	addition := &user.Addition{
 		UserID:   userID,
-		Concerns: request.Concerns,
-		Emotions: request.Emotions,
+		Concerns: utils.Deduplicate(request.Concerns),
+		Emotions: utils.Deduplicate(request.Emotions),
 	}
 
 	result, err := h.deps.DB.NewInsert().
