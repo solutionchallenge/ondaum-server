@@ -81,5 +81,5 @@ func (conversation *Conversation) GetStatistics() llm.Statistics {
 }
 
 func (conversation *Conversation) End() {
-	conversation.Client.Conversations[conversation.ID] = nil
+	conversation.Client.Close(conversation.ID)
 }
