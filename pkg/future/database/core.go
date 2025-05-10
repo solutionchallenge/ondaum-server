@@ -103,7 +103,7 @@ func (c *Core) Inspect(ctx context.Context, ID string) (*future.Job, error) {
 	}
 
 	return &future.Job{
-		ID:               job.ID,
+		ID:               strconv.FormatInt(job.ID, 10),
 		ActionIdentifier: job.ActionIdentifier,
 		ActionType:       job.ActionType,
 		ActionParams:     job.ActionParams,
@@ -124,7 +124,7 @@ func (c *Core) FindBy(ctx context.Context, actionIdentifier string) (*future.Job
 		return nil, err
 	}
 	return &future.Job{
-		ID:               job.ID,
+		ID:               strconv.FormatInt(job.ID, 10),
 		ActionIdentifier: job.ActionIdentifier,
 		ActionType:       job.ActionType,
 		ActionParams:     job.ActionParams,
@@ -179,7 +179,7 @@ func (c *Core) RunNext(ctx context.Context, ignoreTriggerAfter bool) (*future.Jo
 	}
 
 	return &future.Job{
-		ID:               job.ID,
+		ID:               strconv.FormatInt(job.ID, 10),
 		ActionIdentifier: job.ActionIdentifier,
 		ActionType:       job.ActionType,
 		ActionParams:     job.ActionParams,

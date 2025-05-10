@@ -9,7 +9,7 @@ import (
 
 type FutureJob struct {
 	bun.BaseModel    `bun:"future_jobs"`
-	ID               string           `bun:"id,pk"`
+	ID               int64            `bun:"id,pk,autoincrement"`
 	ActionIdentifier string           `bun:"action_identifier,notnull"`
 	ActionType       future.JobType   `bun:"action_type,notnull"`
 	ActionParams     string           `bun:"action_params,notnull"`
