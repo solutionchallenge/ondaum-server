@@ -73,7 +73,9 @@ func (h *UpsertChatSummaryHandler) Handle(c *fiber.Ctx) error {
 	chat := &domain.Chat{}
 	err = h.deps.DB.NewSelect().
 		Model(chat).
-		Relation("Histories").
+		Relation("Histories", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.Order("inserted_at ASC")
+		}).
 		Where("session_id = ?", sessionID).
 		Where("user_id = ?", userID).
 		Order("created_at ASC").
@@ -117,6 +119,14 @@ func (h *UpsertChatSummaryHandler) Handle(c *fiber.Ctx) error {
 			Rate    float64        `json:"rate"`
 		} `json:"emotions"`
 		Recommendations []string `json:"recommendations"`
+		PositiveScore   float64  `json:"positive_score"`
+		NegativeScore   float64  `json:"negative_score"`
+		NeutralScore    float64  `json:"neutral_score"`
+		// We must fetch indicies and convert them to history IDs later because the LLM can't get corresponding history IDs.
+		MainTopic struct {
+			BeginHistoryIndex int `json:"begin_history_index"`
+			EndHistoryIndex   int `json:"end_history_index"`
+		} `json:"main_topic"`
 	}{}
 	if err := json.Unmarshal([]byte(resolved.Content), &summary); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
@@ -132,6 +142,23 @@ func (h *UpsertChatSummaryHandler) Handle(c *fiber.Ctx) error {
 			Rate:    e.Rate,
 		}
 	})
+	convertedMainTopic := func() domain.MainTopic {
+		if summary.MainTopic.BeginHistoryIndex < 0 || summary.MainTopic.EndHistoryIndex < 0 {
+			return domain.MainTopic{}
+		}
+		if summary.MainTopic.BeginHistoryIndex > summary.MainTopic.EndHistoryIndex {
+			return domain.MainTopic{}
+		}
+		if summary.MainTopic.BeginHistoryIndex >= len(chat.Histories) || summary.MainTopic.EndHistoryIndex >= len(chat.Histories) {
+			return domain.MainTopic{}
+		}
+		beginHistoryID := chat.Histories[summary.MainTopic.BeginHistoryIndex].MessageID
+		endHistoryID := chat.Histories[summary.MainTopic.EndHistoryIndex].MessageID
+		return domain.MainTopic{
+			BeginMessageID: beginHistoryID,
+			EndMessageID:   endHistoryID,
+		}
+	}()
 	model := &domain.Summary{
 		ChatID:          chat.ID,
 		Title:           summary.Title,
@@ -139,6 +166,10 @@ func (h *UpsertChatSummaryHandler) Handle(c *fiber.Ctx) error {
 		Keywords:        summary.Keywords,
 		Emotions:        emotions,
 		Recommendations: summary.Recommendations,
+		PositiveScore:   summary.PositiveScore,
+		NegativeScore:   summary.NegativeScore,
+		NeutralScore:    summary.NeutralScore,
+		MainTopic:       convertedMainTopic,
 	}
 	result, err := h.deps.DB.NewInsert().
 		Model(model).
@@ -148,6 +179,10 @@ func (h *UpsertChatSummaryHandler) Handle(c *fiber.Ctx) error {
 		Set("keywords = ?", summary.Keywords).
 		Set("emotions = ?", emotions.ToString()).
 		Set("recommendations = ?", summary.Recommendations).
+		Set("positive_score = ?", summary.PositiveScore).
+		Set("negative_score = ?", summary.NegativeScore).
+		Set("neutral_score = ?", summary.NeutralScore).
+		Set("main_topic = ?", convertedMainTopic.ToString()).
 		Set("updated_at = CURRENT_TIMESTAMP").
 		Exec(ctx)
 	if err != nil {

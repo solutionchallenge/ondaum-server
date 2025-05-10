@@ -21,6 +21,7 @@ type History struct {
 }
 
 type HistoryDTO struct {
+	ID       string    `json:"id"`
 	When     time.Time `json:"when"`
 	Role     string    `json:"role"`
 	Content  string    `json:"content"`
@@ -29,6 +30,7 @@ type HistoryDTO struct {
 
 func (h *History) ToHistoryDTO() HistoryDTO {
 	return HistoryDTO{
+		ID:       h.MessageID,
 		When:     h.InsertedAt,
 		Role:     h.Role,
 		Content:  h.Content,

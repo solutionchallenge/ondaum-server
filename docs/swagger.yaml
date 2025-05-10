@@ -83,6 +83,13 @@ definitions:
           $ref: '#/definitions/chat.ChatWithSummaryDTO'
         type: array
     type: object
+  chat.MainTopic:
+    properties:
+      begin_history_id:
+        type: integer
+      end_history_id:
+        type: integer
+    type: object
   chat.SummaryDTO:
     properties:
       emotions:
@@ -93,6 +100,14 @@ definitions:
         items:
           type: string
         type: array
+      main_topic:
+        $ref: '#/definitions/chat.MainTopic'
+      negative_score:
+        type: number
+      neutral_score:
+        type: number
+      positive_score:
+        type: number
       recommendations:
         items:
           type: string
@@ -497,6 +512,10 @@ paths:
       - description: Filter by chat ended datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)
         in: query
         name: datetime_lte
+        type: string
+      - description: Filter by sub-string matching keyword
+        in: query
+        name: matching_keyword
         type: string
       - description: Filter by dominant emotion
         in: query

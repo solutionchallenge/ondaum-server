@@ -232,6 +232,12 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "Filter by sub-string matching keyword",
+                        "name": "matching_keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "description": "Filter by dominant emotion",
                         "name": "dominant_emotion",
                         "in": "query"
@@ -1125,6 +1131,17 @@ const docTemplate = `{
                 }
             }
         },
+        "chat.MainTopic": {
+            "type": "object",
+            "properties": {
+                "begin_history_id": {
+                    "type": "integer"
+                },
+                "end_history_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "chat.SummaryDTO": {
             "type": "object",
             "properties": {
@@ -1139,6 +1156,18 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "main_topic": {
+                    "$ref": "#/definitions/chat.MainTopic"
+                },
+                "negative_score": {
+                    "type": "number"
+                },
+                "neutral_score": {
+                    "type": "number"
+                },
+                "positive_score": {
+                    "type": "number"
                 },
                 "recommendations": {
                     "type": "array",
