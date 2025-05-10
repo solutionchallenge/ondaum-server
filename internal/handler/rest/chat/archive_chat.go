@@ -44,6 +44,7 @@ func NewArchiveChatHandler(deps ArchiveChatHandlerDependencies) (*ArchiveChatHan
 // @Failure 404 {object} http.Error
 // @Failure 500 {object} http.Error
 // @Router /chats/{session_id}/archive [post]
+// @Security BearerAuth
 func (h *ArchiveChatHandler) Handle(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 

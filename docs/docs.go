@@ -335,6 +335,11 @@ const docTemplate = `{
         },
         "/chats/{session_id}/archive": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Archive a chat to prevent it from being accessed again and allow to summarize it.",
                 "consumes": [
                     "application/json"
@@ -599,6 +604,11 @@ const docTemplate = `{
         },
         "/diagnoses/papers": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "List diagnosis papers",
                 "consumes": [
                     "application/json"

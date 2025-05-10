@@ -32,6 +32,7 @@ func NewListDiagnosisPaperHandler(deps ListDiagnosisPaperHandlerDependencies) (*
 // @Produce json
 // @Success 200 {array} ListDiagnosisPaperHandlerResponse
 // @Router /diagnoses/papers [get]
+// @Security BearerAuth
 func (h *ListDiagnosisPaperHandler) Handle(c *fiber.Ctx) error {
 	diagnoses := utils.Map(common.SupportedDiagnoses, func(diagnosis common.Diagnosis) ListDiagnosisPaperHandlerResponse {
 		return ListDiagnosisPaperHandlerResponse{

@@ -602,6 +602,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/http.Error'
+      security:
+      - BearerAuth: []
       summary: Archive a chat
       tags:
       - chat
@@ -758,6 +760,8 @@ paths:
             items:
               $ref: '#/definitions/diagnosis.ListDiagnosisPaperHandlerResponse'
             type: array
+      security:
+      - BearerAuth: []
       summary: List diagnosis papers
       tags:
       - diagnosis
