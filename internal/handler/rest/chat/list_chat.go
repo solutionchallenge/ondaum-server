@@ -2,6 +2,7 @@ package chat
 
 import (
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -38,6 +39,7 @@ func NewListChatHandler(deps ListChatHandlerDependencies) (*ListChatHandler, err
 // @Produce json
 // @Param datetime_gte query string false "Filter by chat started datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)"
 // @Param datetime_lte query string false "Filter by chat ended datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)"
+// @Param matching_keyword query string false "Filter by sub-string matching keyword"
 // @Param dominant_emotion query string false "Filter by dominant emotion"
 // @Param message_id query string false "Filter by message ID"
 // @Param only_archived query bool false "Filter only archived chats"
@@ -69,6 +71,7 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 	dominantEmotion := c.Query("dominant_emotion")
 	onlyArchivedStr := c.Query("only_archived")
 	messageID := c.Query("message_id")
+	matchingKeyword := c.Query("matching_keyword")
 
 	var localStartTime, localEndTime time.Time
 	if datetimeGte != "" {
@@ -126,6 +129,22 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(
 			http.NewError(ctx, err, "Failed to list chats"),
 		)
+	}
+
+	if matchingKeyword != "" {
+		filteredChats := make([]domain.Chat, 0, len(chats))
+		for _, chat := range chats {
+			if chat.Summary == nil {
+				continue
+			}
+			for _, keyword := range chat.Summary.Keywords {
+				if strings.Contains(strings.ToLower(keyword), strings.ToLower(matchingKeyword)) {
+					filteredChats = append(filteredChats, chat)
+					break
+				}
+			}
+		}
+		chats = filteredChats
 	}
 
 	if dominantEmotion != "" {
