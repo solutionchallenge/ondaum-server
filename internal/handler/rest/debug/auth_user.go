@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/solutionchallenge/ondaum-server/internal/domain/user"
 	"github.com/solutionchallenge/ondaum-server/pkg/http"
 	"github.com/solutionchallenge/ondaum-server/pkg/jwt"
 	"github.com/uptrace/bun"
@@ -49,19 +48,7 @@ func (h *AuthUserHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 
-	user := &user.User{}
-	err := h.deps.DB.NewSelect().
-		Model(user).
-		Where("id = ?", request.ID).
-		Scan(ctx)
-
-	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(
-			http.NewError(ctx, err, "User not found"),
-		)
-	}
-
-	tokenPair, err := h.deps.JWT.GenerateTokenPair(strconv.FormatInt(user.ID, 10))
+	tokenPair, err := h.deps.JWT.GenerateTokenPair(strconv.FormatInt(request.ID, 10))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
 			http.NewError(ctx, err, "Failed to generate token pair"),

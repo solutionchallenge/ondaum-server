@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strconv"
 	"time"
 
 	"github.com/benbjohnson/clock"
@@ -30,7 +31,6 @@ func (c *Core) Create(ctx context.Context, actionType future.JobType, actionPara
 	}
 
 	job := &FutureJob{
-		ID:               future.GenerateID(),
 		ActionType:       actionType,
 		ActionParams:     actionParams,
 		TriggeredAt:      c.Clock.Now().UTC().Add(triggerAfter),
@@ -38,13 +38,18 @@ func (c *Core) Create(ctx context.Context, actionType future.JobType, actionPara
 		ActionIdentifier: actionIdentifierValue,
 	}
 
-	_, err := c.DB.NewInsert().Model(job).Exec(ctx)
+	result, err := c.DB.NewInsert().Model(job).Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	id, err := result.LastInsertId()
 	if err != nil {
 		return nil, err
 	}
 
 	return &future.Job{
-		ID:               job.ID,
+		ID:               strconv.FormatInt(id, 10),
 		ActionIdentifier: job.ActionIdentifier,
 		ActionType:       job.ActionType,
 		ActionParams:     job.ActionParams,
