@@ -134,14 +134,7 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 			if chat.Summary == nil {
 				continue
 			}
-			var maxRate float64
-			var dominant common.Emotion
-			for _, emotion := range chat.Summary.Emotions {
-				if emotion.Rate > maxRate {
-					maxRate = emotion.Rate
-					dominant = emotion.Emotion
-				}
-			}
+			dominant := chat.Summary.Emotions.GetDominant()
 			if dominant == common.Emotion(dominantEmotion) {
 				filteredChats = append(filteredChats, chat)
 			}
