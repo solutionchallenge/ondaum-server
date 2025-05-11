@@ -1,5 +1,23 @@
 package utils
 
+func Map[IN any, OUT any](slice []IN, transformer func(val IN) OUT) []OUT {
+	results := make([]OUT, len(slice))
+	for idx, val := range slice {
+		results[idx] = transformer(val)
+	}
+	return results
+}
+
+func Filter[T any](slice []T, predicate func(T) bool) []T {
+	results := make([]T, 0, len(slice))
+	for _, val := range slice {
+		if predicate(val) {
+			results = append(results, val)
+		}
+	}
+	return results
+}
+
 func Intersect[T comparable](first, second []T) []T {
 	if len(first) == 0 || len(second) == 0 {
 		return nil

@@ -1,6 +1,7 @@
 package chat
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -152,18 +153,13 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 		trimedEmotions := utils.Map(emotions, func(emotion string) string {
 			return strings.TrimSpace(emotion)
 		})
-		filteredChats := make([]domain.Chat, 0, len(chats))
-		for _, chat := range chats {
+		chats = utils.Filter(chats, func(chat domain.Chat) bool {
 			if chat.Summary == nil {
-				continue
+				return false
 			}
 			dominant := chat.Summary.Emotions.GetDominant()
-			filteredEmotions := utils.Intersect(trimedEmotions, []string{string(dominant)})
-			if len(filteredEmotions) > 0 {
-				filteredChats = append(filteredChats, chat)
-			}
-		}
-		chats = filteredChats
+			return slices.Contains(trimedEmotions, string(dominant))
+		})
 	}
 
 	chatDTOs := make([]domain.ChatWithSummaryDTO, len(chats))
