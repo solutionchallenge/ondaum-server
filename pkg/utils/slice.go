@@ -50,3 +50,12 @@ func Deduplicate[T comparable](input []T) []T {
 	}
 	return unique
 }
+
+func OneOf[T any](slice []T, predicate func(T) bool) bool {
+	for _, val := range slice {
+		if predicate(val) {
+			return true
+		}
+	}
+	return false
+}

@@ -232,14 +232,20 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "Filter by dominant emotions (comma separated, e.g. 'joy,sadness')",
+                        "name": "dominant_emotions",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "description": "Filter by sub-string matching keyword",
                         "name": "matching_keyword",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Filter by dominant emotions (comma separated, e.g. 'joy,sadness')",
-                        "name": "dominant_emotions",
+                        "description": "Filter by sub-string matching content (search raw-text from histories, it could be slow for large data)",
+                        "name": "matching_content",
                         "in": "query"
                     },
                     {

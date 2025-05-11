@@ -515,13 +515,18 @@ paths:
         in: query
         name: datetime_lte
         type: string
+      - description: Filter by dominant emotions (comma separated, e.g. 'joy,sadness')
+        in: query
+        name: dominant_emotions
+        type: string
       - description: Filter by sub-string matching keyword
         in: query
         name: matching_keyword
         type: string
-      - description: Filter by dominant emotions (comma separated, e.g. 'joy,sadness')
+      - description: Filter by sub-string matching content (search raw-text from histories,
+          it could be slow for large data)
         in: query
-        name: dominant_emotions
+        name: matching_content
         type: string
       - description: Filter by message ID
         in: query

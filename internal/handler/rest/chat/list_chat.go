@@ -40,8 +40,9 @@ func NewListChatHandler(deps ListChatHandlerDependencies) (*ListChatHandler, err
 // @Produce json
 // @Param datetime_gte query string false "Filter by chat started datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)"
 // @Param datetime_lte query string false "Filter by chat ended datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)"
-// @Param matching_keyword query string false "Filter by sub-string matching keyword"
 // @Param dominant_emotions query string false "Filter by dominant emotions (comma separated, e.g. 'joy,sadness')"
+// @Param matching_keyword query string false "Filter by sub-string matching keyword"
+// @Param matching_content query string false "Filter by sub-string matching content (search raw-text from histories, it could be slow for large data)"
 // @Param message_id query string false "Filter by message ID"
 // @Param only_archived query bool false "Filter only archived chats"
 // @Success 200 {object} ListChatResponse
@@ -70,9 +71,10 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 	datetimeGte := c.Query("datetime_gte")
 	datetimeLte := c.Query("datetime_lte")
 	dominantEmotions := c.Query("dominant_emotions")
-	onlyArchivedStr := c.Query("only_archived")
-	messageID := c.Query("message_id")
 	matchingKeyword := c.Query("matching_keyword")
+	matchingContent := c.Query("matching_content")
+	messageID := c.Query("message_id")
+	onlyArchivedStr := c.Query("only_archived")
 
 	var localStartTime, localEndTime time.Time
 	if datetimeGte != "" {
@@ -133,19 +135,25 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 	}
 
 	if matchingKeyword != "" {
-		filteredChats := make([]domain.Chat, 0, len(chats))
-		for _, chat := range chats {
+		chats = utils.Filter(chats, func(chat domain.Chat) bool {
 			if chat.Summary == nil {
-				continue
+				return false
 			}
-			for _, keyword := range chat.Summary.Keywords {
-				if strings.Contains(strings.ToLower(keyword), strings.ToLower(matchingKeyword)) {
-					filteredChats = append(filteredChats, chat)
-					break
-				}
-			}
-		}
-		chats = filteredChats
+			return utils.OneOf(chat.Summary.Keywords, func(keyword string) bool {
+				return strings.Contains(strings.ToLower(keyword), strings.ToLower(matchingKeyword))
+			})
+		})
+	}
+
+	if matchingContent != "" {
+		chats = utils.Filter(chats, func(chat domain.Chat) bool {
+			allContents := utils.Map(chat.Histories, func(history *domain.History) string {
+				return history.Content
+			})
+			return utils.OneOf(allContents, func(content string) bool {
+				return strings.Contains(strings.ToLower(content), strings.ToLower(matchingContent))
+			})
+		})
 	}
 
 	if dominantEmotions != "" {
@@ -162,10 +170,9 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 		})
 	}
 
-	chatDTOs := make([]domain.ChatWithSummaryDTO, len(chats))
-	for i, chat := range chats {
-		chatDTOs[i] = chat.ToChatWithSummaryDTO()
-	}
+	chatDTOs := utils.Map(chats, func(chat domain.Chat) domain.ChatWithSummaryDTO {
+		return chat.ToChatWithSummaryDTO()
+	})
 
 	return c.JSON(ListChatResponse{
 		Chats: chatDTOs,
