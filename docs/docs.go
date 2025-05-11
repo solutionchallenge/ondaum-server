@@ -238,8 +238,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Filter by dominant emotion",
-                        "name": "dominant_emotion",
+                        "description": "Filter by dominant emotions (comma separated, e.g. 'joy,sadness')",
+                        "name": "dominant_emotions",
                         "in": "query"
                     },
                     {
@@ -1106,6 +1106,9 @@ const docTemplate = `{
                 "content": {
                     "type": "string"
                 },
+                "id": {
+                    "type": "string"
+                },
                 "metadata": {
                     "type": "array",
                     "items": {
@@ -1134,11 +1137,11 @@ const docTemplate = `{
         "chat.MainTopic": {
             "type": "object",
             "properties": {
-                "begin_history_id": {
-                    "type": "integer"
+                "begin_message_id": {
+                    "type": "string"
                 },
-                "end_history_id": {
-                    "type": "integer"
+                "end_message_id": {
+                    "type": "string"
                 }
             }
         },

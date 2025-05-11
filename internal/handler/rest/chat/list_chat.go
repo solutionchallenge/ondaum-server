@@ -7,9 +7,9 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	domain "github.com/solutionchallenge/ondaum-server/internal/domain/chat"
-	"github.com/solutionchallenge/ondaum-server/internal/domain/common"
 	"github.com/solutionchallenge/ondaum-server/internal/domain/user"
 	"github.com/solutionchallenge/ondaum-server/pkg/http"
+	"github.com/solutionchallenge/ondaum-server/pkg/utils"
 	"github.com/uptrace/bun"
 	"go.uber.org/fx"
 )
@@ -40,7 +40,7 @@ func NewListChatHandler(deps ListChatHandlerDependencies) (*ListChatHandler, err
 // @Param datetime_gte query string false "Filter by chat started datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)"
 // @Param datetime_lte query string false "Filter by chat ended datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)"
 // @Param matching_keyword query string false "Filter by sub-string matching keyword"
-// @Param dominant_emotion query string false "Filter by dominant emotion"
+// @Param dominant_emotions query string false "Filter by dominant emotions (comma separated, e.g. 'joy,sadness')"
 // @Param message_id query string false "Filter by message ID"
 // @Param only_archived query bool false "Filter only archived chats"
 // @Success 200 {object} ListChatResponse
@@ -68,7 +68,7 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 
 	datetimeGte := c.Query("datetime_gte")
 	datetimeLte := c.Query("datetime_lte")
-	dominantEmotion := c.Query("dominant_emotion")
+	dominantEmotions := c.Query("dominant_emotions")
 	onlyArchivedStr := c.Query("only_archived")
 	messageID := c.Query("message_id")
 	matchingKeyword := c.Query("matching_keyword")
@@ -147,14 +147,19 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 		chats = filteredChats
 	}
 
-	if dominantEmotion != "" {
+	if dominantEmotions != "" {
+		emotions := strings.Split(dominantEmotions, ",")
+		trimedEmotions := utils.Map(emotions, func(emotion string) string {
+			return strings.TrimSpace(emotion)
+		})
 		filteredChats := make([]domain.Chat, 0, len(chats))
 		for _, chat := range chats {
 			if chat.Summary == nil {
 				continue
 			}
 			dominant := chat.Summary.Emotions.GetDominant()
-			if dominant == common.Emotion(dominantEmotion) {
+			filteredEmotions := utils.Intersect(trimedEmotions, []string{string(dominant)})
+			if len(filteredEmotions) > 0 {
 				filteredChats = append(filteredChats, chat)
 			}
 		}

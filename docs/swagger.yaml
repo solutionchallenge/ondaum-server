@@ -67,6 +67,8 @@ definitions:
     properties:
       content:
         type: string
+      id:
+        type: string
       metadata:
         items:
           type: integer
@@ -85,10 +87,10 @@ definitions:
     type: object
   chat.MainTopic:
     properties:
-      begin_history_id:
-        type: integer
-      end_history_id:
-        type: integer
+      begin_message_id:
+        type: string
+      end_message_id:
+        type: string
     type: object
   chat.SummaryDTO:
     properties:
@@ -517,9 +519,9 @@ paths:
         in: query
         name: matching_keyword
         type: string
-      - description: Filter by dominant emotion
+      - description: Filter by dominant emotions (comma separated, e.g. 'joy,sadness')
         in: query
-        name: dominant_emotion
+        name: dominant_emotions
         type: string
       - description: Filter by message ID
         in: query
