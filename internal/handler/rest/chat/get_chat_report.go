@@ -73,7 +73,7 @@ func NewGetChatReportHandler(deps GetChatReportHandlerDependencies) (*GetChatRep
 // @Failure 401 {object} http.Error
 // @Failure 404 {object} http.Error
 // @Failure 500 {object} http.Error
-// @Router /chats/report [get]
+// @Router /chat-reports [get]
 func (h *GetChatReportHandler) Handle(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 	userID, err := http.GetUserID(c)
