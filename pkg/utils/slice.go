@@ -1,5 +1,7 @@
 package utils
 
+import "slices"
+
 func Map[IN any, OUT any](slice []IN, transformer func(val IN) OUT) []OUT {
 	results := make([]OUT, len(slice))
 	for idx, val := range slice {
@@ -52,10 +54,5 @@ func Deduplicate[T comparable](input []T) []T {
 }
 
 func OneOf[T any](slice []T, predicate func(T) bool) bool {
-	for _, val := range slice {
-		if predicate(val) {
-			return true
-		}
-	}
-	return false
+	return slices.ContainsFunc(slice, predicate)
 }

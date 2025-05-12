@@ -1,7 +1,6 @@
 package chat
 
 import (
-	"math"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -51,7 +50,7 @@ type GetChatReportHandlerResponse struct {
 	AverageNegativeScore  float64                 `json:"average_negative_score"`
 	AverageNeutralScore   float64                 `json:"average_neutral_score"`
 	TotalChatCount        int                     `json:"total_chat_count"`
-	AverageChatDuration   time.Duration           `json:"average_chat_duration"`
+	AverageChatDuration   string                  `json:"average_chat_duration"`
 	StressLevelDescriptor PredefinedStressLevel   `json:"stress_level_descriptor"`
 }
 
@@ -59,10 +58,21 @@ type GetChatReportHandler struct {
 	deps GetChatReportHandlerDependencies
 }
 
-func NewGetChatReportHandler(deps GetChatReportHandlerDependencies) *GetChatReportHandler {
-	return &GetChatReportHandler{deps: deps}
+func NewGetChatReportHandler(deps GetChatReportHandlerDependencies) (*GetChatReportHandler, error) {
+	return &GetChatReportHandler{deps: deps}, nil
 }
 
+// @Summary Get chat report
+// @Description Get chat report
+// @Accept json
+// @Produce json
+// @Param datetime_gte query string false "Filter by chat started datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)"
+// @Param datetime_lte query string false "Filter by chat ended datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)"
+// @Success 200 {object} GetChatReportHandlerResponse
+// @Failure 401 {object} http.Error
+// @Failure 404 {object} http.Error
+// @Failure 500 {object} http.Error
+// @Router /chats/report [get]
 func (h *GetChatReportHandler) Handle(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 	userID, err := http.GetUserID(c)
@@ -81,56 +91,40 @@ func (h *GetChatReportHandler) Handle(c *fiber.Ctx) error {
 	datetimeGte := c.Query("datetime_gte")
 	datetimeLte := c.Query("datetime_lte")
 
-	var localStartTime, localEndTime time.Time
+	localStartTime := time.Time{}
+	localEndTime := time.Time{}
+
+	query := h.deps.DB.NewSelect().
+		Model((*domain.Chat)(nil)).
+		Relation("Summary").
+		Where("c.user_id = ?", userID)
+
 	if datetimeGte != "" {
-		localStartTime, err = time.Parse(time.RFC3339, datetimeGte)
+		parsedTime, err := time.Parse(time.RFC3339, datetimeGte)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(
 				http.NewError(ctx, err, "Invalid datetime_gte format. Use YYYY-MM-DDTHH:mm:ssZ"),
 			)
 		}
+		localStartTime = parsedTime
+		query = query.Where("c.created_at >= ?", parsedTime.UTC())
 	}
 	if datetimeLte != "" {
-		localEndTime, err = time.Parse(time.RFC3339, datetimeLte)
+		parsedTime, err := time.Parse(time.RFC3339, datetimeLte)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(
 				http.NewError(ctx, err, "Invalid datetime_lte format. Use YYYY-MM-DDTHH:mm:ssZ"),
 			)
 		}
+		localEndTime = parsedTime
+		query = query.Where("c.finished_at <= ?", parsedTime.UTC())
 	}
 
-	chats := []domain.Chat{}
-	if err := h.deps.DB.NewSelect().
-		Model(&chats).
-		Relation("Summary").
-		Where("user_id = ?", userID).
-		Where("created_at >= ?", localStartTime).
-		Where("created_at <= ?", localEndTime).
-		Scan(ctx); err != nil {
+	var chats []domain.Chat
+	if err := query.Scan(ctx, &chats); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
 			http.NewError(ctx, err, "Failed to get chats"),
 		)
-	}
-
-	emotionCounts := make(map[common.Emotion]int64)
-	var totalPositiveScore, totalNegativeScore, totalNeutralScore float64
-	var totalChatDuration time.Duration
-
-	for _, chat := range chats {
-		if chat.Summary == nil {
-			continue
-		}
-
-		dominantEmotion := chat.Summary.Emotions.GetDominant()
-		emotionCounts[dominantEmotion]++
-
-		totalPositiveScore += chat.Summary.PositiveScore
-		totalNegativeScore += chat.Summary.NegativeScore
-		totalNeutralScore += chat.Summary.NeutralScore
-
-		if chat.ChatDuration.Valid {
-			totalChatDuration += time.Duration(chat.ChatDuration.Duration)
-		}
 	}
 
 	chatCount := len(chats)
@@ -141,9 +135,52 @@ func (h *GetChatReportHandler) Handle(c *fiber.Ctx) error {
 		})
 	}
 
-	avgPositiveScore := utils.RoundTo(totalPositiveScore/float64(chatCount), 3)
-	avgNegativeScore := utils.RoundTo(totalNegativeScore/float64(chatCount), 3)
-	avgNeutralScore := utils.RoundTo(totalNeutralScore/float64(chatCount), 3)
+	validChats := utils.Filter(chats, func(chat domain.Chat) bool {
+		return chat.Summary != nil && chat.ChatDuration.Valid
+	})
+
+	validChatCount := len(validChats)
+	if validChatCount == 0 {
+		return c.Status(fiber.StatusOK).JSON(GetChatReportHandlerResponse{
+			DatetimeGte: localStartTime,
+			DatetimeLte: localEndTime,
+		})
+	}
+
+	type ChatStats struct {
+		PositiveScore float64
+		NegativeScore float64
+		NeutralScore  float64
+		Duration      time.Duration
+		EmotionGroups map[common.Emotion][]domain.Chat
+	}
+
+	stats := utils.Reduce(validChats, func(acc ChatStats, chat domain.Chat) ChatStats {
+		dominantEmotion := chat.Summary.Emotions.GetDominant()
+		acc.EmotionGroups[dominantEmotion] = append(acc.EmotionGroups[dominantEmotion], chat)
+
+		return ChatStats{
+			PositiveScore: acc.PositiveScore + chat.Summary.PositiveScore,
+			NegativeScore: acc.NegativeScore + chat.Summary.NegativeScore,
+			NeutralScore:  acc.NeutralScore + chat.Summary.NeutralScore,
+			Duration:      acc.Duration + time.Duration(chat.ChatDuration.Duration),
+			EmotionGroups: acc.EmotionGroups,
+		}
+	}, ChatStats{
+		EmotionGroups: make(map[common.Emotion][]domain.Chat),
+	})
+
+	emotionCountList := make(common.EmotionCountList, 0, len(stats.EmotionGroups))
+	for emotion, chats := range stats.EmotionGroups {
+		emotionCountList = append(emotionCountList, common.EmotionCount{
+			Emotion: emotion,
+			Count:   int64(len(chats)),
+		})
+	}
+
+	avgPositiveScore := utils.RoundTo(stats.PositiveScore/float64(validChatCount), 3)
+	avgNegativeScore := utils.RoundTo(stats.NegativeScore/float64(validChatCount), 3)
+	avgNeutralScore := utils.RoundTo(stats.NeutralScore/float64(validChatCount), 3)
 
 	total := avgPositiveScore + avgNegativeScore + avgNeutralScore
 	if total != 1.00 {
@@ -161,8 +198,8 @@ func (h *GetChatReportHandler) Handle(c *fiber.Ctx) error {
 		}
 	}
 
-	avgDurationSeconds := int(math.Ceil(totalChatDuration.Seconds()))
-	avgDurationMinutes := time.Duration(avgDurationSeconds/60+1) * time.Minute
+	avgConvertedDuration := common.NewDuration(stats.Duration)
+	avgRedableDuration := avgConvertedDuration.ToString(common.DurationFormatMinutes)
 
 	var stressLevel PredefinedStressLevel
 	for _, level := range PredefinedStressLevels {
@@ -172,14 +209,6 @@ func (h *GetChatReportHandler) Handle(c *fiber.Ctx) error {
 		}
 	}
 
-	emotionCountList := make(common.EmotionCountList, 0, len(emotionCounts))
-	for emotion, count := range emotionCounts {
-		emotionCountList = append(emotionCountList, common.EmotionCount{
-			Emotion: emotion,
-			Count:   count,
-		})
-	}
-
 	return c.Status(fiber.StatusOK).JSON(GetChatReportHandlerResponse{
 		DatetimeGte:           localStartTime,
 		DatetimeLte:           localEndTime,
@@ -187,8 +216,8 @@ func (h *GetChatReportHandler) Handle(c *fiber.Ctx) error {
 		AveragePositiveScore:  avgPositiveScore,
 		AverageNegativeScore:  avgNegativeScore,
 		AverageNeutralScore:   avgNeutralScore,
-		TotalChatCount:        chatCount,
-		AverageChatDuration:   avgDurationMinutes,
+		TotalChatCount:        validChatCount,
+		AverageChatDuration:   avgRedableDuration,
 		StressLevelDescriptor: stressLevel,
 	})
 }

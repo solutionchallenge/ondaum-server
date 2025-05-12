@@ -14,6 +14,7 @@ type DurationFormat string
 const (
 	DurationFormatSeconds = DurationFormat("3600sec")
 	DurationFormatTime    = DurationFormat("02:04:05")
+	DurationFormatMinutes = DurationFormat("60min")
 )
 
 type Duration time.Duration
@@ -58,6 +59,9 @@ func (d Duration) ToString(format DurationFormat) string {
 		minutes := (seconds % 3600) / 60
 		secs := seconds % 60
 		return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, secs)
+	case DurationFormatMinutes:
+		minutes := (seconds + 59) / 60
+		return fmt.Sprintf("%dmin", minutes)
 	default:
 		return fmt.Sprintf("%dsec", seconds)
 	}

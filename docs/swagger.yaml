@@ -63,6 +63,29 @@ definitions:
       user_timezone:
         type: string
     type: object
+  chat.GetChatReportHandlerResponse:
+    properties:
+      average_chat_duration:
+        type: string
+      average_negative_score:
+        type: number
+      average_neutral_score:
+        type: number
+      average_positive_score:
+        type: number
+      datetime_gte:
+        type: string
+      datetime_lte:
+        type: string
+      emotion_counts:
+        items:
+          $ref: '#/definitions/common.EmotionCount'
+        type: array
+      stress_level_descriptor:
+        $ref: '#/definitions/chat.PredefinedStressLevel'
+      total_chat_count:
+        type: integer
+    type: object
   chat.HistoryDTO:
     properties:
       content:
@@ -90,6 +113,15 @@ definitions:
       begin_message_id:
         type: string
       end_message_id:
+        type: string
+    type: object
+  chat.PredefinedStressLevel:
+    properties:
+      description:
+        type: string
+      threshold:
+        type: number
+      title:
         type: string
     type: object
   chat.SummaryDTO:
@@ -211,6 +243,13 @@ definitions:
     - EmotionFear
     - EmotionDisgust
     - EmotionNeutral
+  common.EmotionCount:
+    properties:
+      count:
+        type: integer
+      emotion:
+        $ref: '#/definitions/common.Emotion'
+    type: object
   common.EmotionRate:
     properties:
       emotion:
@@ -705,6 +744,40 @@ paths:
       summary: Create or update chat summary
       tags:
       - chat
+  /chats/report:
+    get:
+      consumes:
+      - application/json
+      description: Get chat report
+      parameters:
+      - description: Filter by chat started datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)
+        in: query
+        name: datetime_gte
+        type: string
+      - description: Filter by chat ended datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)
+        in: query
+        name: datetime_lte
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/chat.GetChatReportHandlerResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Error'
+      summary: Get chat report
   /diagnoses:
     get:
       consumes:

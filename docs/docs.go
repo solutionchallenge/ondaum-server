@@ -289,6 +289,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/chats/report": {
+            "get": {
+                "description": "Get chat report",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get chat report",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by chat started datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)",
+                        "name": "datetime_gte",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by chat ended datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)",
+                        "name": "datetime_lte",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/chat.GetChatReportHandlerResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/chats/{session_id}": {
             "get": {
                 "security": [
@@ -1106,6 +1158,41 @@ const docTemplate = `{
                 }
             }
         },
+        "chat.GetChatReportHandlerResponse": {
+            "type": "object",
+            "properties": {
+                "average_chat_duration": {
+                    "type": "string"
+                },
+                "average_negative_score": {
+                    "type": "number"
+                },
+                "average_neutral_score": {
+                    "type": "number"
+                },
+                "average_positive_score": {
+                    "type": "number"
+                },
+                "datetime_gte": {
+                    "type": "string"
+                },
+                "datetime_lte": {
+                    "type": "string"
+                },
+                "emotion_counts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/common.EmotionCount"
+                    }
+                },
+                "stress_level_descriptor": {
+                    "$ref": "#/definitions/chat.PredefinedStressLevel"
+                },
+                "total_chat_count": {
+                    "type": "integer"
+                }
+            }
+        },
         "chat.HistoryDTO": {
             "type": "object",
             "properties": {
@@ -1147,6 +1234,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "end_message_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "chat.PredefinedStressLevel": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "threshold": {
+                    "type": "number"
+                },
+                "title": {
                     "type": "string"
                 }
             }
@@ -1324,6 +1425,17 @@ const docTemplate = `{
                 "EmotionDisgust",
                 "EmotionNeutral"
             ]
+        },
+        "common.EmotionCount": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "emotion": {
+                    "$ref": "#/definitions/common.Emotion"
+                }
+            }
         },
         "common.EmotionRate": {
             "type": "object",
