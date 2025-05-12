@@ -3,8 +3,9 @@ package common
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"fmt"
 	"slices"
+
+	"github.com/solutionchallenge/ondaum-server/pkg/utils"
 )
 
 type Feature string
@@ -35,7 +36,7 @@ type FeatureList []Feature
 func (e *FeatureList) Scan(src interface{}) error {
 	bytes, ok := src.([]byte)
 	if !ok {
-		return fmt.Errorf("failed to type assert FeatureList")
+		return utils.NewError("failed to type assert FeatureList")
 	}
 	var result []Feature
 	if err := json.Unmarshal(bytes, &result); err != nil {

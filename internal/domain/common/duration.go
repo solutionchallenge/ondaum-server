@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+
+	"github.com/solutionchallenge/ondaum-server/pkg/utils"
 )
 
 type DurationFormat string
@@ -32,7 +34,7 @@ func (d *Duration) Scan(value interface{}) error {
 		}
 		*d = Duration(duration)
 	default:
-		return fmt.Errorf("unsupported Scan type for Duration: %T", value)
+		return utils.NewError("unsupported Scan type for Duration: %T", value)
 	}
 	return nil
 }
@@ -87,7 +89,7 @@ func (nd *NullableDuration) Scan(value interface{}) error {
 		}
 		nd.Duration = Duration(duration)
 	default:
-		return fmt.Errorf("unsupported Scan type for NullableDuration: %T", value)
+		return utils.NewError("unsupported Scan type for NullableDuration: %T", value)
 	}
 	return nil
 }

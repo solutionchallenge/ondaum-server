@@ -99,7 +99,7 @@ func Migrate(db *sql.DB, migrations ...Migration) error {
 
 	histories, err := getMigrationHistories(ctx, tx)
 	if err != nil {
-		return err
+		return utils.WrapError(err, "failed to get migration histories")
 	}
 
 	if len(histories) == 0 {

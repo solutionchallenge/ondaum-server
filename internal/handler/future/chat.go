@@ -3,11 +3,11 @@ package future
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 
 	"github.com/benbjohnson/clock"
 	domain "github.com/solutionchallenge/ondaum-server/internal/domain/chat"
 	"github.com/solutionchallenge/ondaum-server/pkg/future"
+	"github.com/solutionchallenge/ondaum-server/pkg/utils"
 	"github.com/uptrace/bun"
 	"go.uber.org/fx"
 )
@@ -41,12 +41,12 @@ func (h *ChatFutureHandler) Handle(ctx context.Context, job *future.Job) error {
 	var input ChatFutureHandlerParams
 	err := json.Unmarshal([]byte(job.ActionParams), &input)
 	if err != nil {
-		return err
+		return utils.WrapError(err, "failed to unmarshal future job params")
 	}
 
 	tx, err := h.deps.DB.BeginTx(ctx, nil)
 	if err != nil {
-		return err
+		return utils.WrapError(err, "failed to begin transaction")
 	}
 	defer tx.Rollback()
 
@@ -57,7 +57,7 @@ func (h *ChatFutureHandler) Handle(ctx context.Context, job *future.Job) error {
 		Where("user_id = ?", input.UserID).
 		Scan(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to select chat: %w(%v:%v)", err, input.UserID, input.ConversationID)
+		return utils.WrapError(err, "failed to select chat (%v:%v)", input.UserID, input.ConversationID)
 	}
 
 	if chat.FinishedAt.IsZero() {
@@ -67,12 +67,12 @@ func (h *ChatFutureHandler) Handle(ctx context.Context, job *future.Job) error {
 			WherePK().
 			Exec(ctx)
 		if err != nil {
-			return fmt.Errorf("failed to update chat: %w(%v:%v)", err, input.UserID, input.ConversationID)
+			return utils.WrapError(err, "failed to update chat (%v:%v)", input.UserID, input.ConversationID)
 		}
 	}
 
 	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("failed to commit transaction: %w(%v:%v)", err, input.UserID, input.ConversationID)
+		return utils.WrapError(err, "failed to commit transaction (%v:%v)", input.UserID, input.ConversationID)
 	}
 
 	return nil

@@ -3,10 +3,10 @@ package chat
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/solutionchallenge/ondaum-server/internal/domain/common"
+	"github.com/solutionchallenge/ondaum-server/pkg/utils"
 	"github.com/uptrace/bun"
 )
 
@@ -18,7 +18,7 @@ type MainTopic struct {
 func (m *MainTopic) Scan(src interface{}) error {
 	bytes, ok := src.([]byte)
 	if !ok {
-		return fmt.Errorf("failed to type assert MainTopic")
+		return utils.NewError("failed to type assert MainTopic")
 	}
 	var result MainTopic
 	if err := json.Unmarshal(bytes, &result); err != nil {

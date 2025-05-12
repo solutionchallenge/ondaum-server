@@ -115,7 +115,7 @@ func handleConnect(
 ) (ResponseWrapper, string, error) {
 	sessionID, err := GetWebsocketSessionID(c)
 	if err != nil {
-		return ResponseWrapper{}, "", err
+		return ResponseWrapper{}, "", utils.WrapError(err, "failed to get session ID")
 	}
 	connectWrapper := ConnectWrapper{
 		ConnectID: sessionID,
@@ -138,7 +138,7 @@ func handleMessage(
 	var requestWrapper MessageWrapper
 	err := json.Unmarshal(rawMessage, &requestWrapper)
 	if err != nil {
-		return ResponseWrapper{}, false, fmt.Errorf("failed to unmarshal message: %w", err)
+		return ResponseWrapper{}, false, utils.WrapError(err, "failed to unmarshal message")
 	}
 	requestWrapper.MessageID = messageID
 	requestWrapper.SessionID = sessionID
@@ -199,11 +199,11 @@ func processControlFlags(
 	if !slices.Contains(responseWrapper.ControlFlags, ControlFlagQuite) {
 		serialized, err := json.Marshal(responseWrapper)
 		if err != nil {
-			return false, fmt.Errorf("failed to serialize message: %w", err)
+			return false, utils.WrapError(err, "failed to serialize message")
 		}
 		err = c.WriteMessage(fiberws.TextMessage, serialized)
 		if err != nil {
-			return false, fmt.Errorf("failed to write message: %w", err)
+			return false, utils.WrapError(err, "failed to write message")
 		}
 	}
 	if slices.Contains(responseWrapper.ControlFlags, ControlFlagClose) {

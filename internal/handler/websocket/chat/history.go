@@ -31,7 +31,7 @@ func (h *ChatHistoryManager) Add(ctx context.Context, messages ...llm.Message) {
 		err := tx.NewSelect().Model(&chat).Where("session_id = ?", h.conversationID).Scan(ctx)
 		if err != nil || chat.ID == 0 {
 			utils.Log(utils.WarnLevel).CID(h.conversationID).Err(err).BT().Send("Failed to query chat")
-			return err
+			return utils.WrapError(err, "failed to query chat")
 		}
 
 		histories := make([]domain.History, 0, len(messages))
@@ -54,7 +54,7 @@ func (h *ChatHistoryManager) Add(ctx context.Context, messages ...llm.Message) {
 			_, err = tx.NewInsert().Model(&histories).Exec(ctx)
 			if err != nil {
 				utils.Log(utils.WarnLevel).CID(h.conversationID).Err(err).BT().Send("Failed to bulk insert chat history")
-				return err
+				return utils.WrapError(err, "failed to bulk insert chat history")
 			}
 		}
 		return nil

@@ -1,18 +1,20 @@
 package utils
 
 import (
-	"errors"
 	"fmt"
 )
 
 func NewError(fmtstr string, args ...interface{}) error {
-	return fmt.Errorf(fmtstr, args...)
+	_, filename, line := GetCallerInfo(2)
+	return fmt.Errorf("(%s:%d) %w", filename, line, fmt.Errorf(fmtstr, args...))
 }
 
 func WrapError(err error, fmtstr string, args ...interface{}) error {
-	return fmt.Errorf("%s: %w", fmt.Sprintf(fmtstr, args...), err)
+	_, filename, line := GetCallerInfo(2)
+	return fmt.Errorf("(%s:%d) %s: %w", filename, line, fmt.Sprintf(fmtstr, args...), err)
 }
 
-func IsError(err error, target error) bool {
-	return errors.Is(err, target)
+func PassError(err error) error {
+	_, filename, line := GetCallerInfo(2)
+	return fmt.Errorf("(%s:%d): %w", filename, line, err)
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/google/uuid"
 	"github.com/solutionchallenge/ondaum-server/pkg/future"
+	"github.com/solutionchallenge/ondaum-server/pkg/utils"
 	"github.com/uptrace/bun"
 )
 
@@ -40,12 +41,12 @@ func (c *Core) Create(ctx context.Context, actionType future.JobType, actionPara
 
 	result, err := c.DB.NewInsert().Model(job).Exec(ctx)
 	if err != nil {
-		return nil, err
+		return nil, utils.WrapError(err, "failed to create future job")
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return nil, err
+		return nil, utils.WrapError(err, "failed to get last insert id")
 	}
 
 	return &future.Job{
@@ -69,7 +70,10 @@ func (c *Core) Update(ctx context.Context, ID string, actionType future.JobType,
 	}
 
 	_, err := update.Exec(ctx)
-	return err
+	if err != nil {
+		return utils.WrapError(err, "failed to update future job")
+	}
+	return nil
 }
 
 func (c *Core) Cancel(ctx context.Context, ID string) error {
@@ -78,7 +82,10 @@ func (c *Core) Cancel(ctx context.Context, ID string) error {
 		Set("completed_at = ?", c.Clock.Now().UTC()).
 		Where("id = ?", ID).
 		Exec(ctx)
-	return err
+	if err != nil {
+		return utils.WrapError(err, "failed to cancel future job")
+	}
+	return nil
 }
 
 func (c *Core) Reschdule(ctx context.Context, ID string, triggerAfter time.Duration, onlyPending bool) error {
@@ -92,14 +99,17 @@ func (c *Core) Reschdule(ctx context.Context, ID string, triggerAfter time.Durat
 	}
 
 	_, err := query.Where("id = ?", ID).Exec(ctx)
-	return err
+	if err != nil {
+		return utils.WrapError(err, "failed to reschedule future job")
+	}
+	return nil
 }
 
 func (c *Core) Inspect(ctx context.Context, ID string) (*future.Job, error) {
 	var job FutureJob
 	err := c.DB.NewSelect().Model(&job).Where("id = ?", ID).Scan(ctx)
 	if err != nil {
-		return nil, err
+		return nil, utils.WrapError(err, "failed to inspect future job")
 	}
 
 	return &future.Job{
@@ -121,7 +131,7 @@ func (c *Core) FindBy(ctx context.Context, actionIdentifier string) (*future.Job
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, utils.WrapError(err, "failed to find future job")
 	}
 	return &future.Job{
 		ID:               strconv.FormatInt(job.ID, 10),
@@ -136,7 +146,7 @@ func (c *Core) RunNext(ctx context.Context, ignoreTriggerAfter bool) (*future.Jo
 
 	tx, err := c.DB.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, utils.WrapError(err, "failed to begin transaction")
 	}
 
 	query := tx.NewSelect().Model(&job).
@@ -154,7 +164,7 @@ func (c *Core) RunNext(ctx context.Context, ignoreTriggerAfter bool) (*future.Jo
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil, nil
 		}
-		return nil, nil, err
+		return nil, nil, utils.WrapError(err, "failed to scan future job")
 	}
 
 	_, err = tx.NewUpdate().Model(&job).
@@ -163,13 +173,13 @@ func (c *Core) RunNext(ctx context.Context, ignoreTriggerAfter bool) (*future.Jo
 		Exec(ctx)
 	if err != nil {
 		tx.Rollback()
-		return nil, nil, err
+		return nil, nil, utils.WrapError(err, "failed to update future job status")
 	}
 
 	err = tx.Commit()
 	if err != nil {
 		tx.Rollback()
-		return nil, nil, err
+		return nil, nil, utils.WrapError(err, "failed to commit transaction")
 	}
 
 	jobTx := &Transaction{
@@ -190,5 +200,8 @@ func (c *Core) RunNext(ctx context.Context, ignoreTriggerAfter bool) (*future.Jo
 
 func (c *Core) DeletePermanently(ctx context.Context, ID string) error {
 	_, err := c.DB.NewDelete().Model((*FutureJob)(nil)).Where("id = ?", ID).Exec(ctx)
-	return err
+	if err != nil {
+		return utils.WrapError(err, "failed to delete future job")
+	}
+	return nil
 }

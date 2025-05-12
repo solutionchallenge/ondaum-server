@@ -3,13 +3,13 @@ package google
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"slices"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 
 	"github.com/solutionchallenge/ondaum-server/pkg/oauth"
+	"github.com/solutionchallenge/ondaum-server/pkg/utils"
 )
 
 const (
@@ -50,7 +50,7 @@ func (client *Client) GetProvider() oauth.Provider {
 func (client *Client) GetAuthURL(state string, override ...string) (string, error) {
 	if len(override) > 0 && override[0] != "" {
 		if !slices.Contains(client.BaseConfig.Google.AllowedRedirections, override[0]) {
-			return "", fmt.Errorf("invalid override redirect URL: %s", override[0])
+			return "", utils.NewError("invalid override redirect URL: %s", override[0])
 		}
 		copied := client.coreConfig
 		copied.RedirectURL = override[0]
@@ -65,7 +65,7 @@ func (client *Client) GetUserInfo(code string, override ...string) (oauth.UserIn
 	var current oauth2.Config
 	if len(override) > 0 && override[0] != "" {
 		if !slices.Contains(client.BaseConfig.Google.AllowedRedirections, override[0]) {
-			return oauth.UserInfoOutput{}, fmt.Errorf("invalid override redirect URL: %s", override[0])
+			return oauth.UserInfoOutput{}, utils.NewError("invalid override redirect URL: %s", override[0])
 		}
 		copied := client.coreConfig
 		copied.RedirectURL = override[0]
@@ -76,19 +76,19 @@ func (client *Client) GetUserInfo(code string, override ...string) (oauth.UserIn
 		current = client.coreConfig
 	}
 	if err != nil || token == nil {
-		return oauth.UserInfoOutput{}, fmt.Errorf("failed to exchange token: %v", err)
+		return oauth.UserInfoOutput{}, utils.NewError("failed to exchange token: %v", err)
 	}
 
 	core := current.Client(context.Background(), token)
 	resp, err := core.Get("https://www.googleapis.com/oauth2/v2/userinfo")
 	if err != nil {
-		return oauth.UserInfoOutput{}, fmt.Errorf("failed to get user info: %v", err)
+		return oauth.UserInfoOutput{}, utils.NewError("failed to get user info: %v", err)
 	}
 	defer resp.Body.Close()
 
 	var userInfo oauth.UserInfoOutput
 	if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil {
-		return oauth.UserInfoOutput{}, fmt.Errorf("failed to decode user info: %v", err)
+		return oauth.UserInfoOutput{}, utils.NewError("failed to decode user info: %v", err)
 	}
 
 	return userInfo, nil

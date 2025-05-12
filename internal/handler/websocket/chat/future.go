@@ -7,6 +7,7 @@ import (
 
 	fthandler "github.com/solutionchallenge/ondaum-server/internal/handler/future"
 	ftpkg "github.com/solutionchallenge/ondaum-server/pkg/future"
+	"github.com/solutionchallenge/ondaum-server/pkg/utils"
 )
 
 func UpsertChattingEndFutureJob(
@@ -14,7 +15,7 @@ func UpsertChattingEndFutureJob(
 ) (*ftpkg.Job, error) {
 	job, err := future.FindBy(ctx, sessionID)
 	if err != nil {
-		return nil, err
+		return nil, utils.WrapError(err, "failed to find future job")
 	}
 	if job == nil {
 		marshaled, err := json.Marshal(fthandler.ChatFutureHandlerParams{
@@ -22,7 +23,7 @@ func UpsertChattingEndFutureJob(
 			ConversationID: sessionID,
 		})
 		if err != nil {
-			return nil, err
+			return nil, utils.WrapError(err, "failed to marshal future job params")
 		}
 		job, err = future.Create(
 			ctx, fthandler.ChatJobType, string(marshaled),
@@ -30,7 +31,7 @@ func UpsertChattingEndFutureJob(
 			sessionID,
 		)
 		if err != nil {
-			return nil, err
+			return nil, utils.WrapError(err, "failed to create future job")
 		}
 		return job, nil
 	} else {

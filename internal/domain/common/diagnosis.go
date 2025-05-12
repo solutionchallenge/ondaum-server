@@ -3,7 +3,6 @@ package common
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"fmt"
 	"slices"
 
 	"github.com/solutionchallenge/ondaum-server/pkg/utils"
@@ -40,7 +39,7 @@ type DiagnosisList []Diagnosis
 func (e *DiagnosisList) Scan(src interface{}) error {
 	bytes, ok := src.([]byte)
 	if !ok {
-		return fmt.Errorf("failed to type assert DiagnosisList")
+		return utils.NewError("failed to type assert DiagnosisList")
 	}
 	var result []Diagnosis
 	if err := json.Unmarshal(bytes, &result); err != nil {

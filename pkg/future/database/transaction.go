@@ -5,6 +5,7 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/solutionchallenge/ondaum-server/pkg/future"
+	"github.com/solutionchallenge/ondaum-server/pkg/utils"
 	"github.com/uptrace/bun"
 )
 
@@ -20,7 +21,10 @@ func (t *Transaction) Complete(ctx context.Context) error {
 		Set("completed_at = ?", t.Clock.Now().UTC()).
 		Where("id = ?", t.Job.ID).
 		Exec(ctx)
-	return err
+	if err != nil {
+		return utils.WrapError(err, "failed to complete future job")
+	}
+	return nil
 }
 
 func (t *Transaction) Fail(ctx context.Context, errorMessage string) error {
@@ -30,5 +34,8 @@ func (t *Transaction) Fail(ctx context.Context, errorMessage string) error {
 		Set("completed_at = ?", t.Clock.Now().UTC()).
 		Where("id = ?", t.Job.ID).
 		Exec(ctx)
-	return err
+	if err != nil {
+		return utils.WrapError(err, "failed to fail future job")
+	}
+	return nil
 }

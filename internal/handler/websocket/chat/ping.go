@@ -24,7 +24,7 @@ func HandlePing(db *bun.DB, request wspkg.PingWrapper) (wspkg.ResponseWrapper, b
 		Scan(context.Background())
 	if err != nil {
 		utils.Log(utils.ErrorLevel).CID(request.SessionID).Err(err).BT().Send("Failed to query chat")
-		return wspkg.ResponseWrapper{}, false, err
+		return wspkg.ResponseWrapper{}, false, utils.WrapError(err, "failed to query chat")
 	}
 
 	if !chat.FinishedAt.IsZero() && chat.ArchivedAt.IsZero() {

@@ -33,7 +33,7 @@ func HandleMessage(
 			Scan(ctx)
 		if err != nil {
 			utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).BT().Send("Failed to query chat")
-			return err
+			return utils.WrapError(err, "failed to query chat")
 		}
 
 		if !chat.ArchivedAt.IsZero() {
@@ -50,27 +50,27 @@ func HandleMessage(
 				Exec(ctx)
 			if err != nil {
 				utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).BT().Send("Failed to reactivate chat")
-				return err
+				return utils.WrapError(err, "failed to reactivate chat")
 			}
 		}
 		return nil
 	})
 	if err != nil {
 		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).BT().Send("Failed to run transaction")
-		return wspkg.ResponseWrapper{}, false, err
+		return wspkg.ResponseWrapper{}, false, utils.WrapError(err, "failed to run transaction")
 	}
 
 	_, err = UpsertChattingEndFutureJob(context.Background(), future, request.SessionID, request.UserID, ChatAutoFinishAfter)
 	if err != nil {
 		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).BT().Send("Failed to upsert future job")
-		return wspkg.ResponseWrapper{}, false, err
+		return wspkg.ResponseWrapper{}, false, utils.WrapError(err, "failed to upsert future job")
 	}
 
 	manager := NewChatHistoryManager(db, request.SessionID)
 	conversation, err := llm.StartConversation(context.Background(), manager, "interactive_chat", request.SessionID)
 	if err != nil {
 		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).BT().Send("Failed to start conversation")
-		return wspkg.ResponseWrapper{}, false, err
+		return wspkg.ResponseWrapper{}, false, utils.WrapError(err, "failed to start conversation")
 	}
 	// TODO: apply user addition to the conversation
 	llmResponse, err := conversation.Request(context.Background(), llmpkg.Message{
@@ -81,7 +81,7 @@ func HandleMessage(
 	})
 	if err != nil {
 		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).BT().Send("Failed to request to conversation")
-		return wspkg.ResponseWrapper{}, false, err
+		return wspkg.ResponseWrapper{}, false, utils.WrapError(err, "failed to request to conversation")
 	}
 	marshaled, _ := json.Marshal(llmResponse.Metadata)
 	utils.Log(utils.DebugLevel).CID(request.SessionID).RID(request.MessageID).BT().Send("Message ID: %v", llmResponse.ID)

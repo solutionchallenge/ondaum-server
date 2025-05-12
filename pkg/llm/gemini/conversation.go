@@ -23,7 +23,7 @@ func NewConversation(ctx context.Context, id string, client *Client, prompt stri
 	})
 	config, err := BuildGenerativeConfig(client, prompt)
 	if err != nil {
-		return nil, err
+		return nil, utils.WrapError(err, "failed to build generative config")
 	}
 	session, err := client.Core.Chats.Create(
 		ctx,
@@ -32,7 +32,7 @@ func NewConversation(ctx context.Context, id string, client *Client, prompt stri
 		histories,
 	)
 	if err != nil {
-		return nil, err
+		return nil, utils.WrapError(err, "failed to create chatting session")
 	}
 	return &Conversation{
 		ID:         id,
@@ -47,18 +47,18 @@ func (conversation *Conversation) Request(ctx context.Context, request llm.Messa
 	prompt := genai.NewPartFromText(request.Content)
 	response, err := conversation.Session.SendMessage(ctx, *prompt)
 	if err != nil {
-		return llm.Message{}, err
+		return llm.Message{}, utils.WrapError(err, "failed to send message")
 	}
 
 	AddStatistics(&conversation.Statistics, response.UsageMetadata)
 	AddStatistics(&conversation.Client.Statistics, response.UsageMetadata)
 
 	if err := checkPromptBlocked(response); err != nil {
-		return llm.Message{}, err
+		return llm.Message{}, utils.WrapError(err, "failed to check prompt blocked")
 	}
 	feedbacks := buildContentFeedbacks(response)
 	if err := checkContentBlocked(feedbacks); err != nil {
-		return llm.Message{}, err
+		return llm.Message{}, utils.WrapError(err, "failed to check content blocked")
 	}
 	message := llm.Message{
 		ID:      uuid.New().String(),

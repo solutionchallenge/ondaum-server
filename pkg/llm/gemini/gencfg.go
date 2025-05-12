@@ -20,7 +20,7 @@ func BuildGenerativeConfig(client *Client, promptIdentifier string, rootpath ...
 	if preparedPrompt != nil {
 		promptData, err := utils.ReadFileFrom(preparedPrompt.PromptFile, rootpath...)
 		if err != nil {
-			return nil, err
+			return nil, utils.WrapError(err, "failed to read prompt file")
 		}
 		systemInstruction = genai.NewContentFromText(promptData, genai.RoleUser)
 	}

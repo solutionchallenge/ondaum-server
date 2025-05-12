@@ -5,6 +5,7 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/solutionchallenge/ondaum-server/pkg/utils"
 )
 
 var (
@@ -38,7 +39,7 @@ func (g *Generator) GenerateTokenPair(value string, metadata ...map[string]any) 
 		time.Duration(g.Config.AccessExpire)*time.Second,
 	)
 	if err != nil {
-		return nil, err
+		return nil, utils.WrapError(err, "failed to generate access token")
 	}
 
 	refreshToken, err := g.GenerateToken(
@@ -48,7 +49,7 @@ func (g *Generator) GenerateTokenPair(value string, metadata ...map[string]any) 
 		time.Duration(g.Config.RefreshExpire)*time.Second,
 	)
 	if err != nil {
-		return nil, err
+		return nil, utils.WrapError(err, "failed to generate refresh token")
 	}
 
 	return &TokenPair{
@@ -80,7 +81,7 @@ func (g *Generator) UnpackToken(tokenString string) (*Claims, error) {
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, utils.WrapError(err, "failed to unpack token")
 	}
 
 	claims, ok := token.Claims.(*Claims)
@@ -98,7 +99,7 @@ func (g *Generator) UnpackToken(tokenString string) (*Claims, error) {
 func (g *Generator) RefreshTokenPair(refreshTokenString string) (*TokenPair, error) {
 	claims, err := g.UnpackToken(refreshTokenString)
 	if err != nil {
-		return nil, err
+		return nil, utils.WrapError(err, "failed to unpack refresh token")
 	}
 
 	if claims.Type != RefreshTokenType {
@@ -112,7 +113,7 @@ func (g *Generator) RefreshTokenPair(refreshTokenString string) (*TokenPair, err
 		time.Duration(g.Config.AccessExpire)*time.Second,
 	)
 	if err != nil {
-		return nil, err
+		return nil, utils.WrapError(err, "failed to generate access token")
 	}
 
 	return &TokenPair{
@@ -124,7 +125,7 @@ func (g *Generator) RefreshTokenPair(refreshTokenString string) (*TokenPair, err
 func (g *Generator) GetTokenType(tokenString string) (Type, error) {
 	claims, err := g.UnpackToken(tokenString)
 	if err != nil {
-		return InvalidType, err
+		return InvalidType, utils.WrapError(err, "failed to get token type")
 	}
 	return claims.Type, nil
 }

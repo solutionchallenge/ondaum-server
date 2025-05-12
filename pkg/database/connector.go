@@ -8,6 +8,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	sqlhook "github.com/qustavo/sqlhooks/v2"
+	"github.com/solutionchallenge/ondaum-server/pkg/utils"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/mysqldialect"
 	"github.com/uptrace/bun/schema"
@@ -51,7 +52,7 @@ func (connector Connector) ToBunDB(hook ...sqlhook.Hooks) (*bun.DB, error) {
 	case "mysql":
 		dialect = mysqldialect.New()
 	default:
-		return nil, fmt.Errorf("unsupported database driver: %s", connector.Kind)
+		return nil, utils.NewError("unsupported database driver: %s", connector.Kind)
 	}
 	boundDriver := string(connector.Kind)
 	if len(hook) > 0 && hook[0] != nil {

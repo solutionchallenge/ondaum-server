@@ -2,7 +2,6 @@ package utils
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/cenkalti/backoff/v4"
 )
@@ -18,14 +17,14 @@ func Retry(ctx context.Context, retryLimit int, action func() error, condition f
 		if condition != nil && condition(err) {
 			next := backoffContext.NextBackOff()
 			if next == backoff.Stop {
-				return fmt.Errorf("max retry backoff reached: %w", err)
+				return WrapError(err, "max retry backoff reached")
 			}
 			if err = SleepWith(ctx, next); err != nil {
-				return fmt.Errorf("sleep interrupted: %w", err)
+				return WrapError(err, "sleep interrupted")
 			}
 			continue
 		}
 		return err
 	}
-	return fmt.Errorf("max retry attempts reached: %w", err)
+	return WrapError(err, "max retry attempts reached")
 }

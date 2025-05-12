@@ -1,9 +1,8 @@
 package gemini
 
 import (
-	"fmt"
-
 	"github.com/solutionchallenge/ondaum-server/pkg/llm"
+	"github.com/solutionchallenge/ondaum-server/pkg/utils"
 	"google.golang.org/genai"
 )
 
@@ -51,13 +50,13 @@ func checkPromptBlocked(response *genai.GenerateContentResponse) error {
 	if response.PromptFeedback != nil {
 		switch response.PromptFeedback.BlockReason {
 		case genai.BlockedReasonProhibitedContent, genai.BlockedReasonSafety:
-			return fmt.Errorf(
+			return utils.NewError(
 				"blocked by gemini by inappropriate prompt: %v(%v)",
 				response.PromptFeedback.BlockReasonMessage,
 				response.PromptFeedback.SafetyRatings,
 			)
 		default:
-			return fmt.Errorf(
+			return utils.NewError(
 				"blocked by gemini with unknown reason: %v(%v)",
 				response.PromptFeedback.BlockReasonMessage,
 				response.PromptFeedback.SafetyRatings,
@@ -70,7 +69,7 @@ func checkPromptBlocked(response *genai.GenerateContentResponse) error {
 func checkContentBlocked(feedbacks []map[string]any) error {
 	for _, feedback := range feedbacks {
 		if feedback["blocked"] == true {
-			return fmt.Errorf("blocked by gemini by inappropriate content: %v(%v)", feedback["category"], feedback["probability"])
+			return utils.NewError("blocked by gemini by inappropriate content: %v(%v)", feedback["category"], feedback["probability"])
 		}
 	}
 	return nil

@@ -38,7 +38,7 @@ func HandleConnect(db *bun.DB, clk clock.Clock, request wspkg.ConnectWrapper) (w
 		_, err = db.NewInsert().Model(chat).Exec(context.Background())
 		if err != nil {
 			utils.Log(utils.ErrorLevel).CID(request.ConnectID).Err(err).BT().Send("Failed to create chat")
-			return wspkg.ResponseWrapper{}, "", err
+			return wspkg.ResponseWrapper{}, "", utils.WrapError(err, "failed to create chat")
 		}
 		return wspkg.BuildResponseFrom(
 			request, uuid.New().String(),

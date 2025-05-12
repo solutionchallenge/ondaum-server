@@ -2,7 +2,6 @@ package gemini
 
 import (
 	"context"
-	"fmt"
 	"sync"
 
 	"github.com/google/uuid"
@@ -23,14 +22,14 @@ type Client struct {
 
 func NewClient(config llm.Config) (*Client, error) {
 	if !config.Gemini.Enabled {
-		return nil, fmt.Errorf("gemini is not enabled")
+		return nil, utils.NewError("gemini is not enabled")
 	}
 	core, err := genai.NewClient(context.Background(), &genai.ClientConfig{
 		APIKey:  config.Gemini.APIKey,
 		Backend: genai.BackendGeminiAPI,
 	})
 	if err != nil {
-		return nil, err
+		return nil, utils.WrapError(err, "failed to create gemini client")
 	}
 	return &Client{
 		Config:        config,
@@ -47,7 +46,7 @@ func (client *Client) StartConversation(ctx context.Context, historyManager llm.
 
 	conversation, err := NewConversation(ctx, ConversationID, client, instructionIdentifier, historyManager)
 	if err != nil {
-		return nil, err
+		return nil, utils.WrapError(err, "failed to create gemini conversation")
 	}
 
 	client.Mutex.Lock()
@@ -59,7 +58,7 @@ func (client *Client) StartConversation(ctx context.Context, historyManager llm.
 func (client *Client) RunActionPrompt(ctx context.Context, instructionIdentifier string, promptIdentifier string, histories ...llm.Message) (llm.Message, error) {
 	config, err := BuildGenerativeConfig(client, instructionIdentifier)
 	if err != nil {
-		return llm.Message{}, fmt.Errorf("BuildGenerativeConfig failed: %w", err)
+		return llm.Message{}, utils.WrapError(err, "failed to build generative config")
 	}
 
 	var prepared *llm.PreparedPrompt = nil
@@ -70,12 +69,12 @@ func (client *Client) RunActionPrompt(ctx context.Context, instructionIdentifier
 		}
 	}
 	if prepared == nil {
-		return llm.Message{}, fmt.Errorf("prepared prompt identifier '%s' not found", promptIdentifier)
+		return llm.Message{}, utils.WrapError(err, "prepared prompt identifier '%s' not found", promptIdentifier)
 	}
 
 	prompt, err := utils.ReadFileFrom(prepared.PromptFile)
 	if err != nil {
-		return llm.Message{}, fmt.Errorf("ReadFileFrom failed for %s: %w", prepared.PromptFile, err)
+		return llm.Message{}, utils.WrapError(err, "ReadFileFrom failed for %s", prepared.PromptFile)
 	}
 
 	finalContents := []*genai.Content{}
@@ -90,7 +89,7 @@ func (client *Client) RunActionPrompt(ctx context.Context, instructionIdentifier
 	if prepared.AttachmentFile != "" {
 		reader, err := utils.OpenFileFrom(prepared.AttachmentFile)
 		if err != nil {
-			return llm.Message{}, fmt.Errorf("OpenFileFrom failed for %s: %w", prepared.AttachmentFile, err)
+			return llm.Message{}, utils.WrapError(err, "OpenFileFrom failed for %s", prepared.AttachmentFile)
 		}
 		defer reader.Close()
 
@@ -99,7 +98,7 @@ func (client *Client) RunActionPrompt(ctx context.Context, instructionIdentifier
 			DisplayName: prepared.AttachmentFile,
 		})
 		if uploadErr != nil {
-			return llm.Message{}, fmt.Errorf("file upload failed for %s: %w", prepared.AttachmentFile, uploadErr)
+			return llm.Message{}, utils.WrapError(uploadErr, "file upload failed for %s", prepared.AttachmentFile)
 		}
 
 		fileDataPart := genai.NewPartFromURI(uploadedFile.URI, prepared.AttachmentMime)
@@ -115,15 +114,15 @@ func (client *Client) RunActionPrompt(ctx context.Context, instructionIdentifier
 		config,
 	)
 	if err != nil {
-		return llm.Message{}, fmt.Errorf("GenerateContent failed: %w", err)
+		return llm.Message{}, utils.WrapError(err, "GenerateContent failed")
 	}
 
 	if err := checkPromptBlocked(response); err != nil {
-		return llm.Message{}, err
+		return llm.Message{}, utils.WrapError(err, "CheckPromptBlocked failed")
 	}
 	feedbacks := buildContentFeedbacks(response)
 	if err := checkContentBlocked(feedbacks); err != nil {
-		return llm.Message{}, err
+		return llm.Message{}, utils.WrapError(err, "CheckContentBlocked failed")
 	}
 
 	return llm.Message{

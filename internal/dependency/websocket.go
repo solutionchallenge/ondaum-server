@@ -1,10 +1,9 @@
 package dependency
 
 import (
-	"fmt"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/solutionchallenge/ondaum-server/pkg/jwt"
+	"github.com/solutionchallenge/ondaum-server/pkg/utils"
 	wspkg "github.com/solutionchallenge/ondaum-server/pkg/websocket"
 	"go.uber.org/fx"
 )
@@ -37,7 +36,7 @@ func WebsocketRoute[DEP any, H wspkg.Handler](path string, constructor func(depe
 					}
 					wspkg.Install(router, path, handler)
 				} else {
-					panic(fmt.Errorf("websocket core already configured for path %s", path))
+					panic(utils.NewError("websocket core already configured for path %s", path))
 				}
 			},
 		),

@@ -23,7 +23,7 @@ func checkConnectability(ctx context.Context, retries int, port int) error {
 	return utils.Retry(ctx, retries, func() error {
 		conn, err := net.Dial("tcp", fmt.Sprintf("127.0.0.1:%d", port))
 		if err != nil {
-			return err
+			return utils.PassError(err)
 		}
 		defer conn.Close()
 		return nil
@@ -48,7 +48,7 @@ func initializeServer(dbname string) (*memory.DbProvider, *sqle.Engine, error) {
 func startServer(port int, dbname string) error {
 	provider, engine, err := initializeServer(dbname)
 	if err != nil {
-		return fmt.Errorf("failed to initialize memdb server: %w", err)
+		return utils.WrapError(err, "failed to initialize memdb server")
 	}
 
 	config := server.Config{
@@ -58,11 +58,11 @@ func startServer(port int, dbname string) error {
 
 	srv, err := server.NewServer(config, engine, memory.NewSessionBuilder(provider), nil)
 	if err != nil {
-		return fmt.Errorf("failed to create server: %w", err)
+		return utils.WrapError(err, "failed to create server")
 	}
 
 	if err = srv.Start(); err != nil {
-		return fmt.Errorf("failed to start server: %w", err)
+		return utils.WrapError(err, "failed to start server")
 	}
 
 	return nil
@@ -70,7 +70,7 @@ func startServer(port int, dbname string) error {
 
 func NewConnector(config database.Config) (database.Connector, error) {
 	if config.Kind != Kind {
-		return database.Connector{}, fmt.Errorf("unsupported database driver: %s", config.Kind)
+		return database.Connector{}, utils.NewError("unsupported database driver: %s", config.Kind)
 	}
 
 	port := config.Port
@@ -78,7 +78,7 @@ func NewConnector(config database.Config) (database.Connector, error) {
 	if port == 0 {
 		free, err := freeport.GetFreePort()
 		if err != nil {
-			return database.Connector{}, fmt.Errorf("failed to get free port: %w", err)
+			return database.Connector{}, utils.WrapError(err, "failed to get free port")
 		}
 		port = free
 	}
@@ -90,7 +90,7 @@ func NewConnector(config database.Config) (database.Connector, error) {
 	}()
 
 	if err := checkConnectability(context.Background(), 5, port); err != nil {
-		return database.Connector{}, fmt.Errorf("failed to connect to memdb: %w", err)
+		return database.Connector{}, utils.WrapError(err, "failed to connect to memdb")
 	}
 
 	return database.Connector{

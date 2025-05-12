@@ -1,7 +1,6 @@
 package http
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -22,15 +21,15 @@ func GetRequestID(c *fiber.Ctx) string {
 func GetUserID(c *fiber.Ctx) (int64, error) {
 	localValue := c.Locals("X-User-ID")
 	if localValue == nil {
-		return 0, fmt.Errorf("X-User-ID is not set")
+		return 0, utils.NewError("X-User-ID is not set")
 	}
 	stringValue, ok := localValue.(string)
 	if !ok {
-		return 0, fmt.Errorf("X-User-ID is not a string")
+		return 0, utils.NewError("X-User-ID is not a string")
 	}
 	userID, err := strconv.ParseInt(stringValue, 10, 64)
 	if err != nil {
-		return 0, fmt.Errorf("X-User-ID is not a valid integer: %w", err)
+		return 0, utils.WrapError(err, "X-User-ID is not a valid integer")
 	}
 	return userID, nil
 }
@@ -38,7 +37,7 @@ func GetUserID(c *fiber.Ctx) (int64, error) {
 func GetUserMetadata(c *fiber.Ctx) (map[string]any, error) {
 	userMetadata, ok := c.Locals("X-User-Metadata").(map[string]any)
 	if !ok {
-		return nil, fmt.Errorf("X-User-Metadata is not set")
+		return nil, utils.NewError("X-User-Metadata is not set")
 	}
 	return userMetadata, nil
 }

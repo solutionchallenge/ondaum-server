@@ -3,8 +3,9 @@ package common
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"fmt"
 	"slices"
+
+	"github.com/solutionchallenge/ondaum-server/pkg/utils"
 )
 
 type Emotion string
@@ -34,7 +35,7 @@ type EmotionList []Emotion
 func (e *EmotionList) Scan(src interface{}) error {
 	bytes, ok := src.([]byte)
 	if !ok {
-		return fmt.Errorf("failed to type assert EmotionList")
+		return utils.NewError("failed to type assert EmotionList")
 	}
 	var result []Emotion
 	if err := json.Unmarshal(bytes, &result); err != nil {
@@ -74,7 +75,7 @@ type EmotionRate struct {
 func (e *EmotionRate) Scan(src interface{}) error {
 	bytes, ok := src.([]byte)
 	if !ok {
-		return fmt.Errorf("failed to type assert EmotionList")
+		return utils.NewError("failed to type assert EmotionList")
 	}
 	var result EmotionRate
 	if err := json.Unmarshal(bytes, &result); err != nil {
@@ -106,7 +107,7 @@ type EmotionRateList []EmotionRate
 func (e *EmotionRateList) Scan(src interface{}) error {
 	bytes, ok := src.([]byte)
 	if !ok {
-		return fmt.Errorf("failed to type assert EmotionRateList")
+		return utils.NewError("failed to type assert EmotionRateList")
 	}
 	var result []EmotionRate
 	if err := json.Unmarshal(bytes, &result); err != nil {
@@ -161,7 +162,7 @@ type EmotionCount struct {
 func (e *EmotionCount) Scan(src interface{}) error {
 	bytes, ok := src.([]byte)
 	if !ok {
-		return fmt.Errorf("failed to type assert EmotionCount")
+		return utils.NewError("failed to type assert EmotionCount")
 	}
 	var result EmotionCount
 	if err := json.Unmarshal(bytes, &result); err != nil {
@@ -193,7 +194,7 @@ type EmotionCountList []EmotionCount
 func (e *EmotionCountList) Scan(src interface{}) error {
 	bytes, ok := src.([]byte)
 	if !ok {
-		return fmt.Errorf("failed to type assert EmotionCountList")
+		return utils.NewError("failed to type assert EmotionCountList")
 	}
 	var result []EmotionCount
 	if err := json.Unmarshal(bytes, &result); err != nil {

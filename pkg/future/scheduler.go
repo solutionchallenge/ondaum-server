@@ -2,7 +2,6 @@ package future
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"time"
 
@@ -97,7 +96,7 @@ func (s *Scheduler) processJobs() {
 						if err, ok := r.(error); ok {
 							errMsg = err.Error()
 						}
-						utils.Log(utils.ErrorLevel).Err(fmt.Errorf("%v", r)).BT().Send("Handler panicked for job: %s", job.ID)
+						utils.Log(utils.ErrorLevel).Err(utils.NewError("%v", r)).BT().Send("Handler panicked for job: %s", job.ID)
 						tx.Fail(s.CancelableCtx, errMsg)
 					}
 				}()
