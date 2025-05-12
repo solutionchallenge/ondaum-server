@@ -27,13 +27,13 @@ type Privacy struct {
 	User *User `bun:"rel:belongs-to,join:user_id=id"`
 }
 
-type SimplifiedPrivacyDTO struct {
+type PrivacyDTO struct {
 	Gender   string `json:"gender"`
 	Birthday string `json:"birthday"`
 }
 
-func (p *Privacy) ToSimplifiedPrivacyDTO() SimplifiedPrivacyDTO {
-	return SimplifiedPrivacyDTO{
+func (p *Privacy) ToPrivacyDTO() PrivacyDTO {
+	return PrivacyDTO{
 		Gender:   string(p.Gender),
 		Birthday: p.Birthday.Format(utils.TIME_FORMAT_DATE),
 	}

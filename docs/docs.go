@@ -1035,7 +1035,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/user.SimplifiedUserDTO"
+                            "$ref": "#/definitions/user.UserDTO"
                         }
                     },
                     "401": {
@@ -1548,7 +1548,7 @@ const docTemplate = `{
                 }
             }
         },
-        "user.SimplifiedAdditionDTO": {
+        "user.AdditionDTO": {
             "type": "object",
             "properties": {
                 "concerns": {
@@ -1565,33 +1565,13 @@ const docTemplate = `{
                 }
             }
         },
-        "user.SimplifiedPrivacyDTO": {
+        "user.PrivacyDTO": {
             "type": "object",
             "properties": {
                 "birthday": {
                     "type": "string"
                 },
                 "gender": {
-                    "type": "string"
-                }
-            }
-        },
-        "user.SimplifiedUserDTO": {
-            "type": "object",
-            "properties": {
-                "addition": {
-                    "$ref": "#/definitions/user.SimplifiedAdditionDTO"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "privacy": {
-                    "$ref": "#/definitions/user.SimplifiedPrivacyDTO"
-                },
-                "username": {
                     "type": "string"
                 }
             }
@@ -1643,6 +1623,26 @@ const docTemplate = `{
                 },
                 "success": {
                     "type": "boolean"
+                }
+            }
+        },
+        "user.UserDTO": {
+            "type": "object",
+            "properties": {
+                "addition": {
+                    "$ref": "#/definitions/user.AdditionDTO"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "privacy": {
+                    "$ref": "#/definitions/user.PrivacyDTO"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },

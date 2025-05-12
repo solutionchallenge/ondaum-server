@@ -21,26 +21,26 @@ type User struct {
 	Addition *Addition `json:"addition,omitempty" bun:"rel:has-one,join:id=user_id"`
 }
 
-type SimplifiedUserDTO struct {
-	ID       int64                  `json:"id"`
-	Email    string                 `json:"email"`
-	Username string                 `json:"username"`
-	Privacy  *SimplifiedPrivacyDTO  `json:"privacy,omitempty"`
-	Addition *SimplifiedAdditionDTO `json:"addition,omitempty"`
+type UserDTO struct {
+	ID       int64        `json:"id"`
+	Email    string       `json:"email"`
+	Username string       `json:"username"`
+	Privacy  *PrivacyDTO  `json:"privacy,omitempty"`
+	Addition *AdditionDTO `json:"addition,omitempty"`
 }
 
-func (u *User) ToSimplifiedUserDTO() SimplifiedUserDTO {
-	privacy := (*SimplifiedPrivacyDTO)(nil)
+func (u *User) ToUserDTO() UserDTO {
+	privacy := (*PrivacyDTO)(nil)
 	if u.Privacy != nil {
-		dto := u.Privacy.ToSimplifiedPrivacyDTO()
+		dto := u.Privacy.ToPrivacyDTO()
 		privacy = &dto
 	}
-	addition := (*SimplifiedAdditionDTO)(nil)
+	addition := (*AdditionDTO)(nil)
 	if u.Addition != nil {
-		dto := u.Addition.ToSimplifiedAdditionDTO()
+		dto := u.Addition.ToAdditionDTO()
 		addition = &dto
 	}
-	return SimplifiedUserDTO{
+	return UserDTO{
 		ID:       u.ID,
 		Email:    u.Email,
 		Username: u.Username,

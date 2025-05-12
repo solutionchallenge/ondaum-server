@@ -2,6 +2,7 @@ package user
 
 import (
 	"database/sql"
+	"errors"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/solutionchallenge/ondaum-server/internal/domain/user"
@@ -36,7 +37,7 @@ func NewGetSelfHandler(deps GetSelfHandlerDependencies) (*GetSelfHandler, error)
 // @Tags         user
 // @Accept       json
 // @Produce      json
-// @Success      200 {object} user.SimplifiedUserDTO
+// @Success      200 {object} user.UserDTO
 // @Failure      401 {object} http.Error
 // @Failure      404 {object} http.Error
 // @Failure      500 {object} http.Error
@@ -58,7 +59,7 @@ func (h *GetSelfHandler) Handle(c *fiber.Ctx) error {
 		Where("id = ?", id).
 		Scan(ctx)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return c.Status(fiber.StatusNotFound).JSON(
 				http.NewError(ctx, err, "User not found for id: %v", id),
 			)
@@ -68,7 +69,7 @@ func (h *GetSelfHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 
-	response := user.ToSimplifiedUserDTO()
+	response := user.ToUserDTO()
 	return c.JSON(response)
 }
 

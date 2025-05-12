@@ -19,13 +19,13 @@ type Addition struct {
 	User *User `json:"user,omitempty" bun:"rel:belongs-to,join:user_id=id"`
 }
 
-type SimplifiedAdditionDTO struct {
+type AdditionDTO struct {
 	Concerns []string           `json:"concerns"`
 	Emotions common.EmotionList `json:"emotions"`
 }
 
-func (a *Addition) ToSimplifiedAdditionDTO() SimplifiedAdditionDTO {
-	return SimplifiedAdditionDTO{
+func (a *Addition) ToAdditionDTO() AdditionDTO {
+	return AdditionDTO{
 		Concerns: a.Concerns,
 		Emotions: a.Emotions,
 	}

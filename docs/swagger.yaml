@@ -324,7 +324,7 @@ definitions:
       auth_url:
         type: string
     type: object
-  user.SimplifiedAdditionDTO:
+  user.AdditionDTO:
     properties:
       concerns:
         items:
@@ -335,24 +335,11 @@ definitions:
           $ref: '#/definitions/common.Emotion'
         type: array
     type: object
-  user.SimplifiedPrivacyDTO:
+  user.PrivacyDTO:
     properties:
       birthday:
         type: string
       gender:
-        type: string
-    type: object
-  user.SimplifiedUserDTO:
-    properties:
-      addition:
-        $ref: '#/definitions/user.SimplifiedAdditionDTO'
-      email:
-        type: string
-      id:
-        type: integer
-      privacy:
-        $ref: '#/definitions/user.SimplifiedPrivacyDTO'
-      username:
         type: string
     type: object
   user.UpsertUserAdditionHandlerRequest:
@@ -386,6 +373,19 @@ definitions:
         type: boolean
       success:
         type: boolean
+    type: object
+  user.UserDTO:
+    properties:
+      addition:
+        $ref: '#/definitions/user.AdditionDTO'
+      email:
+        type: string
+      id:
+        type: integer
+      privacy:
+        $ref: '#/definitions/user.PrivacyDTO'
+      username:
+        type: string
     type: object
   websocket.Action:
     enum:
@@ -1088,7 +1088,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/user.SimplifiedUserDTO'
+            $ref: '#/definitions/user.UserDTO'
         "401":
           description: Unauthorized
           schema:

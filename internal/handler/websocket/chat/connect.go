@@ -3,6 +3,7 @@ package chat
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/benbjohnson/clock"
@@ -28,7 +29,7 @@ func HandleConnect(db *bun.DB, clk clock.Clock, request wspkg.ConnectWrapper) (w
 		Limit(1).
 		Scan(context.Background())
 
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		chat = &domain.Chat{
 			UserID:       request.UserID,
 			SessionID:    request.ConnectID,
