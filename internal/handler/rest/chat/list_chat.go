@@ -76,48 +76,40 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 	messageID := c.Query("message_id")
 	onlyArchivedStr := c.Query("only_archived")
 
-	var localStartTime, localEndTime time.Time
+	query := h.deps.DB.NewSelect().
+		Model((*domain.Chat)(nil)).
+		Relation("Summary").
+		Where("c.user_id = ?", userID)
+
 	if datetimeGte != "" {
-		localStartTime, err = time.Parse(time.RFC3339, datetimeGte)
+		localStartTime, err := time.Parse(time.RFC3339, datetimeGte)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(
 				http.NewError(ctx, err, "Invalid datetime_gte format. Use YYYY-MM-DDTHH:mm:ssZ"),
 			)
 		}
+		query = query.Where("c.created_at >= ?", localStartTime.UTC())
 	}
 	if datetimeLte != "" {
-		localEndTime, err = time.Parse(time.RFC3339, datetimeLte)
+		localEndTime, err := time.Parse(time.RFC3339, datetimeLte)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(
 				http.NewError(ctx, err, "Invalid datetime_lte format. Use YYYY-MM-DDTHH:mm:ssZ"),
 			)
 		}
+		query = query.Where("(c.finished_at IS NULL OR c.finished_at <= ?)", localEndTime.UTC())
 	}
 
-	onlyArchived := false
 	if onlyArchivedStr != "" {
-		onlyArchived, err = strconv.ParseBool(onlyArchivedStr)
+		onlyArchived, err := strconv.ParseBool(onlyArchivedStr)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(
 				http.NewError(ctx, err, "Invalid only_archived value. Use true or false"),
 			)
 		}
-	}
-
-	query := h.deps.DB.NewSelect().
-		Model((*domain.Chat)(nil)).
-		Relation("Summary").
-		Where("user_id = ?", userID)
-
-	if onlyArchived {
-		query = query.Where("archived_at IS NOT NULL")
-	}
-
-	if !localStartTime.IsZero() {
-		query = query.Where("created_at >= ?", localStartTime.UTC())
-	}
-	if !localEndTime.IsZero() {
-		query = query.Where("(finished_at IS NULL OR finished_at <= ?)", localEndTime.UTC())
+		if onlyArchived {
+			query = query.Where("c.archived_at IS NOT NULL")
+		}
 	}
 
 	if messageID != "" {
