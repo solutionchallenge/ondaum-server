@@ -64,6 +64,7 @@ func NewGetChatReportHandler(deps GetChatReportHandlerDependencies) (*GetChatRep
 
 // @Summary Get chat report
 // @Description Get chat report
+// @Tags chat
 // @Accept json
 // @Produce json
 // @Param datetime_gte query string false "Filter by chat started datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)"

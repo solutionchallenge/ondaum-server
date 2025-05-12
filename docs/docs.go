@@ -298,6 +298,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "chat"
+                ],
                 "summary": "Get chat report",
                 "parameters": [
                     {

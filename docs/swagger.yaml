@@ -778,6 +778,8 @@ paths:
           schema:
             $ref: '#/definitions/http.Error'
       summary: Get chat report
+      tags:
+      - chat
   /diagnoses:
     get:
       consumes:
