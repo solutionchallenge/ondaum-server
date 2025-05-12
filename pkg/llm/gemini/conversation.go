@@ -44,6 +44,8 @@ func NewConversation(ctx context.Context, id string, client *Client, prompt stri
 }
 
 func (conversation *Conversation) Request(ctx context.Context, request llm.Message) (llm.Message, error) {
+	conversation.Manager.Add(ctx, request)
+
 	prompt := genai.NewPartFromText(request.Content)
 	response, err := conversation.Session.SendMessage(ctx, *prompt)
 	if err != nil {
@@ -68,7 +70,7 @@ func (conversation *Conversation) Request(ctx context.Context, request llm.Messa
 			"feedbacks": feedbacks,
 		},
 	}
-	conversation.Manager.Add(ctx, request, message)
+	conversation.Manager.Add(ctx, message)
 	return message, nil
 }
 
