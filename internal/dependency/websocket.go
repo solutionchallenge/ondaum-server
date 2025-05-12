@@ -27,7 +27,7 @@ func WebsocketRoute[DEP any, H wspkg.Handler](path string, constructor func(depe
 	return fx.Options(
 		fx.Provide(fx.Private, constructor),
 		fx.Invoke(
-			func(manager *WebsocketCoreManager, router fiber.Router, jwt *jwt.Generator, handler H) {
+			func(manager *WebsocketCoreManager, router fiber.Router, jwt jwt.Generator, handler H) {
 				if _, ok := manager.ConfiguredCoreMap[path]; !ok {
 					manager.ConfiguredCoreMap[path] = struct{}{}
 					err := wspkg.EnableWebsocketCore(router, path, jwt)

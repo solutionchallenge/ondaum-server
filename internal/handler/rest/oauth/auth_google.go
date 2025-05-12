@@ -18,7 +18,7 @@ type AuthGoogleHandlerDependencies struct {
 	fx.In
 	DB    *bun.DB
 	OAuth *oauth.Container
-	JWT   *jwt.Generator
+	JWT   jwt.Generator
 }
 
 type AuthGoogleHandlerRequest struct {

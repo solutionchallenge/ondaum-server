@@ -20,14 +20,13 @@ require (
 	github.com/uptrace/bun v1.1.12
 	github.com/uptrace/bun/dialect/mysqldialect v1.1.12
 	go.uber.org/fx v1.23.0
-	google.golang.org/api v0.222.0
+	go.uber.org/mock v0.5.2
 	google.golang.org/genai v1.3.0
 )
 
 require (
 	cloud.google.com/go v0.118.3 // indirect
 	cloud.google.com/go/auth v0.14.1 // indirect
-	cloud.google.com/go/auth/oauth2adapt v0.2.7 // indirect
 	cloud.google.com/go/compute/metadata v0.6.0 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/fasthttp/websocket v1.5.3 // indirect

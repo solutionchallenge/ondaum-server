@@ -11,7 +11,7 @@ import (
 
 type RefreshAccessTokenHandlerDependencies struct {
 	fx.In
-	JWT *jwt.Generator
+	JWT jwt.Generator
 }
 
 type RefreshAccessTokenHandlerRequest struct {

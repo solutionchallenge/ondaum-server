@@ -14,7 +14,7 @@ import (
 type AuthUserHandlerDependencies struct {
 	fx.In
 	DB  *bun.DB
-	JWT *jwt.Generator
+	JWT jwt.Generator
 }
 
 type AuthUserHandlerRequest struct {

@@ -12,7 +12,7 @@ type CoreMessage struct {
 	Data   any    `json:"data"`
 }
 
-func EnableWebsocketCore(app fiber.Router, path string, generator *jwt.Generator) error {
+func EnableWebsocketCore(app fiber.Router, path string, generator jwt.Generator) error {
 	app.Use(path, func(c *fiber.Ctx) error {
 		if c.Get("Upgrade") != "websocket" {
 			return c.SendStatus(fiber.StatusUpgradeRequired)
@@ -36,7 +36,7 @@ func EnableWebsocketCore(app fiber.Router, path string, generator *jwt.Generator
 	return nil
 }
 
-func tryWebsocketAuthorization(c *fiber.Ctx, generator *jwt.Generator, sessionID string, accessToken ...string) {
+func tryWebsocketAuthorization(c *fiber.Ctx, generator jwt.Generator, sessionID string, accessToken ...string) {
 	tokenString := ""
 	if len(accessToken) > 0 && accessToken[0] != "" {
 		tokenString = accessToken[0]

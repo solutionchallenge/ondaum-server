@@ -14,19 +14,27 @@ var (
 	ErrTokenExpired   = jwt.ErrTokenExpired
 )
 
-type Generator struct {
+type Generator interface {
+	GenerateTokenPair(value string, metadata ...map[string]any) (*TokenPair, error)
+	GenerateToken(typ Type, value string, metadata map[string]any, duration time.Duration) (string, error)
+	UnpackToken(tokenString string) (*Claims, error)
+	RefreshTokenPair(refreshTokenString string) (*TokenPair, error)
+	GetTokenType(tokenString string) (Type, error)
+}
+
+type GeneratorImplementation struct {
 	Config Config
 	Clock  clock.Clock
 }
 
-func NewGenerator(config Config, clk clock.Clock) *Generator {
-	return &Generator{
+func NewGenerator(config Config, clk clock.Clock) Generator {
+	return &GeneratorImplementation{
 		Config: config,
 		Clock:  clk,
 	}
 }
 
-func (g *Generator) GenerateTokenPair(value string, metadata ...map[string]any) (*TokenPair, error) {
+func (g *GeneratorImplementation) GenerateTokenPair(value string, metadata ...map[string]any) (*TokenPair, error) {
 	injector := map[string]any{}
 	if len(metadata) > 0 && metadata[0] != nil {
 		injector = metadata[0]
@@ -58,7 +66,7 @@ func (g *Generator) GenerateTokenPair(value string, metadata ...map[string]any) 
 	}, nil
 }
 
-func (g *Generator) GenerateToken(typ Type, value string, metadata map[string]any, duration time.Duration) (string, error) {
+func (g *GeneratorImplementation) GenerateToken(typ Type, value string, metadata map[string]any, duration time.Duration) (string, error) {
 	now := g.Clock.Now().UTC().UTC()
 	claims := Claims{
 		Type:     typ,
@@ -75,7 +83,7 @@ func (g *Generator) GenerateToken(typ Type, value string, metadata map[string]an
 	return token.SignedString([]byte(g.Config.SecretKey))
 }
 
-func (g *Generator) UnpackToken(tokenString string) (*Claims, error) {
+func (g *GeneratorImplementation) UnpackToken(tokenString string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (any, error) {
 		return []byte(g.Config.SecretKey), nil
 	})
@@ -96,7 +104,7 @@ func (g *Generator) UnpackToken(tokenString string) (*Claims, error) {
 	return claims, nil
 }
 
-func (g *Generator) RefreshTokenPair(refreshTokenString string) (*TokenPair, error) {
+func (g *GeneratorImplementation) RefreshTokenPair(refreshTokenString string) (*TokenPair, error) {
 	claims, err := g.UnpackToken(refreshTokenString)
 	if err != nil {
 		return nil, utils.WrapError(err, "failed to unpack refresh token")
@@ -122,7 +130,7 @@ func (g *Generator) RefreshTokenPair(refreshTokenString string) (*TokenPair, err
 	}, nil
 }
 
-func (g *Generator) GetTokenType(tokenString string) (Type, error) {
+func (g *GeneratorImplementation) GetTokenType(tokenString string) (Type, error) {
 	claims, err := g.UnpackToken(tokenString)
 	if err != nil {
 		return InvalidType, utils.WrapError(err, "failed to get token type")

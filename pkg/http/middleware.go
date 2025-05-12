@@ -8,7 +8,7 @@ import (
 
 type MiddlewareFunc = func(c *fiber.Ctx) error
 
-func NewJWTAuthMiddleware(generator *jwt.Generator) MiddlewareFunc {
+func NewJWTAuthMiddleware(generator jwt.Generator) MiddlewareFunc {
 	return func(c *fiber.Ctx) error {
 		rid := GetRequestID(c)
 
