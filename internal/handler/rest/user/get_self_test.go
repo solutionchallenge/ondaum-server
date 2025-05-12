@@ -27,13 +27,13 @@ import (
 
 var testcases_GetSelfHandler = []struct {
 	name     string
-	setup    func(t *testing.T, tester *GetSelfHandlerTester)
+	setup    func(t *testing.T, tester *tester_GetSelfHandler)
 	request  *http.Request
 	response *http.Response
 }{
 	{
 		name: "Failure Case - Unauthorized",
-		setup: func(t *testing.T, tester *GetSelfHandlerTester) {
+		setup: func(t *testing.T, tester *tester_GetSelfHandler) {
 			tester.mockedJWT.EXPECT().GetTokenType(gomock.Any()).Return(jwt.InvalidType, nil)
 		},
 		request: &http.Request{
@@ -50,7 +50,7 @@ var testcases_GetSelfHandler = []struct {
 	},
 	{
 		name: "Failure Case - User Not Found",
-		setup: func(t *testing.T, tester *GetSelfHandlerTester) {
+		setup: func(t *testing.T, tester *tester_GetSelfHandler) {
 			preparedClaims := jwt.Claims{
 				Value: "1",
 				Metadata: map[string]any{
@@ -85,7 +85,7 @@ var testcases_GetSelfHandler = []struct {
 	},
 	{
 		name: "Failure Case - Internal Server Error",
-		setup: func(t *testing.T, tester *GetSelfHandlerTester) {
+		setup: func(t *testing.T, tester *tester_GetSelfHandler) {
 			preparedClaims := jwt.Claims{
 				Value: "1",
 			}
@@ -117,7 +117,7 @@ var testcases_GetSelfHandler = []struct {
 	},
 	{
 		name: "Success Case",
-		setup: func(t *testing.T, tester *GetSelfHandlerTester) {
+		setup: func(t *testing.T, tester *tester_GetSelfHandler) {
 			preparedClaims := jwt.Claims{
 				Value: "1",
 			}
@@ -200,7 +200,7 @@ func Test_GetSelfHandler(t *testing.T) {
 	tester.mockController.Finish()
 }
 
-type GetSelfHandlerTester struct {
+type tester_GetSelfHandler struct {
 	mockController     *gomock.Controller
 	databaseController sqlmock.Sqlmock
 	mockedDatabase     *sql.DB
@@ -210,7 +210,7 @@ type GetSelfHandlerTester struct {
 	handler            *GetSelfHandler
 }
 
-func prepareGetSelfHandlerForTest(t *testing.T) (*GetSelfHandlerTester, error) {
+func prepareGetSelfHandlerForTest(t *testing.T) (*tester_GetSelfHandler, error) {
 	mockController := gomock.NewController(t)
 	defer mockController.Finish()
 
@@ -237,7 +237,7 @@ func prepareGetSelfHandlerForTest(t *testing.T) (*GetSelfHandlerTester, error) {
 		return nil, err
 	}
 
-	return &GetSelfHandlerTester{
+	return &tester_GetSelfHandler{
 		mockController:     mockController,
 		databaseController: databaseController,
 		mockedDatabase:     mockedDatabase,

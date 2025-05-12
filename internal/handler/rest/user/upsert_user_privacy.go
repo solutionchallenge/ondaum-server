@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/solutionchallenge/ondaum-server/internal/domain/user"
+	domain "github.com/solutionchallenge/ondaum-server/internal/domain/user"
 	"github.com/solutionchallenge/ondaum-server/pkg/http"
 	"github.com/solutionchallenge/ondaum-server/pkg/utils"
 	"github.com/uptrace/bun"
@@ -55,6 +55,12 @@ func (h *UpsertUserPrivacyHandler) Handle(c *fiber.Ctx) error {
 			http.NewError(ctx, err, "Unauthorized"),
 		)
 	}
+	user := &domain.User{ID: userID}
+	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(ctx); err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(
+			http.NewError(ctx, err, "User not found"),
+		)
+	}
 
 	request := &UpsertUserPrivacyHandlerRequest{}
 	if err := c.BodyParser(request); err != nil {
@@ -71,14 +77,14 @@ func (h *UpsertUserPrivacyHandler) Handle(c *fiber.Ctx) error {
 	}
 
 	// Validate gender
-	gender := user.UserGender(request.Gender)
-	if gender != user.UserGenderMale && gender != user.UserGenderFemale && gender != user.UserGenderOther {
+	gender := domain.UserGender(request.Gender)
+	if gender != domain.UserGenderMale && gender != domain.UserGenderFemale && gender != domain.UserGenderOther {
 		return c.Status(fiber.StatusBadRequest).JSON(
 			http.NewError(ctx, nil, "Invalid gender. Must be one of: male, female, other"),
 		)
 	}
 
-	privacy := &user.Privacy{
+	privacy := &domain.Privacy{
 		UserID:   userID,
 		Gender:   gender,
 		Birthday: birthday,

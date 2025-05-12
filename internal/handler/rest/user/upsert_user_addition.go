@@ -3,7 +3,7 @@ package user
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/solutionchallenge/ondaum-server/internal/domain/common"
-	"github.com/solutionchallenge/ondaum-server/internal/domain/user"
+	domain "github.com/solutionchallenge/ondaum-server/internal/domain/user"
 	"github.com/solutionchallenge/ondaum-server/pkg/http"
 	"github.com/solutionchallenge/ondaum-server/pkg/utils"
 	"github.com/uptrace/bun"
@@ -54,6 +54,12 @@ func (h *UpsertUserAdditionHandler) Handle(c *fiber.Ctx) error {
 			http.NewError(ctx, err, "Unauthorized"),
 		)
 	}
+	user := &domain.User{ID: userID}
+	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(ctx); err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(
+			http.NewError(ctx, err, "User not found"),
+		)
+	}
 
 	request := &UpsertUserAdditionHandlerRequest{}
 	if err := c.BodyParser(request); err != nil {
@@ -68,7 +74,7 @@ func (h *UpsertUserAdditionHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 
-	addition := &user.Addition{
+	addition := &domain.Addition{
 		UserID:   userID,
 		Concerns: utils.Deduplicate(request.Concerns),
 		Emotions: utils.Deduplicate(request.Emotions),
