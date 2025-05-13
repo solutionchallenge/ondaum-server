@@ -128,14 +128,6 @@ func (h *GetChatReportHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 
-	chatCount := len(chats)
-	if chatCount == 0 {
-		return c.Status(fiber.StatusOK).JSON(GetChatReportHandlerResponse{
-			DatetimeGte: localStartTime,
-			DatetimeLte: localEndTime,
-		})
-	}
-
 	validChats := utils.Filter(chats, func(chat domain.Chat) bool {
 		return chat.Summary != nil && chat.ChatDuration.Valid
 	})
