@@ -1094,9 +1094,6 @@ const docTemplate = `{
         "chat.ChatWithSummaryAndHistoriesDTO": {
             "type": "object",
             "properties": {
-                "archived_at": {
-                    "type": "string"
-                },
                 "chat_duration": {
                     "type": "string"
                 },
@@ -1135,9 +1132,6 @@ const docTemplate = `{
         "chat.ChatWithSummaryDTO": {
             "type": "object",
             "properties": {
-                "archived_at": {
-                    "type": "string"
-                },
                 "chat_duration": {
                     "type": "string"
                 },

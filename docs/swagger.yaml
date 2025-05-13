@@ -19,8 +19,6 @@ definitions:
     type: object
   chat.ChatWithSummaryAndHistoriesDTO:
     properties:
-      archived_at:
-        type: string
       chat_duration:
         type: string
       histories:
@@ -46,8 +44,6 @@ definitions:
     type: object
   chat.ChatWithSummaryDTO:
     properties:
-      archived_at:
-        type: string
       chat_duration:
         type: string
       id:

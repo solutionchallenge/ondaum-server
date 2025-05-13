@@ -1088,9 +1088,6 @@
         "chat.ChatWithSummaryAndHistoriesDTO": {
             "type": "object",
             "properties": {
-                "archived_at": {
-                    "type": "string"
-                },
                 "chat_duration": {
                     "type": "string"
                 },
@@ -1129,9 +1126,6 @@
         "chat.ChatWithSummaryDTO": {
             "type": "object",
             "properties": {
-                "archived_at": {
-                    "type": "string"
-                },
                 "chat_duration": {
                     "type": "string"
                 },
