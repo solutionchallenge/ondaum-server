@@ -97,7 +97,7 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 				http.NewError(ctx, err, "Invalid datetime_lte format. Use YYYY-MM-DDTHH:mm:ssZ"),
 			)
 		}
-		query = query.Where("(c.finished_at IS NULL OR c.finished_at <= ?)", localEndTime.UTC())
+		query = query.Where("(c.archived_at IS NULL OR c.archived_at <= ?)", localEndTime.UTC())
 	}
 
 	if onlyArchivedStr != "" {

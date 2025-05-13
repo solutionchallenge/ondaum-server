@@ -118,7 +118,7 @@ func (h *GetChatReportHandler) Handle(c *fiber.Ctx) error {
 			)
 		}
 		localEndTime = parsedTime
-		query = query.Where("c.finished_at <= ?", parsedTime.UTC())
+		query = query.Where("(c.archived_at IS NULL OR c.archived_at <= ?)", parsedTime.UTC())
 	}
 
 	var chats []domain.Chat
