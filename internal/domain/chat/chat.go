@@ -48,7 +48,7 @@ type ChatWithSummaryAndHistoriesDTO struct {
 func (c *Chat) ToChatWithSummaryDTO() ChatWithSummaryDTO {
 	summary := (*SummaryDTO)(nil)
 	if c.Summary != nil {
-		dto := c.Summary.ToSummaryDTO()
+		dto := c.Summary.ToSummaryDTO(c.Histories)
 		summary = &dto
 	}
 	return ChatWithSummaryDTO{

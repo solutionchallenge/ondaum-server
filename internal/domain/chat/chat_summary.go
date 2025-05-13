@@ -3,6 +3,7 @@ package chat
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"slices"
 	"time"
 
 	"github.com/solutionchallenge/ondaum-server/internal/domain/common"
@@ -74,10 +75,29 @@ type SummaryDTO struct {
 	PositiveScore   float64                `json:"positive_score"`
 	NegativeScore   float64                `json:"negative_score"`
 	NeutralScore    float64                `json:"neutral_score"`
-	MainTopic       MainTopic              `json:"main_topic"`
+	TopicMessages   []HistoryDTO           `json:"topic_messages"`
 }
 
-func (s *Summary) ToSummaryDTO() SummaryDTO {
+func (s *Summary) ToSummaryDTO(histories []*History) SummaryDTO {
+	topicHistories := []*History{}
+	if len(histories) > 0 {
+		sortedHistories := make([]*History, len(histories))
+		copy(sortedHistories, histories)
+
+		slices.SortFunc(sortedHistories, func(a *History, b *History) int {
+			return a.InsertedAt.Compare(b.InsertedAt)
+		})
+
+		beginIndex := slices.IndexFunc(sortedHistories, func(h *History) bool {
+			return h.MessageID == s.MainTopic.BeginMessageID
+		})
+		endIndex := slices.IndexFunc(sortedHistories, func(h *History) bool {
+			return h.MessageID == s.MainTopic.EndMessageID
+		})
+		if beginIndex == -1 || endIndex == -1 {
+			topicHistories = sortedHistories[beginIndex:endIndex]
+		}
+	}
 	return SummaryDTO{
 		Title:           s.Title,
 		Text:            s.Text,
@@ -87,6 +107,8 @@ func (s *Summary) ToSummaryDTO() SummaryDTO {
 		PositiveScore:   s.PositiveScore,
 		NegativeScore:   s.NegativeScore,
 		NeutralScore:    s.NeutralScore,
-		MainTopic:       s.MainTopic,
+		TopicMessages: utils.Map(topicHistories, func(h *History) HistoryDTO {
+			return h.ToHistoryDTO()
+		}),
 	}
 }

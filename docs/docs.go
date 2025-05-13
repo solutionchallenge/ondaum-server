@@ -1230,17 +1230,6 @@ const docTemplate = `{
                 }
             }
         },
-        "chat.MainTopic": {
-            "type": "object",
-            "properties": {
-                "begin_message_id": {
-                    "type": "string"
-                },
-                "end_message_id": {
-                    "type": "string"
-                }
-            }
-        },
         "chat.PredefinedStressLevel": {
             "type": "object",
             "properties": {
@@ -1270,9 +1259,6 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
-                "main_topic": {
-                    "$ref": "#/definitions/chat.MainTopic"
-                },
                 "negative_score": {
                     "type": "number"
                 },
@@ -1293,6 +1279,12 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
+                },
+                "topic_messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/chat.HistoryDTO"
+                    }
                 }
             }
         },

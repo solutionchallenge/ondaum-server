@@ -61,6 +61,9 @@ func (h *GetChatSummaryHandler) Handle(c *fiber.Ctx) error {
 	if err := h.deps.DB.NewSelect().
 		Model(chat).
 		Relation("Summary").
+		Relation("Histories", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.Order("inserted_at ASC")
+		}).
 		Where("session_id = ?", sessionID).
 		Where("user_id = ?", userID).
 		Scan(ctx); err != nil {
@@ -73,7 +76,7 @@ func (h *GetChatSummaryHandler) Handle(c *fiber.Ctx) error {
 			http.NewError(ctx, errors.New("summary not found"), "Failed to get summary"),
 		)
 	}
-	response := chat.Summary.ToSummaryDTO()
+	response := chat.Summary.ToSummaryDTO(chat.Histories)
 	return c.JSON(response)
 }
 

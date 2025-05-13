@@ -194,7 +194,7 @@ func (h *UpsertChatSummaryHandler) Handle(c *fiber.Ctx) error {
 	response := &UpsertChatSummaryHandlerResponse{
 		Success:   true,
 		Created:   rowsAffected == 1,
-		Returning: model.ToSummaryDTO(),
+		Returning: model.ToSummaryDTO(chat.Histories),
 	}
 	return c.JSON(response)
 }

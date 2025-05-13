@@ -108,13 +108,6 @@ definitions:
           $ref: '#/definitions/chat.ChatWithSummaryDTO'
         type: array
     type: object
-  chat.MainTopic:
-    properties:
-      begin_message_id:
-        type: string
-      end_message_id:
-        type: string
-    type: object
   chat.PredefinedStressLevel:
     properties:
       description:
@@ -134,8 +127,6 @@ definitions:
         items:
           type: string
         type: array
-      main_topic:
-        $ref: '#/definitions/chat.MainTopic'
       negative_score:
         type: number
       neutral_score:
@@ -150,6 +141,10 @@ definitions:
         type: string
       title:
         type: string
+      topic_messages:
+        items:
+          $ref: '#/definitions/chat.HistoryDTO'
+        type: array
     type: object
   chat.UpsertChatSummaryHandlerResponse:
     properties:
