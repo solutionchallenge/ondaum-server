@@ -2,7 +2,6 @@ package diagnosis
 
 import (
 	"errors"
-	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/solutionchallenge/ondaum-server/internal/domain/diagnosis"
@@ -60,25 +59,18 @@ func (h *GetDiagnosisResultHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 
-	convertedID, err := strconv.ParseInt(diagnosisID, 10, 64)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(
-			http.NewError(ctx, err, "Invalid diagnosis_id"),
-		)
-	}
-
 	diagnosis := &diagnosis.Diagnosis{}
 	if err := h.deps.DB.NewSelect().
 		Model(diagnosis).
-		Where("id = ?", convertedID).
 		Where("user_id = ?", userID).
+		Where("sub_id = ?", diagnosisID).
 		Scan(ctx); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
 			http.NewError(ctx, err, "Diagnosis not found"),
 		)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(diagnosis.ToDiagnosisDTO())
+	return c.Status(fiber.StatusOK).JSON(diagnosis.ToDiagnosisDTOWithSubID())
 }
 
 func (h *GetDiagnosisResultHandler) Identify() string {

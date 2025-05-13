@@ -19,6 +19,8 @@ definitions:
     type: object
   chat.ChatWithSummaryAndHistoriesDTO:
     properties:
+      archived_at:
+        type: string
       chat_duration:
         type: string
       histories:
@@ -44,6 +46,8 @@ definitions:
     type: object
   chat.ChatWithSummaryDTO:
     properties:
+      archived_at:
+        type: string
       chat_duration:
         type: string
       id:
@@ -275,8 +279,23 @@ definitions:
     properties:
       diagnosis:
         $ref: '#/definitions/common.Diagnosis'
-      id:
+      result_critical:
+        type: boolean
+      result_description:
+        type: string
+      result_name:
+        type: string
+      result_score:
         type: integer
+      total_score:
+        type: integer
+    type: object
+  diagnosis.DiagnosisDTOWithSubID:
+    properties:
+      diagnosis:
+        $ref: '#/definitions/common.Diagnosis'
+      id:
+        type: string
       result_critical:
         type: boolean
       result_description:
@@ -298,7 +317,7 @@ definitions:
   diagnosis.ReportDiagnosisResultHandlerResponse:
     properties:
       id:
-        type: integer
+        type: string
       success:
         type: boolean
     type: object
@@ -792,7 +811,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/diagnosis.DiagnosisDTO'
+            $ref: '#/definitions/diagnosis.DiagnosisDTOWithSubID'
         "401":
           description: Unauthorized
           schema:

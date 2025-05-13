@@ -29,7 +29,7 @@ func NewListDiagnosisResultHandler(deps ListDiagnosisResultHandlerDependencies) 
 // @Tags diagnosis
 // @Accept json
 // @Produce json
-// @Success 200 {object} diagnosis.DiagnosisDTO
+// @Success 200 {object} diagnosis.DiagnosisDTOWithSubID
 // @Failure 401 {object} http.Error
 // @Failure 404 {object} http.Error
 // @Failure 500 {object} http.Error
@@ -61,8 +61,8 @@ func (h *ListDiagnosisResultHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 
-	dtos := utils.Map(diagnoses, func(d *diagnosis.Diagnosis) diagnosis.DiagnosisDTO {
-		return d.ToDiagnosisDTO()
+	dtos := utils.Map(diagnoses, func(d *diagnosis.Diagnosis) diagnosis.DiagnosisDTOWithSubID {
+		return d.ToDiagnosisDTOWithSubID()
 	})
 	return c.Status(fiber.StatusOK).JSON(dtos)
 }

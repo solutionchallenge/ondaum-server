@@ -589,7 +589,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/diagnosis.DiagnosisDTO"
+                            "$ref": "#/definitions/diagnosis.DiagnosisDTOWithSubID"
                         }
                     },
                     "401": {
@@ -1094,6 +1094,9 @@ const docTemplate = `{
         "chat.ChatWithSummaryAndHistoriesDTO": {
             "type": "object",
             "properties": {
+                "archived_at": {
+                    "type": "string"
+                },
                 "chat_duration": {
                     "type": "string"
                 },
@@ -1132,6 +1135,9 @@ const docTemplate = `{
         "chat.ChatWithSummaryDTO": {
             "type": "object",
             "properties": {
+                "archived_at": {
+                    "type": "string"
+                },
                 "chat_duration": {
                     "type": "string"
                 },
@@ -1474,8 +1480,31 @@ const docTemplate = `{
                 "diagnosis": {
                     "$ref": "#/definitions/common.Diagnosis"
                 },
-                "id": {
+                "result_critical": {
+                    "type": "boolean"
+                },
+                "result_description": {
+                    "type": "string"
+                },
+                "result_name": {
+                    "type": "string"
+                },
+                "result_score": {
                     "type": "integer"
+                },
+                "total_score": {
+                    "type": "integer"
+                }
+            }
+        },
+        "diagnosis.DiagnosisDTOWithSubID": {
+            "type": "object",
+            "properties": {
+                "diagnosis": {
+                    "$ref": "#/definitions/common.Diagnosis"
+                },
+                "id": {
+                    "type": "string"
                 },
                 "result_critical": {
                     "type": "boolean"
@@ -1509,7 +1538,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "success": {
                     "type": "boolean"

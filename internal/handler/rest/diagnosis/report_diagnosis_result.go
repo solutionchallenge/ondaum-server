@@ -2,6 +2,7 @@ package diagnosis
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/solutionchallenge/ondaum-server/internal/domain/diagnosis"
 	"github.com/solutionchallenge/ondaum-server/internal/domain/user"
 	"github.com/solutionchallenge/ondaum-server/pkg/http"
@@ -15,8 +16,8 @@ type ReportDiagnosisResultHandlerDependencies struct {
 }
 
 type ReportDiagnosisResultHandlerResponse struct {
-	Success bool  `json:"success"`
-	ID      int64 `json:"id"`
+	Success bool   `json:"success"`
+	ID      string `json:"id"`
 }
 
 type ReportDiagnosisResultHandler struct {
@@ -62,8 +63,10 @@ func (h *ReportDiagnosisResultHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 
+	subID := uuid.New().String()
 	diagnosis := &diagnosis.Diagnosis{
 		UserID:            userID,
+		SubID:             subID,
 		Diagnosis:         request.Diagnosis,
 		TotalScore:        request.TotalScore,
 		ResultScore:       request.ResultScore,
@@ -71,22 +74,16 @@ func (h *ReportDiagnosisResultHandler) Handle(c *fiber.Ctx) error {
 		ResultDescription: request.ResultDescription,
 		ResultCritical:    request.ResultCritical,
 	}
-	result, err := h.deps.DB.NewInsert().Model(diagnosis).Exec(ctx)
+	_, err = h.deps.DB.NewInsert().Model(diagnosis).Exec(ctx)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(
 			http.NewError(ctx, err, "Failed to report diagnosis result"),
 		)
 	}
 
-	inserted, err := result.LastInsertId()
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(
-			http.NewError(ctx, err, "Failed to report diagnosis result"),
-		)
-	}
 	response := ReportDiagnosisResultHandlerResponse{
 		Success: true,
-		ID:      inserted,
+		ID:      subID,
 	}
 	return c.Status(fiber.StatusOK).JSON(response)
 }

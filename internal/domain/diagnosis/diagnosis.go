@@ -12,6 +12,7 @@ type Diagnosis struct {
 	bun.BaseModel `bun:"table:diagnoses,alias:i"`
 
 	ID                int64            `json:"id" db:"id" bun:"id,pk,autoincrement"`
+	SubID             string           `json:"sub_id" db:"sub_id" bun:"sub_id,notnull,default:uuid()"`
 	UserID            int64            `json:"user_id" db:"user_id" bun:"user_id,notnull"`
 	Diagnosis         common.Diagnosis `json:"diagnosis" db:"diagnosis" bun:"diagnosis,notnull"`
 	TotalScore        int64            `json:"total_score" db:"total_score" bun:"total_score,notnull"`
@@ -26,7 +27,6 @@ type Diagnosis struct {
 }
 
 type DiagnosisDTO struct {
-	ID                int64            `json:"id"`
 	Diagnosis         common.Diagnosis `json:"diagnosis"`
 	TotalScore        int64            `json:"total_score"`
 	ResultScore       int64            `json:"result_score"`
@@ -37,12 +37,23 @@ type DiagnosisDTO struct {
 
 func (i *Diagnosis) ToDiagnosisDTO() DiagnosisDTO {
 	return DiagnosisDTO{
-		ID:                i.ID,
 		Diagnosis:         i.Diagnosis,
 		TotalScore:        i.TotalScore,
 		ResultScore:       i.ResultScore,
 		ResultName:        i.ResultName,
 		ResultDescription: i.ResultDescription,
 		ResultCritical:    i.ResultCritical,
+	}
+}
+
+type DiagnosisDTOWithSubID struct {
+	DiagnosisDTO
+	ID string `json:"id"`
+}
+
+func (i *Diagnosis) ToDiagnosisDTOWithSubID() DiagnosisDTOWithSubID {
+	return DiagnosisDTOWithSubID{
+		DiagnosisDTO: i.ToDiagnosisDTO(),
+		ID:           i.SubID,
 	}
 }

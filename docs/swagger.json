@@ -583,7 +583,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/diagnosis.DiagnosisDTO"
+                            "$ref": "#/definitions/diagnosis.DiagnosisDTOWithSubID"
                         }
                     },
                     "401": {
@@ -1088,6 +1088,9 @@
         "chat.ChatWithSummaryAndHistoriesDTO": {
             "type": "object",
             "properties": {
+                "archived_at": {
+                    "type": "string"
+                },
                 "chat_duration": {
                     "type": "string"
                 },
@@ -1126,6 +1129,9 @@
         "chat.ChatWithSummaryDTO": {
             "type": "object",
             "properties": {
+                "archived_at": {
+                    "type": "string"
+                },
                 "chat_duration": {
                     "type": "string"
                 },
@@ -1468,8 +1474,31 @@
                 "diagnosis": {
                     "$ref": "#/definitions/common.Diagnosis"
                 },
-                "id": {
+                "result_critical": {
+                    "type": "boolean"
+                },
+                "result_description": {
+                    "type": "string"
+                },
+                "result_name": {
+                    "type": "string"
+                },
+                "result_score": {
                     "type": "integer"
+                },
+                "total_score": {
+                    "type": "integer"
+                }
+            }
+        },
+        "diagnosis.DiagnosisDTOWithSubID": {
+            "type": "object",
+            "properties": {
+                "diagnosis": {
+                    "$ref": "#/definitions/common.Diagnosis"
+                },
+                "id": {
+                    "type": "string"
                 },
                 "result_critical": {
                     "type": "boolean"
@@ -1503,7 +1532,7 @@
             "type": "object",
             "properties": {
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "success": {
                     "type": "boolean"
