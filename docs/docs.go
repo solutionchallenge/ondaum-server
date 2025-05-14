@@ -653,7 +653,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/diagnosis-papers/{diagnosis_id}": {
+        "/diagnoses/{diagnosis_id}": {
             "get": {
                 "security": [
                     {
