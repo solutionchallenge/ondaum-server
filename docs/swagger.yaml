@@ -38,7 +38,7 @@ definitions:
       user_timezone:
         type: string
     type: object
-  chat.ChatDTOWithHistory:
+  chat.ChatWithHistoryDTO:
     properties:
       chat_duration:
         type: string
@@ -57,7 +57,7 @@ definitions:
       started_date:
         type: string
       summary:
-        $ref: '#/definitions/chat.SummaryDTO'
+        $ref: '#/definitions/chat.SummaryWithTopicMessages'
       user_id:
         type: string
       user_timezone:
@@ -141,6 +141,31 @@ definitions:
         type: string
       title:
         type: string
+    type: object
+  chat.SummaryWithTopicMessages:
+    properties:
+      emotions:
+        items:
+          $ref: '#/definitions/common.EmotionRate'
+        type: array
+      keywords:
+        items:
+          type: string
+        type: array
+      negative_score:
+        type: number
+      neutral_score:
+        type: number
+      positive_score:
+        type: number
+      recommendations:
+        items:
+          type: string
+        type: array
+      text:
+        type: string
+      title:
+        type: string
       topic_messages:
         items:
           $ref: '#/definitions/chat.HistoryDTO'
@@ -151,7 +176,7 @@ definitions:
       created:
         type: boolean
       returning:
-        $ref: '#/definitions/chat.SummaryDTO'
+        $ref: '#/definitions/chat.SummaryWithTopicMessages'
       success:
         type: boolean
     type: object
@@ -657,9 +682,9 @@ paths:
         name: session_id
         required: true
         type: string
-      - description: Exclude histories from response if not required
+      - description: Include histories in response
         in: query
-        name: without_history
+        name: with_history
         type: boolean
       produces:
       - application/json
@@ -667,7 +692,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/chat.ChatDTOWithHistory'
+            $ref: '#/definitions/chat.ChatWithHistoryDTO'
         "401":
           description: Unauthorized
           schema:

@@ -373,8 +373,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "boolean",
-                        "description": "Exclude histories from response if not required",
-                        "name": "without_history",
+                        "description": "Include histories in response",
+                        "name": "with_history",
                         "in": "query"
                     }
                 ],
@@ -382,7 +382,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/chat.ChatDTOWithHistory"
+                            "$ref": "#/definitions/chat.ChatWithHistoryDTO"
                         }
                     },
                     "401": {
@@ -1075,7 +1075,7 @@ const docTemplate = `{
                 }
             }
         },
-        "chat.ChatDTOWithHistory": {
+        "chat.ChatWithHistoryDTO": {
             "type": "object",
             "properties": {
                 "chat_duration": {
@@ -1103,7 +1103,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "summary": {
-                    "$ref": "#/definitions/chat.SummaryDTO"
+                    "$ref": "#/definitions/chat.SummaryWithTopicMessages"
                 },
                 "user_id": {
                     "type": "string"
@@ -1231,6 +1231,44 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "chat.SummaryWithTopicMessages": {
+            "type": "object",
+            "properties": {
+                "emotions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/common.EmotionRate"
+                    }
+                },
+                "keywords": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "negative_score": {
+                    "type": "number"
+                },
+                "neutral_score": {
+                    "type": "number"
+                },
+                "positive_score": {
+                    "type": "number"
+                },
+                "recommendations": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "text": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
                 },
                 "topic_messages": {
                     "type": "array",
@@ -1247,7 +1285,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "returning": {
-                    "$ref": "#/definitions/chat.SummaryDTO"
+                    "$ref": "#/definitions/chat.SummaryWithTopicMessages"
                 },
                 "success": {
                     "type": "boolean"

@@ -22,9 +22,9 @@ type UpsertChatSummaryHandlerDependencies struct {
 }
 
 type UpsertChatSummaryHandlerResponse struct {
-	Success   bool              `json:"success"`
-	Created   bool              `json:"created"`
-	Returning domain.SummaryDTO `json:"returning"`
+	Success   bool                            `json:"success"`
+	Created   bool                            `json:"created"`
+	Returning domain.SummaryWithTopicMessages `json:"returning"`
 }
 
 type UpsertChatSummaryHandler struct {
@@ -194,7 +194,7 @@ func (h *UpsertChatSummaryHandler) Handle(c *fiber.Ctx) error {
 	response := &UpsertChatSummaryHandlerResponse{
 		Success:   true,
 		Created:   rowsAffected == 1,
-		Returning: model.ToSummaryDTO(chat.Histories),
+		Returning: model.ToSummaryWithTopicMessages(chat.Histories),
 	}
 	return c.JSON(response)
 }

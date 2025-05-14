@@ -49,8 +49,7 @@ func (m *MainTopic) ToString() string {
 type Summary struct {
 	bun.BaseModel `bun:"table:chat_summaries,alias:cs"`
 
-	ID              int64                  `json:"id" db:"id" bun:"id,pk,autoincrement"`
-	ChatID          int64                  `json:"chat_id" db:"chat_id" bun:"chat_id,notnull"`
+	ChatID          int64                  `json:"chat_id" db:"chat_id" bun:"chat_id,pk,notnull"`
 	Title           string                 `json:"title" db:"title" bun:"title"`
 	Text            string                 `json:"text" db:"text" bun:"text"`
 	Keywords        []string               `json:"keywords" db:"keywords" bun:"keywords,type:json"`
@@ -75,11 +74,28 @@ type SummaryDTO struct {
 	PositiveScore   float64                `json:"positive_score"`
 	NegativeScore   float64                `json:"negative_score"`
 	NeutralScore    float64                `json:"neutral_score"`
-	TopicMessages   []HistoryDTO           `json:"topic_messages"`
 }
 
-func (s *Summary) ToSummaryDTO(histories []*History) SummaryDTO {
-	topicHistories := []*History{}
+func (s *Summary) ToSummaryDTO() SummaryDTO {
+	return SummaryDTO{
+		Title:           s.Title,
+		Text:            s.Text,
+		Keywords:        s.Keywords,
+		Emotions:        s.Emotions,
+		Recommendations: s.Recommendations,
+		PositiveScore:   s.PositiveScore,
+		NegativeScore:   s.NegativeScore,
+		NeutralScore:    s.NeutralScore,
+	}
+}
+
+type SummaryWithTopicMessages struct {
+	SummaryDTO
+	TopicMessages *[]HistoryDTO `json:"topic_messages,omitempty"`
+}
+
+func (s *Summary) ToSummaryWithTopicMessages(histories []*History) SummaryWithTopicMessages {
+	topicMessages := (*[]HistoryDTO)(nil)
 	if len(histories) > 0 {
 		sortedHistories := make([]*History, len(histories))
 		copy(sortedHistories, histories)
@@ -100,19 +116,14 @@ func (s *Summary) ToSummaryDTO(histories []*History) SummaryDTO {
 		if endIndex == -1 {
 			endIndex = len(sortedHistories)
 		}
-		topicHistories = sortedHistories[beginIndex:endIndex]
-	}
-	return SummaryDTO{
-		Title:           s.Title,
-		Text:            s.Text,
-		Keywords:        s.Keywords,
-		Emotions:        s.Emotions,
-		Recommendations: s.Recommendations,
-		PositiveScore:   s.PositiveScore,
-		NegativeScore:   s.NegativeScore,
-		NeutralScore:    s.NeutralScore,
-		TopicMessages: utils.Map(topicHistories, func(h *History) HistoryDTO {
+		topicHistories := sortedHistories[beginIndex:endIndex]
+		convertedHistories := utils.Map(topicHistories, func(h *History) HistoryDTO {
 			return h.ToHistoryDTO()
-		}),
+		})
+		topicMessages = &convertedHistories
+	}
+	return SummaryWithTopicMessages{
+		SummaryDTO:    s.ToSummaryDTO(),
+		TopicMessages: topicMessages,
 	}
 }

@@ -28,25 +28,19 @@ type Chat struct {
 	Histories []*History `json:"histories,omitempty" bun:"rel:has-many,join:id=chat_id"`
 }
 
-type ChatDTO struct {
-	ID           string      `json:"id"`
-	UserID       string      `json:"user_id"`
-	SessionID    string      `json:"session_id"`
-	StartedDate  string      `json:"started_date"`
-	UserTimezone string      `json:"user_timezone"`
-	ChatDuration string      `json:"chat_duration"`
-	IsFinished   bool        `json:"is_finished"`
-	IsArchived   bool        `json:"is_archived"`
-	Summary      *SummaryDTO `json:"summary,omitempty"`
+type ChatBaseDTO struct {
+	ID           string `json:"id"`
+	UserID       string `json:"user_id"`
+	SessionID    string `json:"session_id"`
+	StartedDate  string `json:"started_date"`
+	UserTimezone string `json:"user_timezone"`
+	ChatDuration string `json:"chat_duration"`
+	IsFinished   bool   `json:"is_finished"`
+	IsArchived   bool   `json:"is_archived"`
 }
 
-func (c *Chat) ToChatDTO() ChatDTO {
-	summary := (*SummaryDTO)(nil)
-	if c.Summary != nil {
-		dto := c.Summary.ToSummaryDTO(c.Histories)
-		summary = &dto
-	}
-	return ChatDTO{
+func (c *Chat) ToChatBaseDTO() ChatBaseDTO {
+	return ChatBaseDTO{
 		ID:           strconv.FormatInt(c.ID, 10),
 		UserID:       strconv.FormatInt(c.UserID, 10),
 		SessionID:    c.SessionID,
@@ -55,17 +49,38 @@ func (c *Chat) ToChatDTO() ChatDTO {
 		ChatDuration: c.ChatDuration.ToString(common.DurationFormatTime),
 		IsFinished:   !c.FinishedAt.IsZero(),
 		IsArchived:   !c.ArchivedAt.IsZero(),
-		Summary:      summary,
 	}
 }
 
-type ChatDTOWithHistory struct {
-	ChatDTO
-	Histories *[]HistoryDTO `json:"histories,omitempty"`
+type ChatDTO struct {
+	ChatBaseDTO
+	Summary *SummaryDTO `json:"summary,omitempty"`
 }
 
-func (c *Chat) ToChatDTOWithHistory() ChatDTOWithHistory {
-	base := c.ToChatDTO()
+func (c *Chat) ToChatDTO() ChatDTO {
+	summary := (*SummaryDTO)(nil)
+	if c.Summary != nil {
+		dto := c.Summary.ToSummaryDTO()
+		summary = &dto
+	}
+	return ChatDTO{
+		ChatBaseDTO: c.ToChatBaseDTO(),
+		Summary:     summary,
+	}
+}
+
+type ChatWithHistoryDTO struct {
+	ChatBaseDTO
+	Summary   *SummaryWithTopicMessages `json:"summary,omitempty"`
+	Histories *[]HistoryDTO             `json:"histories,omitempty"`
+}
+
+func (c *Chat) ToChatWithHistoryDTO() ChatWithHistoryDTO {
+	summary := (*SummaryWithTopicMessages)(nil)
+	if c.Summary != nil {
+		dto := c.Summary.ToSummaryWithTopicMessages(c.Histories)
+		summary = &dto
+	}
 	histories := (*[]HistoryDTO)(nil)
 	if len(c.Histories) > 0 {
 		converted := utils.Map(c.Histories, func(h *History) HistoryDTO {
@@ -73,8 +88,9 @@ func (c *Chat) ToChatDTOWithHistory() ChatDTOWithHistory {
 		})
 		histories = &converted
 	}
-	return ChatDTOWithHistory{
-		ChatDTO:   base,
-		Histories: histories,
+	return ChatWithHistoryDTO{
+		ChatBaseDTO: c.ToChatBaseDTO(),
+		Summary:     summary,
+		Histories:   histories,
 	}
 }

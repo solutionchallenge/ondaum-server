@@ -30,8 +30,8 @@ func NewGetChatHandler(deps GetChatHandlerDependencies) (*GetChatHandler, error)
 // @Accept json
 // @Produce json
 // @Param session_id path string true "Session ID"
-// @Param without_history query bool false "Exclude histories from response if not required"
-// @Success 200 {object} domain.ChatDTOWithHistory
+// @Param with_history query bool false "Include histories in response"
+// @Success 200 {object} domain.ChatWithHistoryDTO
 // @Failure 401 {object} http.Error
 // @Failure 404 {object} http.Error
 // @Failure 500 {object} http.Error
@@ -59,28 +59,27 @@ func (h *GetChatHandler) Handle(c *fiber.Ctx) error {
 		)
 	}
 
-	query := h.deps.DB.NewSelect().
-		Model((*domain.Chat)(nil)).
+	chat := &domain.Chat{}
+	err = h.deps.DB.NewSelect().
+		Model(chat).
+		Relation("Histories", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.Order("inserted_at ASC")
+		}).
 		Relation("Summary").
 		Where("session_id = ?", sessionID).
 		Where("user_id = ?", userID).
-		Order("created_at ASC")
-
-	withoutHistory := c.QueryBool("without_history")
-	if !withoutHistory {
-		query = query.Relation("Histories", func(q *bun.SelectQuery) *bun.SelectQuery {
-			return q.Order("inserted_at ASC")
-		})
-	}
-
-	chat := &domain.Chat{}
-	if err := query.Scan(ctx); err != nil {
+		Scan(ctx)
+	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(
 			http.NewError(ctx, err, "Chat not found"),
 		)
 	}
 
-	response := chat.ToChatDTOWithHistory()
+	response := chat.ToChatWithHistoryDTO()
+	with_history := c.QueryBool("with_history", false)
+	if !with_history {
+		response.Histories = nil
+	}
 	return c.JSON(response)
 }
 
