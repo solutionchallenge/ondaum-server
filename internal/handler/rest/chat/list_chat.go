@@ -25,7 +25,7 @@ type ListChatHandler struct {
 }
 
 type ListChatResponse struct {
-	Chats []domain.ChatWithSummaryDTO `json:"chats"`
+	Chats []domain.ChatDTO `json:"chats"`
 }
 
 func NewListChatHandler(deps ListChatHandlerDependencies) (*ListChatHandler, error) {
@@ -162,8 +162,8 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 		})
 	}
 
-	chatDTOs := utils.Map(chats, func(chat domain.Chat) domain.ChatWithSummaryDTO {
-		return chat.ToChatWithSummaryDTO()
+	chatDTOs := utils.Map(chats, func(chat domain.Chat) domain.ChatDTO {
+		return chat.ToChatDTO()
 	})
 
 	return c.JSON(ListChatResponse{

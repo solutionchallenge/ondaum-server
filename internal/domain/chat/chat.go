@@ -28,7 +28,7 @@ type Chat struct {
 	Histories []*History `json:"histories,omitempty" bun:"rel:has-many,join:id=chat_id"`
 }
 
-type ChatWithSummaryDTO struct {
+type ChatDTO struct {
 	ID           string      `json:"id"`
 	UserID       string      `json:"user_id"`
 	SessionID    string      `json:"session_id"`
@@ -40,18 +40,13 @@ type ChatWithSummaryDTO struct {
 	Summary      *SummaryDTO `json:"summary,omitempty"`
 }
 
-type ChatWithSummaryAndHistoriesDTO struct {
-	ChatWithSummaryDTO
-	Histories []HistoryDTO `json:"histories"`
-}
-
-func (c *Chat) ToChatWithSummaryDTO() ChatWithSummaryDTO {
+func (c *Chat) ToChatDTO() ChatDTO {
 	summary := (*SummaryDTO)(nil)
 	if c.Summary != nil {
 		dto := c.Summary.ToSummaryDTO(c.Histories)
 		summary = &dto
 	}
-	return ChatWithSummaryDTO{
+	return ChatDTO{
 		ID:           strconv.FormatInt(c.ID, 10),
 		UserID:       strconv.FormatInt(c.UserID, 10),
 		SessionID:    c.SessionID,
@@ -64,15 +59,22 @@ func (c *Chat) ToChatWithSummaryDTO() ChatWithSummaryDTO {
 	}
 }
 
-func (c *Chat) ToChatWithSummaryAndHistoriesDTO() ChatWithSummaryAndHistoriesDTO {
-	histories := make([]HistoryDTO, len(c.Histories))
+type ChatDTOWithHistory struct {
+	ChatDTO
+	Histories *[]HistoryDTO `json:"histories,omitempty"`
+}
+
+func (c *Chat) ToChatDTOWithHistory() ChatDTOWithHistory {
+	base := c.ToChatDTO()
+	histories := (*[]HistoryDTO)(nil)
 	if len(c.Histories) > 0 {
-		histories = utils.Map(c.Histories, func(h *History) HistoryDTO {
+		converted := utils.Map(c.Histories, func(h *History) HistoryDTO {
 			return h.ToHistoryDTO()
 		})
+		histories = &converted
 	}
-	return ChatWithSummaryAndHistoriesDTO{
-		ChatWithSummaryDTO: c.ToChatWithSummaryDTO(),
-		Histories:          histories,
+	return ChatDTOWithHistory{
+		ChatDTO:   base,
+		Histories: histories,
 	}
 }

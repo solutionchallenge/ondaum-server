@@ -17,14 +17,10 @@ definitions:
       success:
         type: boolean
     type: object
-  chat.ChatWithSummaryAndHistoriesDTO:
+  chat.ChatDTO:
     properties:
       chat_duration:
         type: string
-      histories:
-        items:
-          $ref: '#/definitions/chat.HistoryDTO'
-        type: array
       id:
         type: string
       is_archived:
@@ -42,10 +38,14 @@ definitions:
       user_timezone:
         type: string
     type: object
-  chat.ChatWithSummaryDTO:
+  chat.ChatDTOWithHistory:
     properties:
       chat_duration:
         type: string
+      histories:
+        items:
+          $ref: '#/definitions/chat.HistoryDTO'
+        type: array
       id:
         type: string
       is_archived:
@@ -105,7 +105,7 @@ definitions:
     properties:
       chats:
         items:
-          $ref: '#/definitions/chat.ChatWithSummaryDTO'
+          $ref: '#/definitions/chat.ChatDTO'
         type: array
     type: object
   chat.PredefinedStressLevel:
@@ -657,13 +657,17 @@ paths:
         name: session_id
         required: true
         type: string
+      - description: Exclude histories from response if not required
+        in: query
+        name: without_history
+        type: boolean
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/chat.ChatWithSummaryAndHistoriesDTO'
+            $ref: '#/definitions/chat.ChatDTOWithHistory'
         "401":
           description: Unauthorized
           schema:
@@ -719,41 +723,6 @@ paths:
       tags:
       - chat
   /chats/{session_id}/summary:
-    get:
-      consumes:
-      - application/json
-      description: Get summary of the chat
-      operationId: GetSummary
-      parameters:
-      - description: Session ID
-        in: path
-        name: session_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/chat.SummaryDTO'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/http.Error'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/http.Error'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/http.Error'
-      security:
-      - BearerAuth: []
-      summary: Get summary
-      tags:
-      - chat
     post:
       consumes:
       - application/json

@@ -370,13 +370,19 @@ const docTemplate = `{
                         "name": "session_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Exclude histories from response if not required",
+                        "name": "without_history",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/chat.ChatWithSummaryAndHistoriesDTO"
+                            "$ref": "#/definitions/chat.ChatDTOWithHistory"
                         }
                     },
                     "401": {
@@ -457,60 +463,6 @@ const docTemplate = `{
             }
         },
         "/chats/{session_id}/summary": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get summary of the chat",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "chat"
-                ],
-                "summary": "Get summary",
-                "operationId": "GetSummary",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Session ID",
-                        "name": "session_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/chat.SummaryDTO"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/http.Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/http.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/http.Error"
-                        }
-                    }
-                }
-            },
             "post": {
                 "security": [
                     {
@@ -1091,17 +1043,11 @@ const docTemplate = `{
                 }
             }
         },
-        "chat.ChatWithSummaryAndHistoriesDTO": {
+        "chat.ChatDTO": {
             "type": "object",
             "properties": {
                 "chat_duration": {
                     "type": "string"
-                },
-                "histories": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/chat.HistoryDTO"
-                    }
                 },
                 "id": {
                     "type": "string"
@@ -1129,11 +1075,17 @@ const docTemplate = `{
                 }
             }
         },
-        "chat.ChatWithSummaryDTO": {
+        "chat.ChatDTOWithHistory": {
             "type": "object",
             "properties": {
                 "chat_duration": {
                     "type": "string"
+                },
+                "histories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/chat.HistoryDTO"
+                    }
                 },
                 "id": {
                     "type": "string"
@@ -1225,7 +1177,7 @@ const docTemplate = `{
                 "chats": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/chat.ChatWithSummaryDTO"
+                        "$ref": "#/definitions/chat.ChatDTO"
                     }
                 }
             }

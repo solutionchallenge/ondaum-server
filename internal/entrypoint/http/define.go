@@ -32,7 +32,6 @@ var PredefinedRoutes = []fx.Option{
 	dependency.HttpRoute("POST", "/oauth/google/auth", oauth.NewAuthGoogleHandler),
 	dependency.HttpRoute("GET", "/chats", chat.NewListChatHandler),
 	dependency.HttpRoute("GET", "/chats/:session_id", chat.NewGetChatHandler),
-	dependency.HttpRoute("GET", "/chats/:session_id/summary", chat.NewGetChatSummaryHandler),
 	dependency.HttpRoute("PUT", "/chats/:session_id/summary", chat.NewUpsertChatSummaryHandler),
 	dependency.HttpRoute("POST", "/chats/:session_id/archive", chat.NewArchiveChatHandler),
 	dependency.HttpRoute("GET", "/chat-reports", chat.NewGetChatReportHandler),
