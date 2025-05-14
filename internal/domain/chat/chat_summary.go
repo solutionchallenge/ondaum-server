@@ -94,9 +94,13 @@ func (s *Summary) ToSummaryDTO(histories []*History) SummaryDTO {
 		endIndex := slices.IndexFunc(sortedHistories, func(h *History) bool {
 			return h.MessageID == s.MainTopic.EndMessageID
 		})
-		if beginIndex == -1 || endIndex == -1 {
-			topicHistories = sortedHistories[beginIndex:endIndex]
+		if beginIndex == -1 {
+			beginIndex = 0
 		}
+		if endIndex == -1 {
+			endIndex = len(sortedHistories)
+		}
+		topicHistories = sortedHistories[beginIndex:endIndex]
 	}
 	return SummaryDTO{
 		Title:           s.Title,
