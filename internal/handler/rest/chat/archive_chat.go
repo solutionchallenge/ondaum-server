@@ -1,6 +1,7 @@
 package chat
 
 import (
+	"database/sql"
 	"errors"
 
 	"github.com/benbjohnson/clock"
@@ -83,8 +84,13 @@ func (h *ArchiveChatHandler) Handle(c *fiber.Ctx) error {
 		Where("session_id = ?", sessionID).
 		Where("user_id = ?", userID).
 		Scan(ctx); err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(
-			http.NewError(ctx, err, "Chat not found"),
+		if errors.Is(err, sql.ErrNoRows) {
+			return c.Status(fiber.StatusNotFound).JSON(
+				http.NewError(ctx, err, "Chat not found for session_id: %v", sessionID),
+			)
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			http.NewError(ctx, err, "Failed to get chat for session_id: %v", sessionID),
 		)
 	}
 

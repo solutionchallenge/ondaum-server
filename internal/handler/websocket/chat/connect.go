@@ -29,7 +29,11 @@ func HandleConnect(db *bun.DB, clk clock.Clock, request wspkg.ConnectWrapper) (w
 		Limit(1).
 		Scan(context.Background())
 
-	if errors.Is(err, sql.ErrNoRows) {
+	if err != nil {
+		if !errors.Is(err, sql.ErrNoRows) {
+			utils.Log(utils.ErrorLevel).CID(request.ConnectID).Err(err).BT().Send("Failed to get chat")
+			return wspkg.ResponseWrapper{}, "", utils.WrapError(err, "failed to get chat")
+		}
 		chat = &domain.Chat{
 			UserID:       request.UserID,
 			SessionID:    request.ConnectID,

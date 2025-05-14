@@ -1,6 +1,7 @@
 package chat
 
 import (
+	"database/sql"
 	"errors"
 
 	"github.com/gofiber/fiber/v2"
@@ -47,8 +48,13 @@ func (h *GetChatHandler) Handle(c *fiber.Ctx) error {
 	}
 	user := &user.User{ID: userID}
 	if err := h.deps.DB.NewSelect().Model(user).Where("id = ?", userID).Scan(ctx); err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(
-			http.NewError(ctx, err, "User not found"),
+		if errors.Is(err, sql.ErrNoRows) {
+			return c.Status(fiber.StatusNotFound).JSON(
+				http.NewError(ctx, err, "User not found for id: %v", userID),
+			)
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			http.NewError(ctx, err, "Failed to get user for id: %v", userID),
 		)
 	}
 
@@ -70,8 +76,13 @@ func (h *GetChatHandler) Handle(c *fiber.Ctx) error {
 		Where("user_id = ?", userID).
 		Scan(ctx)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(
-			http.NewError(ctx, err, "Chat not found"),
+		if errors.Is(err, sql.ErrNoRows) {
+			return c.Status(fiber.StatusNotFound).JSON(
+				http.NewError(ctx, err, "Chat not found for session_id: %v", sessionID),
+			)
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			http.NewError(ctx, err, "Failed to get chat for session_id: %v", sessionID),
 		)
 	}
 

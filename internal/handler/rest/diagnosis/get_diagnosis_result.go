@@ -1,6 +1,7 @@
 package diagnosis
 
 import (
+	"database/sql"
 	"errors"
 
 	"github.com/gofiber/fiber/v2"
@@ -65,8 +66,13 @@ func (h *GetDiagnosisResultHandler) Handle(c *fiber.Ctx) error {
 		Where("user_id = ?", userID).
 		Where("sub_id = ?", diagnosisID).
 		Scan(ctx); err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(
-			http.NewError(ctx, err, "Diagnosis not found"),
+		if errors.Is(err, sql.ErrNoRows) {
+			return c.Status(fiber.StatusNotFound).JSON(
+				http.NewError(ctx, err, "Diagnosis not found for id: %v", diagnosisID),
+			)
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			http.NewError(ctx, err, "Failed to get diagnosis for id: %v", diagnosisID),
 		)
 	}
 

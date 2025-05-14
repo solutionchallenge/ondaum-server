@@ -2,7 +2,9 @@ package chat
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
+	"errors"
 
 	domain "github.com/solutionchallenge/ondaum-server/internal/domain/chat"
 	"github.com/solutionchallenge/ondaum-server/pkg/llm"
@@ -73,7 +75,11 @@ func (h *ChatHistoryManager) Get(ctx context.Context, conversationID string) []l
 		Order("created_at ASC").
 		Scan(ctx)
 	if err != nil {
-		utils.Log(utils.WarnLevel).CID(conversationID).Err(err).BT().Send("Failed to get chat history")
+		if errors.Is(err, sql.ErrNoRows) {
+			utils.Log(utils.WarnLevel).CID(conversationID).Err(err).BT().Send("Chat not found for session_id: %v", conversationID)
+			return h.memoryCache
+		}
+		utils.Log(utils.ErrorLevel).CID(conversationID).Err(err).BT().Send("Failed to get chat for session_id: %v", conversationID)
 		return h.memoryCache
 	}
 	utils.Log(utils.DebugLevel).CID(conversationID).BT().Send("Found %d histories", len(chat.Histories))
