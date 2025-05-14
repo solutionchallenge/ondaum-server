@@ -5,8 +5,7 @@ import "github.com/solutionchallenge/ondaum-server/pkg/database"
 const sqlUser008CreateChatSummaryTable = `
 CREATE TABLE IF NOT EXISTS chat_summaries
 (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    chat_id BIGINT NOT NULL,
+    chat_id BIGINT PRIMARY KEY,
     title VARCHAR(255),
     text TEXT,
     keywords JSON,
