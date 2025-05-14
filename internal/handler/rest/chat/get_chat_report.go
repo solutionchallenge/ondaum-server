@@ -21,19 +21,34 @@ type PredefinedStressLevel struct {
 
 var PredefinedStressLevels = []PredefinedStressLevel{
 	{
-		Title:       "Your Stress Level seems High",
-		Description: "Talking to someone you trust can lift the weight off your heart.",
-		Threshold:   0.7,
+		Title:       "Your stress level seems extremely high",
+		Description: "Your stress level is at a critical point. Please consider seeking professional help and take immediate steps to reduce stress.",
+		Threshold:   0.81,
 	},
 	{
-		Title:       "Your stress level seems Moderate",
-		Description: "It's important to take care of yourself and find ways to relax.",
-		Threshold:   0.5,
+		Title:       "Your stress level seems severe",
+		Description: "You're experiencing significant stress. It's important to identify stress triggers and implement stress management techniques.",
+		Threshold:   0.65,
 	},
 	{
-		Title:       "Your stress level seems Low",
-		Description: "You seem to be under a low amount of stress, keep it up!",
-		Threshold:   0.3,
+		Title:       "Your stress level seems moderately severe",
+		Description: "Your stress level is concerning. Consider taking regular breaks and practicing relaxation techniques.",
+		Threshold:   0.49,
+	},
+	{
+		Title:       "Your stress level seems moderate",
+		Description: "You're experiencing a moderate level of stress. Regular exercise and mindfulness can help manage this level.",
+		Threshold:   0.33,
+	},
+	{
+		Title:       "Your stress level seems mild",
+		Description: "You're experiencing mild stress. Simple stress management techniques can help maintain this level.",
+		Threshold:   0.17,
+	},
+	{
+		Title:       "Your stress level seems minimal",
+		Description: "You're managing stress well. Continue with your current stress management practices.",
+		Threshold:   0.01,
 	},
 }
 
