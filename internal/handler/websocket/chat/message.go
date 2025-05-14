@@ -23,6 +23,11 @@ func HandleMessage(
 		return wspkg.BuildRejectResponse(request), false, nil
 	}
 
+	if request.Action != wspkg.Action("chat") {
+		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).BT().Send("Invalid action %v", request.Action)
+		return wspkg.ResponseWrapper{}, false, utils.WrapError(errors.New("invalid action"), "invalid action %v", request.Action)
+	}
+
 	if request.Payload == nil {
 		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).BT().Send("Payload is nil")
 		return wspkg.ResponseWrapper{}, false, utils.WrapError(errors.New("payload is nil"), "payload is nil")
