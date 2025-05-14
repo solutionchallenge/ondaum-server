@@ -12,7 +12,7 @@ type Diagnosis struct {
 	bun.BaseModel `bun:"table:diagnoses,alias:i"`
 
 	ID                int64            `json:"id" db:"id" bun:"id,pk,autoincrement"`
-	SubID             string           `json:"sub_id" db:"sub_id" bun:"sub_id,notnull,default:uuid()"`
+	SubID             string           `json:"sub_id" db:"sub_id" bun:"sub_id,notnull"`
 	UserID            int64            `json:"user_id" db:"user_id" bun:"user_id,notnull"`
 	Diagnosis         common.Diagnosis `json:"diagnosis" db:"diagnosis" bun:"diagnosis,notnull"`
 	TotalScore        int64            `json:"total_score" db:"total_score" bun:"total_score,notnull"`
