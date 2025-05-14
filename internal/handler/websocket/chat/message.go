@@ -3,6 +3,7 @@ package chat
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
 	"github.com/benbjohnson/clock"
 	domain "github.com/solutionchallenge/ondaum-server/internal/domain/chat"
@@ -20,6 +21,17 @@ func HandleMessage(
 	if !request.Authorized || !checkAuthorization(db, request.UserID) {
 		utils.Log(utils.InfoLevel).CID(request.SessionID).RID(request.MessageID).BT().Send("Unauthorized")
 		return wspkg.BuildRejectResponse(request), false, nil
+	}
+
+	if request.Payload == nil {
+		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).BT().Send("Payload is nil")
+		return wspkg.ResponseWrapper{}, false, utils.WrapError(errors.New("payload is nil"), "payload is nil")
+	}
+
+	payload, ok := request.Payload.(string)
+	if !ok || payload == "" {
+		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).BT().Send("Payload is empty")
+		return wspkg.ResponseWrapper{}, false, utils.WrapError(errors.New("payload is empty"), "payload is empty")
 	}
 
 	var response wspkg.ResponseWrapper
@@ -77,7 +89,7 @@ func HandleMessage(
 		ConversationID: request.SessionID,
 		ID:             request.MessageID,
 		Role:           llmpkg.RoleUser,
-		Content:        request.Payload.(string),
+		Content:        payload,
 	})
 	if err != nil {
 		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).BT().Send("Failed to request to conversation")
