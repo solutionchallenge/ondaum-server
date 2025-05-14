@@ -117,6 +117,8 @@ func (client *Client) RunActionPrompt(ctx context.Context, instructionIdentifier
 		return llm.Message{}, utils.WrapError(err, "GenerateContent failed")
 	}
 
+	AddStatistics(&client.Statistics, response.UsageMetadata)
+
 	if err := checkPromptBlocked(response); err != nil {
 		return llm.Message{}, utils.WrapError(err, "CheckPromptBlocked failed")
 	}
