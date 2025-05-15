@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"time"
 
 	"github.com/benbjohnson/clock"
 	"github.com/google/uuid"
@@ -37,7 +36,6 @@ func HandleConnect(db *bun.DB, clk clock.Clock, request wspkg.ConnectWrapper) (w
 		chat = &domain.Chat{
 			UserID:       request.UserID,
 			SessionID:    request.ConnectID,
-			StartedDate:  clk.Now().Truncate(24 * time.Hour),
 			UserTimezone: utils.FormatTimezoneOffset(clk.Now()),
 		}
 		_, err = db.NewInsert().Model(chat).Exec(context.Background())

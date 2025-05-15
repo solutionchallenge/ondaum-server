@@ -15,8 +15,6 @@ CREATE TABLE IF NOT EXISTS chats
     finished_at DATETIME,
     archived_at DATETIME,
     UNIQUE KEY unique_session_user (session_id, user_id),
-    INDEX idx_user_session_id_finished (user_id, session_id, id, finished_at),
-    INDEX idx_user_started_id_finished (user_id, started_date, id, finished_at),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 )`
 

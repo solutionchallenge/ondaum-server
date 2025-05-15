@@ -15,7 +15,6 @@ type Chat struct {
 	ID            int64                   `json:"id" db:"id" bun:"id,pk,autoincrement"`
 	UserID        int64                   `json:"user_id" db:"user_id" bun:"user_id,notnull"`
 	SessionID     string                  `json:"session_id" db:"session_id" bun:"session_id,notnull"`
-	StartedDate   time.Time               `json:"started_date" db:"started_date" bun:"started_date,notnull"`
 	UserTimezone  string                  `json:"user_timezone" db:"user_timezone" bun:"user_timezone,notnull"`
 	CreatedAt     time.Time               `json:"created_at" db:"created_at" bun:"created_at,notnull,default:CURRENT_TIMESTAMP"`
 	UpdatedAt     time.Time               `json:"updated_at" db:"updated_at" bun:"updated_at,notnull,default:CURRENT_TIMESTAMP"`
@@ -44,7 +43,7 @@ func (c *Chat) ToChatBaseDTO() ChatBaseDTO {
 		ID:           strconv.FormatInt(c.ID, 10),
 		UserID:       strconv.FormatInt(c.UserID, 10),
 		SessionID:    c.SessionID,
-		StartedDate:  c.StartedDate.Format(utils.TIME_FORMAT_DATE),
+		StartedDate:  c.CreatedAt.Format(utils.TIME_FORMAT_ISO8601),
 		UserTimezone: c.UserTimezone,
 		ChatDuration: c.ChatDuration.ToString(common.DurationFormatTime),
 		IsFinished:   !c.FinishedAt.IsZero(),
