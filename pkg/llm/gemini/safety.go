@@ -6,6 +6,9 @@ import (
 	"google.golang.org/genai"
 )
 
+var PromptBlockedErr = utils.NewError("blocked by gemini by inappropriate prompt")
+var ContentBlockedErr = utils.NewError("blocked by gemini by inappropriate content")
+
 func ConfigToSafetySetting(config llm.Config) []*genai.SafetySetting {
 	return []*genai.SafetySetting{
 		{
@@ -50,13 +53,15 @@ func checkPromptBlocked(response *genai.GenerateContentResponse) error {
 	if response.PromptFeedback != nil {
 		switch response.PromptFeedback.BlockReason {
 		case genai.BlockedReasonProhibitedContent, genai.BlockedReasonSafety:
-			return utils.NewError(
+			return utils.WrapError(
+				PromptBlockedErr,
 				"blocked by gemini by inappropriate prompt: %v(%v)",
 				response.PromptFeedback.BlockReasonMessage,
 				response.PromptFeedback.SafetyRatings,
 			)
 		default:
-			return utils.NewError(
+			return utils.WrapError(
+				PromptBlockedErr,
 				"blocked by gemini with unknown reason: %v(%v)",
 				response.PromptFeedback.BlockReasonMessage,
 				response.PromptFeedback.SafetyRatings,
@@ -69,7 +74,12 @@ func checkPromptBlocked(response *genai.GenerateContentResponse) error {
 func checkContentBlocked(feedbacks []map[string]any) error {
 	for _, feedback := range feedbacks {
 		if feedback["blocked"] == true {
-			return utils.NewError("blocked by gemini by inappropriate content: %v(%v)", feedback["category"], feedback["probability"])
+			return utils.WrapError(
+				ContentBlockedErr,
+				"blocked by gemini by inappropriate content: %v(%v)",
+				feedback["category"],
+				feedback["probability"],
+			)
 		}
 	}
 	return nil
@@ -81,7 +91,7 @@ func buildContentFeedbacks(response *genai.GenerateContentResponse) []map[string
 		if len(candidate.SafetyRatings) > 0 {
 			for _, result := range candidate.SafetyRatings {
 				feedback[idx] = map[string]any{
-					"blocked":     result.Blocked,
+					"blocked":     candidate.FinishReason == genai.FinishReasonSafety || result.Blocked,
 					"category":    result.Category,
 					"probability": result.Probability,
 				}

@@ -7,9 +7,11 @@ import (
 
 	"github.com/benbjohnson/clock"
 	domain "github.com/solutionchallenge/ondaum-server/internal/domain/chat"
+	"github.com/solutionchallenge/ondaum-server/internal/domain/common"
 	ftpkg "github.com/solutionchallenge/ondaum-server/pkg/future"
 	"github.com/solutionchallenge/ondaum-server/pkg/llm"
 	llmpkg "github.com/solutionchallenge/ondaum-server/pkg/llm"
+	"github.com/solutionchallenge/ondaum-server/pkg/llm/gemini"
 	"github.com/solutionchallenge/ondaum-server/pkg/utils"
 	wspkg "github.com/solutionchallenge/ondaum-server/pkg/websocket"
 	"github.com/uptrace/bun"
@@ -99,7 +101,22 @@ func HandleMessage(
 		Role:           llmpkg.RoleUser,
 		Content:        payload,
 	})
-	if err != nil {
+	if err != nil || !IsValidChatLLMResponse(llmResponse.Content) {
+		if errors.Is(err, gemini.PromptBlockedErr) || errors.Is(err, gemini.ContentBlockedErr) {
+			utils.Log(utils.InfoLevel).CID(request.SessionID).RID(request.MessageID).Err(err).BT().Send("Blocked by gemini")
+			marshaled, err := json.Marshal(ChatLLMResponse{
+				Type: ChatLLMResponseTypeAction,
+				Data: string(common.FeatureEscalateCrisis),
+			})
+			if err != nil {
+				utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).BT().Send("Failed to marshal pre-defined data")
+				return wspkg.ResponseWrapper{}, false, utils.WrapError(err, "failed to marshal pre-defined data")
+			}
+			return wspkg.BuildResponseFrom(
+				request, llmResponse.ID,
+				wspkg.PredefinedActionData, string(marshaled),
+			), false, nil
+		}
 		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).BT().Send("Failed to request to conversation")
 		return wspkg.ResponseWrapper{}, false, utils.WrapError(err, "failed to request to conversation")
 	}

@@ -24,9 +24,13 @@ func BuildGenerativeConfig(client *Client, promptIdentifier string, rootpath ...
 		}
 		systemInstruction = genai.NewContentFromText(promptData, genai.RoleUser)
 	}
+	safetySettings := ([]*genai.SafetySetting)(nil)
+	if !preparedPrompt.DisableRedaction {
+		safetySettings = ConfigToSafetySetting(client.Config)
+	}
 	chatConfig := &genai.GenerateContentConfig{
 		ResponseMIMEType:  client.Config.Gemini.ResponseFormat,
-		SafetySettings:    ConfigToSafetySetting(client.Config),
+		SafetySettings:    safetySettings,
 		SystemInstruction: systemInstruction,
 	}
 	return chatConfig, nil

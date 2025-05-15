@@ -60,6 +60,7 @@ llm:
         prompt_file: resource/llm/prompt/summary-chat-prompt-v1.md
         attachment_file: resource/llm/attachment/counseling-psychology-101.pdf
         attachment_mime: application/pdf
+        disable_redaction: true
     redaction_threshold:
       harrasement: low
       hate_speech: medium

@@ -12,11 +12,12 @@ const (
 )
 
 type PreparedPrompt struct {
-	Identifier     string     `mapstructure:"identifier"`
-	PromptType     PromptType `mapstructure:"prompt_type"`
-	PromptFile     string     `mapstructure:"prompt_file"`
-	AttachmentFile string     `mapstructure:"attachment_file"`
-	AttachmentMime string     `mapstructure:"attachment_mime"`
+	Identifier       string     `mapstructure:"identifier"`
+	PromptType       PromptType `mapstructure:"prompt_type"`
+	PromptFile       string     `mapstructure:"prompt_file"`
+	AttachmentFile   string     `mapstructure:"attachment_file"`
+	AttachmentMime   string     `mapstructure:"attachment_mime"`
+	DisableRedaction bool       `mapstructure:"disable_redaction"`
 }
 
 type RedactionThreshold struct {
