@@ -129,7 +129,7 @@ func (client *Client) RunActionPrompt(ctx context.Context, instructionIdentifier
 
 	return llm.Message{
 		ID:      uuid.New().String(),
-		Role:    llm.RoleAssistant,
+		Role:    llm.RoleModel,
 		Content: response.Text(),
 		Metadata: map[string]any{
 			"feedbacks": feedbacks,

@@ -21,4 +21,5 @@ var Collection = []database.Migration{
 	sql.MigrationUser013AlterDiagnosisTable,
 	sql.MigrationUser014AlterDiagnosisTable,
 	sql.MigrationUser015AlterChatTable,
+	sql.MigrationUser016UpdateChatHistoryRow,
 }

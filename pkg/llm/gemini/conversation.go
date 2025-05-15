@@ -64,7 +64,7 @@ func (conversation *Conversation) Request(ctx context.Context, request llm.Messa
 	}
 	message := llm.Message{
 		ID:      uuid.New().String(),
-		Role:    llm.RoleAssistant,
+		Role:    llm.RoleModel,
 		Content: response.Text(),
 		Metadata: map[string]any{
 			"feedbacks": feedbacks,

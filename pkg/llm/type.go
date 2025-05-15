@@ -11,8 +11,8 @@ type Statistics struct {
 type Role string
 
 const (
-	RoleUser      Role = "user"
-	RoleAssistant Role = "assistant"
+	RoleUser  Role = "user"
+	RoleModel Role = "model"
 )
 
 type Message struct {
