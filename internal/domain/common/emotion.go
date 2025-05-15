@@ -17,7 +17,7 @@ const (
 	EmotionSurprise Emotion = "surprise"
 	EmotionFear     Emotion = "fear"
 	EmotionDisgust  Emotion = "disgust"
-	EmotionNeutral  Emotion = "neutral"
+	EmotionNeutral  Emotion = "neutral" //deprecated
 )
 
 var SupportedEmotions = EmotionList{
@@ -141,6 +141,7 @@ func (e *EmotionRateList) ToString() string {
 
 func (e *EmotionRateList) GetDominant() Emotion {
 	if len(*e) == 0 {
+		// for backward compatibility
 		return EmotionNeutral
 	}
 	var maxRate float64
@@ -228,6 +229,7 @@ func (e *EmotionCountList) ToString() string {
 
 func (e *EmotionCountList) GetDominant() Emotion {
 	if len(*e) == 0 {
+		// for backward compatibility
 		return EmotionNeutral
 	}
 	var maxCount int64
