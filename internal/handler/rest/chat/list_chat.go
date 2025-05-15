@@ -79,7 +79,8 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 	query := h.deps.DB.NewSelect().
 		Model((*domain.Chat)(nil)).
 		Relation("Summary").
-		Where("c.user_id = ?", userID)
+		Where("c.user_id = ?", userID).
+		Order("c.created_at DESC")
 
 	if datetimeGte != "" {
 		localStartTime, err := time.Parse(time.RFC3339, datetimeGte)
@@ -148,6 +149,7 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 			err := h.deps.DB.NewSelect().
 				Model((*domain.History)(nil)).
 				Where("chat_id = ?", chat.ID).
+				Order("created_at ASC").
 				Scan(ctx, &histories)
 			if err == nil {
 				summaryDTO := chat.Summary.ToSummaryWithTopicMessages(histories)
