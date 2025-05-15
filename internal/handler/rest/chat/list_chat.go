@@ -150,11 +150,6 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 			})
 			allContents = append(allContents, summaryContents...)
 
-			historyContents := utils.Map(chat.Histories, func(history *domain.History) string {
-				return history.Content
-			})
-			allContents = append(allContents, historyContents...)
-
 			return utils.OneOf(allContents, func(content string) bool {
 				return strings.Contains(strings.ToLower(content), strings.ToLower(matchingContent))
 			})
