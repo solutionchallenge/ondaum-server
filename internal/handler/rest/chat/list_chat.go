@@ -144,11 +144,20 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 			summaryText := chat.Summary.Text
 			allContents = append(allContents, summaryTitle, summaryText)
 
-			summaryDTO := chat.Summary.ToSummaryWithTopicMessages(chat.Histories)
-			summaryContents := utils.Map(*summaryDTO.TopicMessages, func(topicMessage domain.HistoryDTO) string {
-				return topicMessage.Content
-			})
-			allContents = append(allContents, summaryContents...)
+			var histories []*domain.History
+			err := h.deps.DB.NewSelect().
+				Model((*domain.History)(nil)).
+				Where("chat_id = ?", chat.ID).
+				Scan(ctx, &histories)
+			if err == nil {
+				summaryDTO := chat.Summary.ToSummaryWithTopicMessages(histories)
+				if summaryDTO.TopicMessages != nil {
+					summaryContents := utils.Map(*summaryDTO.TopicMessages, func(topicMessage domain.HistoryDTO) string {
+						return topicMessage.Content
+					})
+					allContents = append(allContents, summaryContents...)
+				}
+			}
 
 			return utils.OneOf(allContents, func(content string) bool {
 				return strings.Contains(strings.ToLower(content), strings.ToLower(matchingContent))
