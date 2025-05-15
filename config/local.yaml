@@ -48,7 +48,7 @@ llm:
   gemini:
     enabled: true
     api_key:
-    llm_model: gemini-2.0-pro
+    llm_model: gemini-2.5-pro-preview-05-06
     embedding_model: text-embedding-001
     response_format: application/json
     prepared_prompts:
