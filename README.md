@@ -1,4 +1,7 @@
-# Ondaum Server (15 May 2025)
+# Ondaum Server
+
+> 📅 This README was written on **May 15, 2025**.
+
 
 Hello👋 This is team Ondaum. ***Ondaum*** is a pure Korean word, meaning ***'a warm and genuine self'***.
 
