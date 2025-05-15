@@ -299,7 +299,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Filter by sub-string matching content (search raw-text from histories, it could be slow for large data)",
+                        "description": "Filter by sub-string matching content (search raw-text from all contents, it could be slow for large data)",
                         "name": "matching_content",
                         "in": "query"
                     },

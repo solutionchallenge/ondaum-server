@@ -42,7 +42,7 @@ func NewListChatHandler(deps ListChatHandlerDependencies) (*ListChatHandler, err
 // @Param datetime_lte query string false "Filter by chat ended datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)"
 // @Param dominant_emotions query string false "Filter by dominant emotions (comma separated, e.g. 'joy,sadness')"
 // @Param matching_keyword query string false "Filter by sub-string matching keyword"
-// @Param matching_content query string false "Filter by sub-string matching content (search raw-text from histories, it could be slow for large data)"
+// @Param matching_content query string false "Filter by sub-string matching content (search raw-text from all contents, it could be slow for large data)"
 // @Param message_id query string false "Filter by message ID"
 // @Param only_archived query bool false "Filter only archived chats"
 // @Success 200 {object} ListChatResponse
@@ -139,9 +139,22 @@ func (h *ListChatHandler) Handle(c *fiber.Ctx) error {
 
 	if matchingContent != "" {
 		chats = utils.Filter(chats, func(chat domain.Chat) bool {
-			allContents := utils.Map(chat.Histories, func(history *domain.History) string {
+			allContents := []string{}
+			summaryTitle := chat.Summary.Title
+			summaryText := chat.Summary.Text
+			allContents = append(allContents, summaryTitle, summaryText)
+
+			summaryDTO := chat.Summary.ToSummaryWithTopicMessages(chat.Histories)
+			summaryContents := utils.Map(*summaryDTO.TopicMessages, func(topicMessage domain.HistoryDTO) string {
+				return topicMessage.Content
+			})
+			allContents = append(allContents, summaryContents...)
+
+			historyContents := utils.Map(chat.Histories, func(history *domain.History) string {
 				return history.Content
 			})
+			allContents = append(allContents, historyContents...)
+
 			return utils.OneOf(allContents, func(content string) bool {
 				return strings.Contains(strings.ToLower(content), strings.ToLower(matchingContent))
 			})
