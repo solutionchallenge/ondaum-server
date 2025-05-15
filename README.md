@@ -31,7 +31,7 @@ Let's start https://ondaum.revimal.me/
 
 ```
 
-## ⏥ RCHITECTURE
+## ⏥ ARCHITECTURE
 ```mermaid
 
 ```
