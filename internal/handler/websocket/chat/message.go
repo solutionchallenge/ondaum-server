@@ -24,6 +24,9 @@ func HandleMessage(
 	}
 
 	if request.Action != wspkg.Action("chat") {
+		if request.Action == wspkg.Action("ping") {
+			return wspkg.BuildNoopResponse(request), false, nil
+		}
 		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).BT().Send("Invalid action %v", request.Action)
 		return wspkg.ResponseWrapper{}, false, utils.WrapError(errors.New("invalid action"), "invalid action %v", request.Action)
 	}
