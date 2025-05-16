@@ -1,9 +1,13 @@
 package user
 
 import (
+	"encoding/json"
 	"time"
 
+	"github.com/benbjohnson/clock"
+	"github.com/solutionchallenge/ondaum-server/internal/domain/common"
 	"github.com/solutionchallenge/ondaum-server/pkg/oauth"
+	"github.com/solutionchallenge/ondaum-server/pkg/utils"
 	"github.com/uptrace/bun"
 )
 
@@ -56,4 +60,36 @@ func (u *User) GetOAuth(provider oauth.Provider) *OAuth {
 		}
 	}
 	return nil
+}
+
+type UserMentalStateHint struct {
+	Today    string              `json:"today"`
+	Gender   *UserGender         `json:"gender,omitempty"`
+	Birthday *string             `json:"birthday,omitempty"`
+	Concerns *[]string           `json:"concerns,omitempty"`
+	Emotions *common.EmotionList `json:"emotions,omitempty"`
+}
+
+func (umsh *UserMentalStateHint) Marshal() string {
+	marshaled, err := json.Marshal(umsh)
+	if err != nil {
+		return ""
+	}
+	return string(marshaled)
+}
+
+func (u *User) ToUserMentalStateHint(clk clock.Clock) *UserMentalStateHint {
+	hint := &UserMentalStateHint{
+		Today: clk.Now().Format(utils.TIME_FORMAT_DATE),
+	}
+	if u.Privacy != nil {
+		birthday := u.Privacy.Birthday.Format(utils.TIME_FORMAT_DATE)
+		hint.Gender = &u.Privacy.Gender
+		hint.Birthday = &birthday
+	}
+	if u.Addition != nil {
+		hint.Concerns = &u.Addition.Concerns
+		hint.Emotions = &u.Addition.Emotions
+	}
+	return hint
 }

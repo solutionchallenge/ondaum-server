@@ -52,6 +52,7 @@ func HandleMessage(
 		user := &user.User{}
 		err := tx.NewSelect().
 			Model(user).
+			Relation("Privacy").
 			Relation("Addition").
 			Where("id = ?", request.UserID).
 			Scan(ctx)
@@ -59,8 +60,8 @@ func HandleMessage(
 			utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).BT().Send("Failed to query user")
 			return utils.WrapError(err, "failed to query user")
 		}
-		if user.Addition != nil {
-			additions := user.Addition.ToAdditionJSON()
+		if user.Privacy != nil || user.Addition != nil {
+			additions := user.ToUserMentalStateHint(clk).Marshal()
 			if additions != "" {
 				payload = fmt.Sprintf("<UserMentalStateHint>\n%s\n</UserMentalStateHint>\n%s", additions, payload)
 			}
