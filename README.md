@@ -20,7 +20,38 @@ Let's start https://ondaum.revimal.me/
 
 ## 🛠 SKILLS
 
-  
+### Architecture & Design
+- **Architecture Pattern**: Vertical Slice Architecture
+- **Design Methodology**: Domain-Driven Design (DDD)
+- **Dependency Injection**: [Uber Fx](https://github.com/uber-go/fx) - A dependency injection system for Go applications
+
+### Backend Development
+- **Language**: Go
+- **Command Line**: [spf13/cobra](https://github.com/spf13/cobra) - A Commander for modern Go CLI interactions
+- **Configuration**: [spf13/viper](https://github.com/spf13/viper) - Go configuration with fangs
+- **Testing**: [gomock](https://github.com/golang/mock) - A mocking framework for Go interfaces
+
+### Database & ORM
+- **Main Database**: MySQL
+- **ORM**: [Bun](https://github.com/uptrace/bun) - A fast and simple ORM for Go
+- **Development DB**: [dolthub/go-mysql-server](https://github.com/dolthub/go-mysql-server) - In-memory MySQL server for development and testing
+
+### API & Communication
+- **HTTP Framework**: [gofiber/fiber](https://github.com/gofiber/fiber) - Express inspired web framework built on top of Fasthttp
+- **WebSocket**: [gorilla/websocket](https://github.com/gorilla/websocket) - A fast, well-tested and widely used WebSocket implementation for Go
+- **API Style**: REST API
+- **Authentication**: 
+  - OAuth 2.0
+  - [golang-jwt/jwt](https://github.com/golang-jwt/jwt) - Go implementation of JSON Web Tokens
+
+### AI/ML Integration
+- **LLM**: [Google Generative AI](https://github.com/google/generative-ai-go) - Official Go client library for Google's Generative AI API
+
+### External Libraries
+- [spf13/cobra](https://github.com/spf13/cobra) - A Commander for modern Go CLI interactions
+- [spf13/viper](https://github.com/spf13/viper) - Go configuration with fangs
+- [dolthub/go-mysql-server](https://github.com/dolthub/go-mysql-server) - In-memory MySQL server for development and testing
+
 ## 📁 DIRECTORY
 
 ```
@@ -80,9 +111,7 @@ Let's start https://ondaum.revimal.me/
 │       └── prompt/     # LLM prompts
 │
 ├── test/               # Test files
-│   └── integration/    # Integration tests
-│       ├── chat/       # Chat tests
-│       └── user/       # User tests
+│   └── mock/           # Test mocks
 │
 ├── .deploy/            # Deployment configurations
 │
@@ -110,6 +139,7 @@ go run main.go http -n "local"
 ```
 
 ## ⏥ ARCHITECTURE
+![SERVER-ARCHITECTURE](https://raw.githubusercontent.com/solutionchallenge/.github/refs/heads/main/assets/images/Ondaum-Server.png)
 
 ## 🏎️ PERFORMANCE
 ![SERVER-PERFORMANCE](https://raw.githubusercontent.com/solutionchallenge/.github/refs/heads/main/assets/images/Ondaum-Performance.png)
