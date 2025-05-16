@@ -24,19 +24,96 @@ Let's start https://ondaum.revimal.me/
 ## 📁 DIRECTORY
 
 ```
-
+.
+├── cmd/                # Application running commands
+│
+├── config/             # Configuration files
+│
+├── docs/               # Swagger documentations
+│
+├── internal/           # Private application code
+│   ├── domain/         # Domain models and business logic
+│   │   ├── chat/       # Chat domain models
+│   │   ├── common/     # Common domain models
+│   │   ├── diagnosis/  # Diagnosis domain models
+│   │   └── user/       # User domain models
+│   │
+│   ├── handler/        # HTTP request handlers
+│   │   ├── future/     # Future-Job handlers
+│   │   ├── rest/       # REST-API handlers
+│   │   └── websocket/  # Websocket handlers
+│   │
+│   ├── dependency/     # Dependency injection
+│   │
+│   └── entrypoint/     # Application entry points
+│       └── http/       # HTTP server entrypoint
+│
+├── migration/          # Database migration files
+│   └── sql/            # Migration SQL scripts
+│
+├── pkg/                # Public library code
+│   ├── database/       # Database utilities
+│   │   ├── mysql/      # MySQL implementation
+│   │   └── memdb/      # In-memory database
+│   │
+│   ├── future/         # Future utilities
+│   │   └── database/   # Database-backed implementation
+│   │
+│   ├── http/           # HTTP utilities
+│   │
+│   ├── jwt/            # JWT authentication
+│   │
+│   ├── llm/            # LLM integration
+│   │   └── gemini/     # Google Gemini integration
+│   │
+│   ├── oauth/          # OAuth integration
+│   │   └── google/     # Google OAuth
+│   │
+│   ├── utils/          # Common utilities
+│   │
+│   └── websocket/      # WebSocket utilities
+│
+├── resource/           # Static resources
+│   ├── diagnosis/      # Diagnosis resources
+│   └── llm/            # LLM resources
+│       ├── attachment/ # LLM attachments
+│       └── prompt/     # LLM prompts
+│
+├── test/               # Test files
+│   └── integration/    # Integration tests
+│       ├── chat/       # Chat tests
+│       └── user/       # User tests
+│
+├── .deploy/            # Deployment configurations
+│
+├── .github/            # GitHub related files
+│   └── workflows/      # GitHub Actions workflows
+│
+├── main.go             # Main application entry
+└── go.mod              # Go module definition
 ```
 
 ## 🚀 LAUNCH
 
 ```bash
+# 1. Install dependencies
+go mod download
 
+# 2. Set up environment variables
+vi .envrc
+
+# 3. Apply environment variables
+source .envrc
+
+# 4. Start the server with local configurations
+go run main.go http -n "local"
 ```
 
 ## ⏥ ARCHITECTURE
-```mermaid
 
-```
+## 🏎️ PERFORMANCE
+![SERVER-PERFORMANCE](https://raw.githubusercontent.com/solutionchallenge/.github/refs/heads/main/assets/images/Ondaum-Performance.png)
+_Benchmarked on a GKE Managed Pod (180 mCPU / 256 MiB)_
 
 ## 📱 FEATURE
 - AI Counseling With Um
@@ -51,5 +128,3 @@ Let's start https://ondaum.revimal.me/
 - Personalized consultation possible
 - Reduced barriers to seeking counseling
 - Access to a pre-trained professional psychological counseling AI
-
-
