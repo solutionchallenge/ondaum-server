@@ -64,6 +64,7 @@ func (u *User) GetOAuth(provider oauth.Provider) *OAuth {
 
 type UserMentalStateHint struct {
 	Today    string              `json:"today"`
+	Username *string             `json:"username,omitempty"`
 	Gender   *UserGender         `json:"gender,omitempty"`
 	Birthday *string             `json:"birthday,omitempty"`
 	Concerns *[]string           `json:"concerns,omitempty"`
@@ -81,6 +82,9 @@ func (umsh *UserMentalStateHint) Marshal() string {
 func (u *User) ToUserMentalStateHint(clk clock.Clock) *UserMentalStateHint {
 	hint := &UserMentalStateHint{
 		Today: clk.Now().Format(utils.TIME_FORMAT_DATE),
+	}
+	if u.Username != "" {
+		hint.Username = &u.Username
 	}
 	if u.Privacy != nil {
 		birthday := u.Privacy.Birthday.Format(utils.TIME_FORMAT_DATE)
