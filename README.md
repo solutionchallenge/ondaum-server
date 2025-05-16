@@ -38,14 +38,15 @@ Let's start https://ondaum.revimal.me/
 
 ### API & Communication
 - **HTTP Framework**: [gofiber/fiber](https://github.com/gofiber/fiber) - Express inspired web framework built on top of Fasthttp
-- **WebSocket**: [gorilla/websocket](https://github.com/gorilla/websocket) - A fast, well-tested and widely used WebSocket implementation for Go
 - **API Style**: REST API
+- **API Documentation**: [swaggo/swag](https://github.com/swaggo/swag) - Swagger documentation generator for Go
+- **Live API Documentation**: [Swagger UI](https://ondaum.revimal.me/api/v1/_sys/swagger)
 - **Authentication**: 
   - OAuth 2.0
   - [golang-jwt/jwt](https://github.com/golang-jwt/jwt) - Go implementation of JSON Web Tokens
 
 ### AI/ML Integration
-- **LLM**: [Google Generative AI](https://github.com/google/generative-ai-go) - Official Go client library for Google's Generative AI API
+- **LLM**: [google.golang.org/genai](https://github.com/googleapis/go-genai) - Official Go client library for Google's Generative AI API
 
 ### External Libraries
 - [spf13/cobra](https://github.com/spf13/cobra) - A Commander for modern Go CLI interactions
