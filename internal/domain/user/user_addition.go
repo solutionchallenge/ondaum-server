@@ -1,6 +1,7 @@
 package user
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/solutionchallenge/ondaum-server/internal/domain/common"
@@ -29,4 +30,12 @@ func (a *Addition) ToAdditionDTO() AdditionDTO {
 		Concerns: a.Concerns,
 		Emotions: a.Emotions,
 	}
+}
+
+func (a *Addition) ToAdditionJSON() string {
+	json, err := json.Marshal(a.ToAdditionDTO())
+	if err != nil {
+		return ""
+	}
+	return string(json)
 }

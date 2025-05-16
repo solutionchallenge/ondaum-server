@@ -54,7 +54,7 @@ llm:
     prepared_prompts:
       - identifier: interactive_chat
         prompt_type: system_instruction
-        prompt_file: resource/llm/prompt/interactive-chat-prompt-v1.md
+        prompt_file: resource/llm/prompt/interactive-chat-prompt-v2.md
       - identifier: summary_chat
         prompt_type: action_prompt
         prompt_file: resource/llm/prompt/summary-chat-prompt-v1.md

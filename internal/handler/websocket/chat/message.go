@@ -4,10 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/benbjohnson/clock"
 	domain "github.com/solutionchallenge/ondaum-server/internal/domain/chat"
 	"github.com/solutionchallenge/ondaum-server/internal/domain/common"
+	"github.com/solutionchallenge/ondaum-server/internal/domain/user"
 	ftpkg "github.com/solutionchallenge/ondaum-server/pkg/future"
 	"github.com/solutionchallenge/ondaum-server/pkg/llm"
 	llmpkg "github.com/solutionchallenge/ondaum-server/pkg/llm"
@@ -47,8 +49,25 @@ func HandleMessage(
 	var response wspkg.ResponseWrapper
 	var shouldClose bool
 	err := db.RunInTx(context.Background(), nil, func(ctx context.Context, tx bun.Tx) error {
-		chat := &domain.Chat{}
+		user := &user.User{}
 		err := tx.NewSelect().
+			Model(user).
+			Relation("Addition").
+			Where("id = ?", request.UserID).
+			Scan(ctx)
+		if err != nil {
+			utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).BT().Send("Failed to query user")
+			return utils.WrapError(err, "failed to query user")
+		}
+		if user.Addition != nil {
+			additions := user.Addition.ToAdditionJSON()
+			if additions != "" {
+				payload = fmt.Sprintf("<UserMentalStateHint>\n%s\n</UserMentalStateHint>\n%s", additions, payload)
+			}
+		}
+
+		chat := &domain.Chat{}
+		err = tx.NewSelect().
 			Model(chat).
 			Where("session_id = ?", request.SessionID).
 			Where("user_id = ?", request.UserID).
@@ -94,8 +113,7 @@ func HandleMessage(
 		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).BT().Send("Failed to start conversation")
 		return wspkg.ResponseWrapper{}, false, utils.WrapError(err, "failed to start conversation")
 	}
-	// TODO: apply user addition to the conversation
-	utils.Log(utils.DebugLevel).CID(request.SessionID).RID(request.MessageID).BT().Send("Message Request: %v", request.Payload)
+	utils.Log(utils.DebugLevel).CID(request.SessionID).RID(request.MessageID).BT().Send("Message Request: %v", payload)
 	llmResponse, err := conversation.Request(context.Background(), llmpkg.Message{
 		ConversationID: request.SessionID,
 		ID:             request.MessageID,
