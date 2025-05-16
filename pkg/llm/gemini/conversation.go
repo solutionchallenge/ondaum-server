@@ -9,6 +9,10 @@ import (
 	"google.golang.org/genai"
 )
 
+var (
+	EmptyResponseErr = utils.NewError("empty response detected")
+)
+
 type Conversation struct {
 	ID         string
 	Client     *Client
@@ -61,6 +65,9 @@ func (conversation *Conversation) Request(ctx context.Context, request llm.Messa
 	feedbacks := buildContentFeedbacks(response)
 	if err := checkContentBlocked(feedbacks); err != nil {
 		return llm.Message{}, utils.WrapError(err, "failed to check content blocked")
+	}
+	if response.Text() == "" {
+		return llm.Message{}, utils.NewError("empty response detected")
 	}
 	message := llm.Message{
 		ID:      uuid.New().String(),

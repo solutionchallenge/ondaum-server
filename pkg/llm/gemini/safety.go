@@ -90,8 +90,9 @@ func buildContentFeedbacks(response *genai.GenerateContentResponse) []map[string
 	for idx, candidate := range response.Candidates {
 		if len(candidate.SafetyRatings) > 0 {
 			for _, result := range candidate.SafetyRatings {
+				blocked := candidate.FinishReason == genai.FinishReasonSafety || result.Blocked
 				feedback[idx] = map[string]any{
-					"blocked":     candidate.FinishReason == genai.FinishReasonSafety || result.Blocked,
+					"blocked":     blocked,
 					"category":    result.Category,
 					"probability": result.Probability,
 				}

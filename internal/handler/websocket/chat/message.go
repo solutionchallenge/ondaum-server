@@ -95,6 +95,7 @@ func HandleMessage(
 		return wspkg.ResponseWrapper{}, false, utils.WrapError(err, "failed to start conversation")
 	}
 	// TODO: apply user addition to the conversation
+	utils.Log(utils.DebugLevel).CID(request.SessionID).RID(request.MessageID).BT().Send("Message Request: %v", request.Payload)
 	llmResponse, err := conversation.Request(context.Background(), llmpkg.Message{
 		ConversationID: request.SessionID,
 		ID:             request.MessageID,
@@ -117,12 +118,27 @@ func HandleMessage(
 				wspkg.PredefinedActionData, string(marshaled),
 			), false, nil
 		}
+		if errors.Is(err, gemini.EmptyResponseErr) {
+			utils.Log(utils.InfoLevel).CID(request.SessionID).RID(request.MessageID).Err(err).BT().Send("Empty response detected")
+			marshaled, err := json.Marshal(ChatLLMResponse{
+				Type: ChatLLMResponseTypeAction,
+				Data: "Sorry, an error occurred. Could you please repeat your question?",
+			})
+			if err != nil {
+				utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).BT().Send("Failed to marshal pre-defined data")
+				return wspkg.ResponseWrapper{}, false, utils.WrapError(err, "failed to marshal pre-defined data")
+			}
+			return wspkg.BuildResponseFrom(
+				request, llmResponse.ID,
+				wspkg.PredefinedActionData, string(marshaled),
+			), false, nil
+		}
 		utils.Log(utils.ErrorLevel).CID(request.SessionID).RID(request.MessageID).Err(err).BT().Send("Failed to request to conversation")
 		return wspkg.ResponseWrapper{}, false, utils.WrapError(err, "failed to request to conversation")
 	}
 	marshaled, _ := json.Marshal(llmResponse.Metadata)
-	utils.Log(utils.DebugLevel).CID(request.SessionID).RID(request.MessageID).BT().Send("Message ID: %v", llmResponse.ID)
-	utils.Log(utils.DebugLevel).CID(request.SessionID).RID(request.MessageID).BT().Send("Message Metadata: %v", string(marshaled))
+	utils.Log(utils.DebugLevel).CID(request.SessionID).RID(request.MessageID).BT().Send("Message[%v] Response: %v", llmResponse.ID, llmResponse.Content)
+	utils.Log(utils.DebugLevel).CID(request.SessionID).RID(request.MessageID).BT().Send("Message[%v] Metadata: %v", llmResponse.ID, string(marshaled))
 
 	response = wspkg.BuildResponseFrom(
 		request, llmResponse.ID,
