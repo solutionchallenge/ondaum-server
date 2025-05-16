@@ -29,7 +29,7 @@ Let's start https://ondaum.revimal.me/
 - **Language**: Go
 - **Command Line**: [spf13/cobra](https://github.com/spf13/cobra) - A Commander for modern Go CLI interactions
 - **Configuration**: [spf13/viper](https://github.com/spf13/viper) - Go configuration with fangs
-- **Testing**: [gomock](https://github.com/golang/mock) - A mocking framework for Go interfaces
+- **Testing**: [uber-go/gomock](https://github.com/uber-go/mock) - A mocking framework for Go interfaces
 
 ### Database & ORM
 - **Main Database**: MySQL
