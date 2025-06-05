@@ -16,7 +16,7 @@ Hello👋 This is team Ondaum. ***Ondaum*** is a pure Korean word, meaning ***'a
 
 We want to help people around the world live healthier lives by being with Um, an AI professional psychological counseling companion, anytime and anywhere.
 
-Let's start https://ondaum.revimal.me/
+Let's start on https://ondaum.revimal.me/
 
 ## 🛠 SKILLS
 
@@ -159,3 +159,19 @@ _Benchmarked on a GKE Managed Pod (180 mCPU / 256 MiB)_
 - Personalized consultation possible
 - Reduced barriers to seeking counseling
 - Access to a pre-trained professional psychological counseling AI
+
+## 🚧 KNOWN-ISSUES
+
+This project was developed under a tight timeline to build a functional end-to-end service. As a result, some pragmatic architectural trade-offs were made, which are outlined below as part of a transparent technical roadmap.
+
+### 1. Performance Optimization for Chat Filtering
+
+* **Issue:** The current implementation of the chat list endpoint (`GET /chats`), specifically when using the `matching_content` filter, performs its search logic in the application layer.
+* **Impact:** This pattern results in a classic **N+1 query problem**. It was a calculated risk to accelerate initial development for the current user base, but this approach will not scale efficiently and can lead to significant latency under heavy load.
+* **Path Forward:** The filtering logic will be delegated to the database. The roadmap includes refactoring the query to use efficient `JOIN`s. For a definitive, long-term solution, implementing a **Full-Text Search index** is planned to handle large-scale text searches with minimal latency.
+
+### 2. Architectural Flexibility for Business Logic
+
+* **Current Approach:** To maintain a lean architecture and maximize development velocity, most features follow a simple two-layer vertical slice (`Handler` -> `Domain`).
+* **Potential Challenge:** For features with more complex business logic, such as the report generation in `GetChatReportHandler`, some orchestration logic currently resides within the handler, which could lead to overly complex handlers as the application grows.
+* **Future Consideration:** If a feature's complexity warrants it, a dedicated `usecase` layer can be introduced. This provides a clear and scalable pattern for managing increased complexity as it arises, without prematurely over-engineering simpler features.
