@@ -170,7 +170,13 @@ This project was developed under a tight timeline to build a functional end-to-e
 * **Impact:** This pattern results in a classic **N+1 query problem**. It was a calculated risk to accelerate initial development for the current user base, but this approach will not scale efficiently and can lead to significant latency under heavy load.
 * **Path Forward:** The filtering logic will be delegated to the database. The roadmap includes refactoring the query to use efficient `JOIN`s. For a definitive, long-term solution, implementing a **Full-Text Search index** is planned to handle large-scale text searches with minimal latency.
 
-### 2. Architectural Flexibility for Business Logic
+### 2. WebSocket Session Management for Scalability
+
+* **Issue:** Currently, WebSocket connections and their associated state are managed directly in the memory of each application instance.
+* **Impact:** In a multi-instance environment behind a load balancer, subsequent messages from a user are not guaranteed to be routed to the instance that holds their active connection.
+* **Path Forward:** To support a scalable, multi-instance architecture, WebSocket session management must be externalized. The plan is to introduce a centralized session store, such as **Redis**, to map active connections to their specific pod handlers.
+
+### 3. Architectural Flexibility for Business Logic
 
 * **Current Approach:** To maintain a lean architecture and maximize development velocity, most features follow a simple two-layer vertical slice (`Handler` -> `Domain`).
 * **Potential Challenge:** For features with more complex business logic, such as the report generation in `GetChatReportHandler`, some orchestration logic currently resides within the handler, which could lead to overly complex handlers as the application grows.
